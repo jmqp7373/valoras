@@ -1,23 +1,10 @@
-# Configuración UTF-8 para Apache# Configuración básica y simple para GoDaddy
+# Configuración mínima compatible con GoDaddy
+DirectoryIndex index.php index.html
 
-AddDefaultCharset UTF-8DirectoryIndex index.php index.html
+# UTF-8 básico (compatible con hosting compartido)
+AddDefaultCharset UTF-8
 
-AddCharset UTF-8 .html .htm .php .css .js
-
-# Configuración de seguridad básica
-
-# MIME types con charset UTF-8<Files ".git*">
-
-<IfModule mod_mime.c>    Order allow,deny
-
-    AddType 'text/html; charset=UTF-8' .html .htm    Deny from all
-
-    AddType 'text/plain; charset=UTF-8' .txt</Files>
-    AddType 'application/javascript; charset=UTF-8' .js
-    AddType 'text/css; charset=UTF-8' .css
-</IfModule>
-
-# Configuración de seguridad básica
+# Seguridad básica
 <Files ".git*">
     Order allow,deny
     Deny from all

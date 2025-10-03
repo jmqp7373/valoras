@@ -1,0 +1,15 @@
+# Configuración básica para Apache
+DirectoryIndex index.php index.html
+
+# Habilitar rewrite engine
+RewriteEngine On
+
+# Redirigir a HTTPS (opcional)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Configuración de seguridad básica
+<Files ".git*">
+    Order allow,deny
+    Deny from all
+</Files>

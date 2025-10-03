@@ -40,6 +40,10 @@ Para que el deployment automático funcione, necesitas configurar estos **secret
 3. **cPanel** → Cuentas FTP
 4. **Crear cuenta FTP** o usar la principal
 
+### 📁 Configuración del directorio:
+- Los archivos se suben directamente a la **raíz** del servidor (`/`)
+- NO se utiliza `/public_html/` como directorio de destino
+
 ## 🚀 Cómo Funciona el Deployment
 
 ### Automático:

@@ -35,7 +35,7 @@ jobs:
         echo "📄 Contenido de index.php:"
         cat index.php
         
-    # 5. Deploy vía FTP a GoDaddy (con más opciones)
+    # 5. Deploy vía FTP a GoDaddy (directamente a la raíz)
     - name: Deploy to GoDaddy via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
@@ -44,7 +44,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
         port: 21
-        server-dir: /public_html/
+        server-dir: /
         local-dir: ./
         log-level: verbose
         dry-run: false
@@ -57,17 +57,17 @@ jobs:
           **/.github/**
           **/deploy/**
           
-    # 6. Intentar también con SFTP si FTP falla
-    - name: Backup deploy via SFTP
+    # 6. Intentar con directorio alternativo si falla
+    - name: Backup deploy to htdocs
       if: failure()
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftps
+        protocol: ftp
         port: 21
-        server-dir: /public_html/
+        server-dir: /htdocs/
         local-dir: ./
         exclude: |
           **/.git*

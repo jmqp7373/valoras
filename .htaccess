@@ -1,15 +1,39 @@
 # Configuración básica para Apache
-DirectoryIndex index.php index.html
+DirectoryIndex index.php index.html index.htm
 
 # Habilitar rewrite engine
 RewriteEngine On
 
-# Redirigir a HTTPS (opcional)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Permitir acceso a archivos PHP
+<Files "*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Permitir acceso al directorio
+Options +Indexes +FollowSymLinks
+AllowOverride All
+
+# Configurar permisos básicos
+<Directory "/">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
 
 # Configuración de seguridad básica
 <Files ".git*">
     Order allow,deny
     Deny from all
 </Files>
+
+<Files ".env*">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Fix para errores 403
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+</IfModule>

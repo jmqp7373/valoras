@@ -51,3 +51,10 @@ config.local.php
 deploy/
 dist/
 build/
+
+# GitHub Actions (mantener los workflows pero ignorar logs locales)
+.github/workflows/*.log
+
+# Archivos de prueba local
+test/
+tests/

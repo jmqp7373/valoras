@@ -1,0 +1,54 @@
+name: Deploy to GoDaddy
+
+# Se ejecuta cuando hay push a la rama main
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # 1. Checkout del código
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    # 2. Setup PHP (opcional, para validaciones)
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        
+    # 3. Validar sintaxis PHP (opcional)
+    - name: Validate PHP syntax
+      run: |
+        find . -name "*.php" -exec php -l {} \;
+        
+    # 4. Deploy vía FTP a GoDaddy
+    - name: Deploy to GoDaddy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftp
+        port: 21
+        server-dir: /public_html/
+        local-dir: ./
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.vscode/**
+          **/README.md
+          **/.github/**
+          **/deploy/**
+          
+    # 5. Notificación de éxito
+    - name: Deployment Success
+      run: |
+        echo "✅ Deployment completado exitosamente!"
+        echo "🌐 Tu sitio web está disponible en tu dominio GoDaddy"

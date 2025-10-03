@@ -27,7 +27,15 @@ jobs:
       run: |
         find . -name "*.php" -exec php -l {} \;
         
-    # 4. Deploy vía FTP a GoDaddy
+    # 4. Debug - Mostrar archivos a subir
+    - name: List files to upload
+      run: |
+        echo "📁 Archivos que se subirán:"
+        ls -la
+        echo "📄 Contenido de index.php:"
+        cat index.php
+        
+    # 5. Deploy vía FTP a GoDaddy (con más opciones)
     - name: Deploy to GoDaddy via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
@@ -35,6 +43,29 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
+        port: 21
+        server-dir: /public_html/
+        local-dir: ./
+        log-level: verbose
+        dry-run: false
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.vscode/**
+          **/README.md
+          **/.github/**
+          **/deploy/**
+          
+    # 6. Intentar también con SFTP si FTP falla
+    - name: Backup deploy via SFTP
+      if: failure()
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftps
         port: 21
         server-dir: /public_html/
         local-dir: ./
@@ -47,8 +78,9 @@ jobs:
           **/.github/**
           **/deploy/**
           
-    # 5. Notificación de éxito
+    # 7. Notificación de éxito
     - name: Deployment Success
       run: |
         echo "✅ Deployment completado exitosamente!"
-        echo "🌐 Tu sitio web está disponible en tu dominio GoDaddy"
+        echo "🌐 Tu sitio web está disponible en valora.vip"
+        echo "📄 Archivos subidos: index.php, index.html, info.php, .htaccess"

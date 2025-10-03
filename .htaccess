@@ -1,8 +1,0 @@
-# Configuración básica y simple para GoDaddy
-DirectoryIndex index.php index.html
-
-# Configuración de seguridad básica
-<Files ".git*">
-    Order allow,deny
-    Deny from all
-</Files>

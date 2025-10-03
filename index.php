@@ -45,7 +45,8 @@
             $fecha = date('d/m/Y H:i:s');
             echo "<div class='php-info'>";
             echo "Ejecutándose con PHP " . phpversion() . "<br>";
-            echo "Fecha y hora: " . $fecha;
+            echo "Fecha y hora: " . $fecha . "<br>";
+            echo "🚀 Deployment automático con GitHub Actions";
             echo "</div>";
         ?>
     </div>

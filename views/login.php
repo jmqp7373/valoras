@@ -12,7 +12,7 @@ header('Content-Type: text/html; charset=UTF-8');
 <body>
     <div class="login-container">
         <!-- Incluir el logo de Valora ubicado en assets/images/logo_valoras.png -->
-        <img src="../assets/images/logos/logo_valora.png" alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone" class>
+        <img src="../assets/images/logos/logo_valora.png" alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone" style="max-width: 150px;">
         <h2>Iniciar Sesión</h2>
         <form action="login.php" method="POST">
             <div class="form-group">

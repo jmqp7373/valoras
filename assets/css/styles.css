@@ -93,3 +93,8 @@ body {
 .btn-submit:active {
     transform: translateY(0px);
 }
+.logo {
+    display: block;
+    margin: 0 auto 20px auto;
+    max-width: 150px;
+}

@@ -37,8 +37,8 @@ header('Content-Type: text/html; charset=UTF-8');
                     <input type="hidden" id="country_code" name="country_code" value="+57" required>
                     
                     <!-- Selector personalizado -->
-                    <div class="custom-select" style="position: relative; width: 220px;">
-                        <div class="select-display" style="padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
+                    <div class="custom-select" style="position: relative; width: 110px;">
+                        <div class="select-display" style="padding: 14px 12px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
                             <div class="selected-option" style="display: flex; align-items: center;">
                                 <img src="../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
                                 <span>+57</span>
@@ -46,7 +46,7 @@ header('Content-Type: text/html; charset=UTF-8');
                             <span style="transform: rotate(0deg); transition: transform 0.3s;">▼</span>
                         </div>
                         
-                        <div class="select-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ee6f92; border-top: none; border-radius: 0 0 12px 12px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none;">
+                        <div class="select-dropdown" style="position: absolute; top: 100%; left: 0; width: 200px; background: white; border: 1px solid #ee6f92; border-top: none; border-radius: 0 0 12px 12px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none;">
                             <!-- Colombia siempre de primero -->
                             <div class="option" data-value="+57" data-country="co" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
                                 <img src="../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">

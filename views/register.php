@@ -84,7 +84,7 @@ header('Content-Type: text/html; charset=UTF-8');
                             </div>
                         </div>
                     </div>
-                    <input type="tel" id="phone_number" placeholder="Número de celular" name="phone_number" inputmode="numeric" pattern="\d{6,15}" style="flex: 1; padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; transition: all 0.3s ease;" required>
+                    <input type="tel" id="phone_number" placeholder="Número de celular" name="phone_number" inputmode="numeric" pattern="\d{10}" maxlength="10" style="flex: 1; padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; transition: all 0.3s ease;" required>
                 </div>
             </div>
             
@@ -192,6 +192,86 @@ header('Content-Type: text/html; charset=UTF-8');
             if (initialOption) {
                 initialOption.classList.add('selected');
             }
+            
+            // Phone number validation and length management
+            const phoneInput = document.getElementById('phone_number');
+            
+            // Country phone length mapping
+            const phoneLengthMap = {
+                '+57': 10,  // Colombia
+                '+52': 10,  // México
+                '+1': 10,   // Estados Unidos
+                '+56': 9,   // Chile
+                '+51': 9,   // Perú
+                '+58': 11,  // Venezuela
+                '+54': 10,  // Argentina
+                '+593': 9   // Ecuador
+            };
+            
+            // Function to update phone maxlength based on country
+            function updatePhoneMaxLength(countryCode) {
+                const maxLength = phoneLengthMap[countryCode] || 10;
+                phoneInput.setAttribute('maxlength', maxLength);
+                phoneInput.setAttribute('pattern', `\\d{${maxLength}}`);
+                
+                // Truncate current value if it exceeds new max length
+                if (phoneInput.value.length > maxLength) {
+                    phoneInput.value = phoneInput.value.substring(0, maxLength);
+                }
+            }
+            
+            // Set initial maxlength for Colombia
+            updatePhoneMaxLength('+57');
+            
+            // Update maxlength when country selection changes
+            options.forEach(option => {
+                const originalClickHandler = option.onclick;
+                option.addEventListener('click', function() {
+                    const countryCode = this.getAttribute('data-value');
+                    updatePhoneMaxLength(countryCode);
+                });
+            });
+            
+            // Numeric validation - only allow numbers
+            phoneInput.addEventListener('input', function(e) {
+                // Remove any non-numeric characters
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                
+                // Update the input value with cleaned numeric value
+                e.target.value = value;
+                
+                // Validate against current maxlength
+                const currentMaxLength = parseInt(e.target.getAttribute('maxlength'));
+                if (value.length > currentMaxLength) {
+                    e.target.value = value.substring(0, currentMaxLength);
+                }
+            });
+            
+            // Prevent pasting non-numeric content
+            phoneInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const numericOnly = paste.replace(/[^0-9]/g, '');
+                const currentMaxLength = parseInt(e.target.getAttribute('maxlength'));
+                e.target.value = numericOnly.substring(0, currentMaxLength);
+            });
+            
+            // Prevent typing non-numeric characters
+            phoneInput.addEventListener('keypress', function(e) {
+                // Allow: backspace, delete, tab, escape, enter
+                if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
         });
     </script>
 </body>

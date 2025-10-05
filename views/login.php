@@ -11,8 +11,8 @@ header('Content-Type: text/html; charset=UTF-8');
 </head>
 <body>
     <div class="login-container">
-        // Incluir el logo de Valoras ubicado en assets/images/logo_valoras.png
-        <img src="../assets/images/logos/logo_valoras.png" alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone" class>
+        <!-- Incluir el logo de Valoras ubicado en assets/images/logo_valoras.png -->
+        <img src="assets/images/logos/logo_valora.png" alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone" class>
         <h2>Iniciar Sesión</h2>
         <form action="login.php" method="POST">
             <div class="form-group">

@@ -196,7 +196,7 @@ header('Content-Type: text/html; charset=UTF-8');
             // Phone number validation and length management
             const phoneInput = document.getElementById('phone_number');
             
-            // Country phone length mapping
+            // Mapeo de longitud de teléfonos por país
             const phoneLengthMap = {
                 '+57': 10,  // Colombia
                 '+52': 10,  // México
@@ -208,68 +208,87 @@ header('Content-Type: text/html; charset=UTF-8');
                 '+593': 9   // Ecuador
             };
             
-            // Function to update phone maxlength based on country
+            // Mapeo de nombres de países para placeholders amigables
+            const countryNamesMap = {
+                '+57': 'Colombia',
+                '+52': 'México', 
+                '+1': 'Estados Unidos',
+                '+56': 'Chile',
+                '+51': 'Perú',
+                '+58': 'Venezuela',
+                '+54': 'Argentina',
+                '+593': 'Ecuador'
+            };
+            
+            // Función para actualizar maxlength y placeholder según el país seleccionado
             function updatePhoneMaxLength(countryCode) {
                 const maxLength = phoneLengthMap[countryCode] || 10;
+                const countryName = countryNamesMap[countryCode] || 'País';
+                
+                // Actualizar atributos del campo de teléfono
                 phoneInput.setAttribute('maxlength', maxLength);
                 phoneInput.setAttribute('pattern', `\\d{${maxLength}}`);
                 
-                // Truncate current value if it exceeds new max length
+                // Actualizar placeholder dinámicamente con información del país
+                phoneInput.setAttribute('placeholder', `${maxLength} dígitos (${countryName})`);
+                
+                // Truncar valor actual si excede la nueva longitud máxima
                 if (phoneInput.value.length > maxLength) {
                     phoneInput.value = phoneInput.value.substring(0, maxLength);
                 }
             }
             
-            // Set initial maxlength for Colombia
+            // Establecer configuración inicial para Colombia (país por defecto)
             updatePhoneMaxLength('+57');
             
-            // Update maxlength when country selection changes
+            // Actualizar maxlength y placeholder cuando cambia la selección de país
             options.forEach(option => {
-                const originalClickHandler = option.onclick;
                 option.addEventListener('click', function() {
                     const countryCode = this.getAttribute('data-value');
+                    // Llamar a la función que actualiza tanto maxlength como placeholder
                     updatePhoneMaxLength(countryCode);
                 });
             });
             
-            // Numeric validation - only allow numbers
+            // Validación numérica en tiempo real - solo permitir números
             phoneInput.addEventListener('input', function(e) {
-                // Remove any non-numeric characters
+                // Eliminar cualquier carácter que no sea numérico
                 let value = e.target.value.replace(/[^0-9]/g, '');
                 
-                // Update the input value with cleaned numeric value
+                // Actualizar el valor del input con solo números limpios
                 e.target.value = value;
                 
-                // Validate against current maxlength
+                // Validar contra la longitud máxima actual
                 const currentMaxLength = parseInt(e.target.getAttribute('maxlength'));
                 if (value.length > currentMaxLength) {
                     e.target.value = value.substring(0, currentMaxLength);
                 }
             });
             
-            // Prevent pasting non-numeric content
+            // Prevenir pegado de contenido no numérico
             phoneInput.addEventListener('paste', function(e) {
-                e.preventDefault();
+                e.preventDefault(); // Interceptar el evento de pegado
                 const paste = (e.clipboardData || window.clipboardData).getData('text');
-                const numericOnly = paste.replace(/[^0-9]/g, '');
+                const numericOnly = paste.replace(/[^0-9]/g, ''); // Filtrar solo números
                 const currentMaxLength = parseInt(e.target.getAttribute('maxlength'));
+                // Aplicar solo los números filtrados respetando la longitud máxima
                 e.target.value = numericOnly.substring(0, currentMaxLength);
             });
             
-            // Prevent typing non-numeric characters
+            // Prevenir escritura de caracteres no numéricos
             phoneInput.addEventListener('keypress', function(e) {
-                // Allow: backspace, delete, tab, escape, enter
+                // Permitir: backspace, delete, tab, escape, enter
                 if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    // Permitir: Ctrl+A (seleccionar todo), Ctrl+C (copiar), Ctrl+V (pegar), Ctrl+X (cortar)
                     (e.keyCode === 65 && e.ctrlKey === true) ||
                     (e.keyCode === 67 && e.ctrlKey === true) ||
                     (e.keyCode === 86 && e.ctrlKey === true) ||
                     (e.keyCode === 88 && e.ctrlKey === true)) {
-                    return;
+                    return; // Permitir estas teclas especiales
                 }
-                // Ensure that it is a number and stop the keypress
+                // Asegurar que solo sean números y bloquear otras teclas
                 if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                    e.preventDefault();
+                    e.preventDefault(); // Bloquear teclas no numéricas
                 }
             });
         });

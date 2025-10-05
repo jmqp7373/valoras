@@ -1,68 +1,98 @@
-/* Estilos para el formulario de login - Valoras */
+/* Estilos para el formulario de login - Valoras | Inspirado en Flycam */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'Poppins', sans-serif;
+    background-color: #fce4ec;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .login-container {
     background-color: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    border: 2px solid #ee6f92;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(224, 224, 224, 0.4);
+    width: 100%;
+    max-width: 380px;
+    border: 1px solid #ee6f92;
+    backdrop-filter: blur(10px);
 }
 
 .login-container h2 {
     text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+    color: #7704c7;
+    margin-bottom: 30px;
+    font-weight: 500;
+    font-size: 24px;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    color: #555;
-    font-weight: bold;
+    margin-bottom: 8px;
+    color: #7704c7;
+    font-weight: 500;
+    font-size: 14px;
+    text-transform: lowercase;
+    letter-spacing: 0.3px;
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px;
+    padding: 14px 16px;
     border: 1px solid #ee6f92;
-    border-radius: 4px;
+    border-radius: 12px;
     font-size: 16px;
+    font-family: 'Poppins', sans-serif;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #ee6f92;
-    box-shadow: 0 0 5px rgba(238, 111, 146, 0.3);
+    border-color: #7704c7;
+    box-shadow: 0 0 15px rgba(238, 111, 146, 0.2);
+    background-color: white;
+    transform: translateY(-1px);
 }
 
 .btn-submit {
     width: 100%;
-    padding: 12px;
-    background-color: #7704c7;
+    padding: 16px;
+    background: linear-gradient(135deg, #7704c7 0%, #ee6f92 100%);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 12px;
     font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(119, 4, 199, 0.3);
 }
 
 .btn-submit:hover {
-    background-color: #5e0399;
+    background: linear-gradient(135deg, #5e0399 0%, #d45087 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(119, 4, 199, 0.4);
+}
+
+.btn-submit:active {
+    transform: translateY(0px);
 }

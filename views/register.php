@@ -164,7 +164,9 @@ header('Content-Type: text/html; charset=UTF-8');
                     // Update display
                     selectedOption.innerHTML = '';
                     selectedOption.appendChild(img);
-                    selectedOption.innerHTML += `<span>${text}</span>`;
+                    const spanElement = document.createElement('span');
+                    spanElement.textContent = text;
+                    selectedOption.appendChild(spanElement);
                     
                     // Close dropdown
                     dropdown.style.display = 'none';

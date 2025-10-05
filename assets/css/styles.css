@@ -44,7 +44,6 @@ body {
     color: #7704c7;
     font-weight: 500;
     font-size: 14px;
-    text-transform: lowercase;
     letter-spacing: 0.3px;
 }
 
@@ -80,7 +79,6 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-transform: lowercase;
     letter-spacing: 0.5px;
     margin-top: 10px;
     box-shadow: 0 4px 15px rgba(119, 4, 199, 0.3);

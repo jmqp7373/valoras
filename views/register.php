@@ -40,7 +40,7 @@ header('Content-Type: text/html; charset=UTF-8');
                     <div class="custom-select" style="position: relative; width: 220px;">
                         <div class="select-display" style="padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
                             <div class="selected-option" style="display: flex; align-items: center;">
-                                <img src="../assets/images/flags/colombia.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
+                                <img src="../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
                                 <span>+57</span>
                             </div>
                             <span style="transform: rotate(0deg); transition: transform 0.3s;">▼</span>
@@ -48,34 +48,38 @@ header('Content-Type: text/html; charset=UTF-8');
                         
                         <div class="select-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ee6f92; border-top: none; border-radius: 0 0 12px 12px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none;">
                             <!-- Colombia siempre de primero -->
-                            <div class="option" data-value="+57" data-country="colombia" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="../assets/images/flags/colombia.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
+                            <div class="option" data-value="+57" data-country="co" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
                                 <span>Colombia (+57)</span>
                             </div>
                             
                             <!-- Resto de países en orden alfabético -->
-                            <div class="option" data-value="+54" data-country="argentina" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="../assets/images/flags/argentina.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Argentina">
+                            <div class="option" data-value="+54" data-country="ar" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/ar.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Argentina">
                                 <span>Argentina (+54)</span>
                             </div>
-                            <div class="option" data-value="+56" data-country="chile" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="../assets/images/flags/chile.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Chile">
+                            <div class="option" data-value="+56" data-country="cl" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/cl.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Chile">
                                 <span>Chile (+56)</span>
                             </div>
-                            <div class="option" data-value="+593" data-country="ecuador" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="../assets/images/flags/ecuador.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Ecuador">
+                            <div class="option" data-value="+593" data-country="ec" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/ec.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Ecuador">
                                 <span>Ecuador (+593)</span>
                             </div>
-                            <div class="option" data-value="+52" data-country="mexico" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="../assets/images/flags/mexico.png" style="width: 20px; height: auto; margin-right: 8px;" alt="México">
+                            <div class="option" data-value="+1" data-country="us" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/us.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Estados Unidos">
+                                <span>Estados Unidos (+1)</span>
+                            </div>
+                            <div class="option" data-value="+52" data-country="mx" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/mx.png" style="width: 20px; height: auto; margin-right: 8px;" alt="México">
                                 <span>México (+52)</span>
                             </div>
-                            <div class="option" data-value="+51" data-country="peru" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="../assets/images/flags/peru.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Perú">
+                            <div class="option" data-value="+51" data-country="pe" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/pe.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Perú">
                                 <span>Perú (+51)</span>
                             </div>
-                            <div class="option" data-value="+58" data-country="venezuela" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="../assets/images/flags/venezuela.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Venezuela">
+                            <div class="option" data-value="+58" data-country="ve" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
+                                <img src="../assets/images/flags/ve.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Venezuela">
                                 <span>Venezuela (+58)</span>
                             </div>
                         </div>

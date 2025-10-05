@@ -72,8 +72,8 @@ header('Content-Type: text/html; charset=UTF-8');
         <h2>Iniciar Sesión</h2>
         <form action="login.php" method="POST">
             <div class="form-group">
-                <label for="usuario">Usuario:</label>
-                <input type="text" id="usuario" name="usuario" required>
+                <label for="Número de Cédula">Número de Cédula:</label>
+                <input type="text" id="Numero_de_cedula" name="Numero_de_cedula" required>
             </div>
             
             <div class="form-group">

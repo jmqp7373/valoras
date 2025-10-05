@@ -27,6 +27,10 @@ header('Content-Type: text/html; charset=UTF-8');
             
             <button type="submit" class="btn-submit">Ingresar</button>
         </form>
+        
+        <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+            ¿Aún no tienes una cuenta? <a href="register.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Regístrate aquí</a>
+        </div>
     </div>
 </body>
 </html>

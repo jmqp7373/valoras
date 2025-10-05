@@ -73,12 +73,12 @@ header('Content-Type: text/html; charset=UTF-8');
         <form action="login.php" method="POST">
             <div class="form-group">
                 <label for="Número de Cédula">Número de Cédula:</label>
-                <input type="text" id="Numero_de_cedula" placeholder="Ingresa tu número de cédula" name="Numero_de_cedula" required>
+                <input type="text" id="Numero_de_cedula" placeholder="Cédula" name="Numero_de_cedula" required>
             </div>
             
             <div class="form-group">
                 <label for="contraseña">Contraseña:</label>
-                <input type="password" id="contraseña" placeholder="Ingresa tu contraseña" name="contraseña" required>
+                <input type="password" id="contraseña" placeholder="Contraseña" name="contraseña" required>
             </div>
             
             <button type="submit" class="btn-submit">Enviar</button>

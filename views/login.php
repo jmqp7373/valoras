@@ -16,8 +16,9 @@ header('Content-Type: text/html; charset=UTF-8');
         <h2>Iniciar Sesión</h2>
         <form action="login.php" method="POST">
             <div class="form-group">
-                <label for="Número de Cédula">Número de Cédula:</label>
-                <input type="text" id="Numero_de_cedula" placeholder="Cédula" name="Numero_de_cedula" required>
+                <!-- Campo de identificación con label y placeholder más descriptivos -->
+                <label for="Numero_de_cedula">Número de identificación (Cédula):</label>
+                <input type="text" id="Numero_de_cedula" placeholder="Número de identificación" name="Numero_de_cedula" required>
             </div>
             
             <div class="form-group">

@@ -43,7 +43,7 @@ header('Content-Type: text/html; charset=UTF-8');
                                 <img src="../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
                                 <span>+57</span>
                             </div>
-                            <span style="transform: rotate(0deg); transition: transform 0.3s;">▼</span>
+                            <span class="dropdown-arrow" style="transform: rotate(0deg); transition: transform 0.3s;">▼</span>
                         </div>
                         
                         <div class="select-dropdown" style="position: absolute; top: 100%; left: 0; width: 200px; background: white; border: 1px solid #ee6f92; border-top: none; border-radius: 0 0 12px 12px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none;">
@@ -115,7 +115,7 @@ header('Content-Type: text/html; charset=UTF-8');
             border-bottom-color: #ee6f92;
         }
         
-        .select-display.open span:last-child {
+        .select-display.open .dropdown-arrow {
             transform: rotate(180deg);
         }
         

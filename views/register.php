@@ -16,38 +16,35 @@ header('Content-Type: text/html; charset=UTF-8');
         <h2>Crear Cuenta</h2>
         <form action="register.php" method="POST">
             <div class="form-group">
-                <label for="nombres">Nombres:</label>
-                <input type="text" id="nombres" placeholder="Nombres completos" name="nombres" required>
+                <label for="Número de Cédula">Número de Cédula:</label>
+                <input type="text" id="Numero_de_cedula" placeholder="Cédula" name="Numero_de_cedula" required>
             </div>
             
             <div class="form-group">
-                <label for="apellidos">Apellidos:</label>
-                <input type="text" id="apellidos" placeholder="Apellidos completos" name="apellidos" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="numero_cedula">Número de Cédula:</label>
-                <input type="text" id="numero_cedula" placeholder="Cédula" name="numero_cedula" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Correo Electrónico:</label>
-                <input type="email" id="email" placeholder="correo@ejemplo.com" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="telefono">Teléfono:</label>
-                <input type="tel" id="telefono" placeholder="Número de teléfono" name="telefono" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="contraseña">Contraseña:</label>
-                <input type="password" id="contraseña" placeholder="Contraseña" name="contraseña" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="confirmar_contraseña">Confirmar Contraseña:</label>
-                <input type="password" id="confirmar_contraseña" placeholder="Confirmar contraseña" name="confirmar_contraseña" required>
+                <label for="celular">Número de Celular:</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="codigo_pais" name="codigo_pais" style="width: 120px; padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; transition: all 0.3s ease;" required>
+                        <option value="+57" selected>🇨🇴 +57</option>
+                        <option value="+58">🇻🇪 +58</option>
+                        <option value="+52">🇲🇽 +52</option>
+                        <option value="+54">🇦🇷 +54</option>
+                        <optgroup label="─────────────────">
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+34">🇪🇸 +34</option>
+                            <option value="+33">🇫🇷 +33</option>
+                            <option value="+39">🇮🇹 +39</option>
+                            <option value="+49">🇩🇪 +49</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+55">🇧🇷 +55</option>
+                            <option value="+56">🇨🇱 +56</option>
+                            <option value="+51">🇵🇪 +51</option>
+                            <option value="+593">🇪🇨 +593</option>
+                            <option value="+507">🇵🇦 +507</option>
+                            <option value="+506">🇨🇷 +506</option>
+                        </optgroup>
+                    </select>
+                    <input type="tel" id="numero_celular" placeholder="Número de celular" name="numero_celular" style="flex: 1; padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; transition: all 0.3s ease;" required>
+                </div>
             </div>
             
             <button type="submit" class="btn-submit">Registrarse</button>

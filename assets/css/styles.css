@@ -98,3 +98,25 @@ body {
     margin: 0 auto 20px auto;
     max-width: 150px;
 }
+
+/* Estilos para el select del código de país */
+select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #ee6f92;
+    border-radius: 12px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #882A57;
+    box-shadow: 0 0 15px rgba(238, 111, 146, 0.2);
+    background-color: white;
+    transform: translateY(-1px);
+}

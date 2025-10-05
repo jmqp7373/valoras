@@ -23,7 +23,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 <input type="password" id="contraseña" placeholder="Contraseña" name="contraseña" required>
             </div>
             
-            <button type="submit" class="btn-submit">Enviar</button>
+            <button type="submit" class="btn-submit">Ingresar</button>
         </form>
     </div>
 </body>

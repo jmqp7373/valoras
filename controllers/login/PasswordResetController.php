@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../models/Usuario.php';
-require_once __DIR__ . '/../services/EmailService.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../models/Usuario.php';
+require_once __DIR__ . '/../../services/EmailService.php';
 
 class PasswordResetController {
     private $db;
@@ -14,24 +14,44 @@ class PasswordResetController {
         $this->emailService = new EmailService();
     }
     
-    public function findUser($cedula) {
-        if(empty($cedula)) {
+    public function findUser($identifier, $method = 'cedula') {
+        if(empty($identifier)) {
+            $methodName = $this->getMethodName($method);
             return [
                 'success' => false,
-                'message' => 'Debe ingresar un número de cédula'
+                'message' => "Debe ingresar $methodName"
             ];
         }
         
         try {
             $pdo = $this->db->getConnection();
-            $stmt = $pdo->prepare("SELECT cedula, email, celular, codigo_pais, nombres, apellidos FROM usuarios WHERE cedula = ? LIMIT 1");
-            $stmt->execute([$cedula]);
+            
+            // Determinar el campo de búsqueda según el método
+            switch($method) {
+                case 'cedula':
+                    $field = 'cedula'; // Confirmado que existe
+                    break;
+                case 'username':
+                    $field = 'usuario'; // Verificar si existe este campo
+                    break;
+                case 'celular':
+                    $field = 'celular'; // Verificar si existe este campo
+                    // Para celular, limpiar el número (remover +, espacios, etc.)
+                    $identifier = preg_replace('/[^\d]/', '', $identifier);
+                    break;
+                default:
+                    $field = 'cedula';
+            }
+            
+            $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE $field = ? LIMIT 1");
+            $stmt->execute([$identifier]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if(!$user) {
+                $methodName = $this->getMethodName($method);
                 return [
                     'success' => false,
-                    'message' => 'No se encontró una cuenta asociada a esta cédula'
+                    'message' => "No se encontró una cuenta asociada a $methodName"
                 ];
             }
             
@@ -77,17 +97,18 @@ class PasswordResetController {
             ];
             
         } catch(Exception $e) {
+            // Temporalmente mostrar error detallado para debug
             return [
                 'success' => false,
-                'message' => 'Error al buscar la cuenta. Inténtalo de nuevo.'
+                'message' => 'ERROR: ' . $e->getMessage()
             ];
         }
     }
     
-    public function sendResetLink($cedula, $method) {
+    public function sendResetLink($identifier, $method, $identificationMethod = 'cedula') {
         try {
             // Obtener datos del usuario nuevamente
-            $result = $this->findUser($cedula);
+            $result = $this->findUser($identifier, $identificationMethod);
             if(!$result['success']) {
                 return $result;
             }
@@ -117,7 +138,7 @@ class PasswordResetController {
             $stmt->execute([$cedula, $token, $method, $expires]);
             
             // Crear enlace de reseteo
-            $resetLink = "http://localhost/valora.vip/views/reset_password.php?token=" . $token;
+            $resetLink = "http://localhost/valora.vip/views/login/reset_password.php?token=" . $token;
             
             // Enviar según el método seleccionado
             if($method === 'email') {
@@ -380,6 +401,19 @@ class PasswordResetController {
         // - Nexmo: https://www.vonage.com/
         
         return true;
+    }
+    
+    private function getMethodName($method) {
+        switch($method) {
+            case 'cedula':
+                return 'esta cédula';
+            case 'username':
+                return 'este nombre de usuario';
+            case 'celular':
+                return 'este número de celular';
+            default:
+                return 'esta información';
+        }
     }
 }
 ?>

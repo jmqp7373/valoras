@@ -66,7 +66,7 @@ function isLoggedIn() {
 // Función para redirigir si no está logueado
 function requireLogin() {
     if (!isLoggedIn()) {
-        header('Location: views/login.php');
+        header('Location: views/login/login.php');
         exit();
     }
 }

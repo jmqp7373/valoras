@@ -31,7 +31,7 @@ fi
 echo "🔍 Verificando archivos del sistema IA..."
 
 files_to_check=(
-    "controllers/usernameGenerator.php"
+    "controllers/login/usernameGenerator.php"
     "views/login/registranteUserAvailavilitySelect.php"
     "config/config.example.php"
 )
@@ -55,4 +55,4 @@ echo ""
 echo "🌐 URLs disponibles:"
 echo "   - Registro: /views/register.php"
 echo "   - Generador IA: /views/login/registranteUserAvailavilitySelect.php"
-echo "   - Verificación: /system-check.php"
+echo "   - Verificación: /views/admin/checksTests/system-check.php"

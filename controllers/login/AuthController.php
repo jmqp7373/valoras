@@ -1,6 +1,6 @@
 <?php
-require_once '../config/database.php';
-require_once '../models/Usuario.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../models/Usuario.php';
 
 startSessionSafely();
 
@@ -43,7 +43,7 @@ class AuthController {
                 return [
                     'success' => true,
                     'message' => 'Login exitoso',
-                    'redirect' => '../index.php'
+                    'redirect' => '../../index.php'
                 ];
             } else {
                 return [
@@ -120,12 +120,59 @@ class AuthController {
         ];
     }
 
+    // Método para verificar disponibilidad de username
+    public function checkUsername() {
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $username = trim($_POST['username']);
+            
+            if(empty($username)) {
+                echo 'invalid';
+                return;
+            }
+            
+            try {
+                // Verificar si el username ya existe en la columna 'usuario'
+                $query = "SELECT COUNT(*) FROM usuarios WHERE usuario = :usuario";
+                $stmt = $this->db->prepare($query);
+                $stmt->bindParam(':usuario', $username);
+                $stmt->execute();
+                
+                $count = $stmt->fetchColumn();
+                
+                echo $count == 0 ? 'available' : 'unavailable';
+                return;
+                
+            } catch (Exception $e) {
+                // En caso de error de base de datos
+                echo 'unavailable';
+                return;
+            }
+        }
+        
+        echo 'invalid';
+        return;
+    }
+
     // Método para cerrar sesión
     public function logout() {
         session_start();
         session_destroy();
-        header('Location: ../views/login.php');
+        header('Location: ../views/login/login.php');
         exit();
+    }
+}
+
+// Manejar solicitudes AJAX
+if(isset($_POST['action'])) {
+    $auth = new AuthController();
+    
+    switch($_POST['action']) {
+        case 'check_username':
+            echo $auth->checkUsername();
+            exit();
+        default:
+            echo 'invalid_action';
+            exit();
     }
 }
 ?>

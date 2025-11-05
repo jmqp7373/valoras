@@ -8,7 +8,7 @@ startSessionSafely();
 
 // Verificar si el usuario está logueado
 if(!isLoggedIn()) {
-    header('Location: views/login.php');
+    header('Location: views/login/login.php');
     exit();
 }
 
@@ -31,7 +31,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
             <img src="assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo">
             <div class="user-info">
                 <span>Bienvenido, <?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></span>
-                <a href="controllers/logout.php" class="logout-btn">Cerrar Sesión</a>
+                <a href="controllers/login/logout.php" class="logout-btn">Cerrar Sesión</a>
             </div>
         </header>
         
@@ -43,6 +43,13 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                     <h3>Información del Usuario:</h3>
                     <p><strong>Nombre:</strong> <?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></p>
                     <p><strong>Cédula:</strong> <?php echo htmlspecialchars($user_cedula); ?></p>
+                </div>
+                
+                <div style="margin-top: 2rem; text-align: center;">
+                    <a href="views/admin/checksTests/system-check.php" 
+                       style="background: #8b5a83; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                        🔍 Verificación del Sistema
+                    </a>
                 </div>
             </div>
         </main>

@@ -88,7 +88,7 @@ Una vez configurado:
 
 - **Registro completo**: `/views/register.php`
 - **Generador IA directo**: `/views/login/registranteUserAvailavilitySelect.php` 
-- **Verificación del sistema**: `/system-check.php`
+- **Verificación del sistema**: `/views/admin/checksTests/system-check.php`
 
 ## 🎯 Flujo de Usuario
 
@@ -113,7 +113,7 @@ Una vez configurado:
 ## 💡 Personalización
 
 ### Modificar el prompt del sistema
-En `controllers/usernameGenerator.php`, línea ~35:
+En `controllers/login/usernameGenerator.php`, línea ~35:
 ```php
 ["role" => "system", "content" => "Personaliza este mensaje según tu marca..."]
 ```
@@ -146,6 +146,6 @@ Cada sugerencia usa aproximadamente:
 ---
 
 **¿Necesitas ayuda?** 
-- Revisa `/system-check.php` para diagnósticos
+- Revisa `/views/admin/checksTests/system-check.php` para diagnósticos
 - Verifica logs del servidor web
 - Contacta soporte técnico

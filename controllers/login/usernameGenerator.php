@@ -5,7 +5,7 @@
  */
 
 // Verificar si existe el archivo de configuración
-$configPath = __DIR__ . '/../config/config.php';
+$configPath = __DIR__ . '/../../config/config.php';
 if (!file_exists($configPath)) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([

@@ -1,48 +1,465 @@
+<?php
+session_start();
+
+// Pool completo de características disponibles
+$caracteristicasPool = [
+    ['emoji' => '💋', 'nombre' => 'Sexy', 'trait' => 'sexy'],
+    ['emoji' => '😄', 'nombre' => 'Divertida', 'trait' => 'divertida'],
+    ['emoji' => '💎', 'nombre' => 'Elegante', 'trait' => 'elegante'],
+    ['emoji' => '🌙', 'nombre' => 'Misteriosa', 'trait' => 'misteriosa'],
+    ['emoji' => '🍯', 'nombre' => 'Dulce', 'trait' => 'dulce'],
+    ['emoji' => '🔥', 'nombre' => 'Atrevida', 'trait' => 'atrevida'],
+    ['emoji' => '🌿', 'nombre' => 'Natural', 'trait' => 'natural'],
+    ['emoji' => '✨', 'nombre' => 'Glamourosa', 'trait' => 'glamourosa'],
+    ['emoji' => '📚', 'nombre' => 'Intelectual', 'trait' => 'intelectual'],
+    ['emoji' => '🗺️', 'nombre' => 'Aventurera', 'trait' => 'aventurera'],
+    ['emoji' => '🎨', 'nombre' => 'Artística', 'trait' => 'artistica'],
+    ['emoji' => '💪', 'nombre' => 'Deportiva', 'trait' => 'deportiva'],
+    ['emoji' => '🎭', 'nombre' => 'Dramática', 'trait' => 'dramatica'],
+    ['emoji' => '🌺', 'nombre' => 'Exótica', 'trait' => 'exotica'],
+    ['emoji' => '⚡', 'nombre' => 'Energética', 'trait' => 'energetica'],
+    ['emoji' => '🦋', 'nombre' => 'Delicada', 'trait' => 'delicada'],
+    ['emoji' => '🔮', 'nombre' => 'Mística', 'trait' => 'mistica'],
+    ['emoji' => '👑', 'nombre' => 'Regia', 'trait' => 'regia'],
+    ['emoji' => '🌟', 'nombre' => 'Radiante', 'trait' => 'radiante'],
+    ['emoji' => '🌹', 'nombre' => 'Romántica', 'trait' => 'romantica'],
+    ['emoji' => '🎪', 'nombre' => 'Extrovertida', 'trait' => 'extrovertida'],
+    ['emoji' => '🏖️', 'nombre' => 'Relajada', 'trait' => 'relajada'],
+    ['emoji' => '🎯', 'nombre' => 'Decidida', 'trait' => 'decidida'],
+    ['emoji' => '🌈', 'nombre' => 'Colorida', 'trait' => 'colorida'],
+    ['emoji' => '🦄', 'nombre' => 'Única', 'trait' => 'unica'],
+    ['emoji' => '🍓', 'nombre' => 'Fresca', 'trait' => 'fresca'],
+    ['emoji' => '�', 'nombre' => 'Pasional', 'trait' => 'pasional'],
+    ['emoji' => '🌊', 'nombre' => 'Fluida', 'trait' => 'fluida'],
+    ['emoji' => '💫', 'nombre' => 'Magnética', 'trait' => 'magnetica'],
+    ['emoji' => '🎵', 'nombre' => 'Musical', 'trait' => 'musical'],
+    ['emoji' => '🍑', 'nombre' => 'Sensual', 'trait' => 'sensual'],
+    ['emoji' => '🌸', 'nombre' => 'Tierna', 'trait' => 'tierna'],
+    ['emoji' => '🍷', 'nombre' => 'Sofisticada', 'trait' => 'sofisticada'],
+    ['emoji' => '🎀', 'nombre' => 'Coqueta', 'trait' => 'coqueta'],
+    ['emoji' => '🌻', 'nombre' => 'Alegre', 'trait' => 'alegre'],
+    ['emoji' => '🍀', 'nombre' => 'Afortunada', 'trait' => 'afortunada'],
+    ['emoji' => '🎈', 'nombre' => 'Juguetona', 'trait' => 'juguetona'],
+    ['emoji' => '🌙', 'nombre' => 'Nocturna', 'trait' => 'nocturna'],
+    ['emoji' => '☀️', 'nombre' => 'Radiosa', 'trait' => 'radiosa'],
+    ['emoji' => '🍃', 'nombre' => 'Libre', 'trait' => 'libre'],
+    ['emoji' => '💃', 'nombre' => 'Bailarina', 'trait' => 'bailarina'],
+    ['emoji' => '🎤', 'nombre' => 'Cantante', 'trait' => 'cantante'],
+    ['emoji' => '📸', 'nombre' => 'Fotogénica', 'trait' => 'fotogenica'],
+    ['emoji' => '🍒', 'nombre' => 'Dulce como cereza', 'trait' => 'dulcecereza'],
+    ['emoji' => '🌷', 'nombre' => 'Primaveral', 'trait' => 'primaveral'],
+    ['emoji' => '🎊', 'nombre' => 'Festiva', 'trait' => 'festiva'],
+    ['emoji' => '💝', 'nombre' => 'Amorosa', 'trait' => 'amorosa'],
+    ['emoji' => '🍯', 'nombre' => 'Melosa', 'trait' => 'melosa'],
+    ['emoji' => '🌺', 'nombre' => 'Tropical', 'trait' => 'tropical'],
+    ['emoji' => '🎨', 'nombre' => 'Creativa', 'trait' => 'creativa'],
+    ['emoji' => '🦢', 'nombre' => 'Elegante como cisne', 'trait' => 'elegantecisne'],
+    ['emoji' => '🍊', 'nombre' => 'Vibrante', 'trait' => 'vibrante'],
+    ['emoji' => '🌿', 'nombre' => 'Ecológica', 'trait' => 'ecologica'],
+    ['emoji' => '🎹', 'nombre' => 'Melódica', 'trait' => 'melodica'],
+    ['emoji' => '🍰', 'nombre' => 'Golosa', 'trait' => 'golosa'],
+    ['emoji' => '🌼', 'nombre' => 'Inocente', 'trait' => 'inocente'],
+    ['emoji' => '🎭', 'nombre' => 'Actriz', 'trait' => 'actriz'],
+    ['emoji' => '🏵️', 'nombre' => 'Premiada', 'trait' => 'premiada'],
+    ['emoji' => '🌟', 'nombre' => 'Estrella', 'trait' => 'estrella'],
+    ['emoji' => '🍎', 'nombre' => 'Tentadora', 'trait' => 'tentadora'],
+    ['emoji' => '🎪', 'nombre' => 'Circense', 'trait' => 'circense'],
+    ['emoji' => '🌋', 'nombre' => 'Volcánica', 'trait' => 'volcanica'],
+    ['emoji' => '🍾', 'nombre' => 'Celebradora', 'trait' => 'celebradora'],
+    ['emoji' => '🎯', 'nombre' => 'Precisa', 'trait' => 'precisa'],
+    ['emoji' => '🌅', 'nombre' => 'Matutina', 'trait' => 'matutina'],
+    ['emoji' => '🍭', 'nombre' => 'Dulce como caramelo', 'trait' => 'dulcecaramelo'],
+    ['emoji' => '🎨', 'nombre' => 'Bohemia', 'trait' => 'bohemia'],
+    ['emoji' => '🌪️', 'nombre' => 'Torbellino', 'trait' => 'torbellino'],
+    ['emoji' => '🍀', 'nombre' => 'Suertuda', 'trait' => 'suertuda'],
+    ['emoji' => '🎈', 'nombre' => 'Espontánea', 'trait' => 'espontanea'],
+    ['emoji' => '🌺', 'nombre' => 'Hawaiana', 'trait' => 'hawaiana'],
+    ['emoji' => '🍑', 'nombre' => 'Provocativa', 'trait' => 'provocativa'],
+    ['emoji' => '🎪', 'nombre' => 'Entretenida', 'trait' => 'entretenida'],
+    ['emoji' => '🌙', 'nombre' => 'Soñadora', 'trait' => 'sonadora'],
+    ['emoji' => '💎', 'nombre' => 'Valiosa', 'trait' => 'valiosa'],
+    ['emoji' => '🍓', 'nombre' => 'Deliciosa', 'trait' => 'deliciosa'],
+    ['emoji' => '🎭', 'nombre' => 'Versátil', 'trait' => 'versatil'],
+    ['emoji' => '🌻', 'nombre' => 'Luminosa', 'trait' => 'luminosa'],
+    ['emoji' => '🍒', 'nombre' => 'Irresistible', 'trait' => 'irresistible'],
+    ['emoji' => '🎨', 'nombre' => 'Inspiradora', 'trait' => 'inspiradora'],
+    ['emoji' => '🌈', 'nombre' => 'Multicolor', 'trait' => 'multicolor'],
+    ['emoji' => '🍯', 'nombre' => 'Adictiva', 'trait' => 'adictiva'],
+    ['emoji' => '🎪', 'nombre' => 'Espectacular', 'trait' => 'espectacular'],
+    ['emoji' => '🌺', 'nombre' => 'Paradisíaca', 'trait' => 'paradisiaca'],
+    ['emoji' => '💫', 'nombre' => 'Cósmica', 'trait' => 'cosmica'],
+    ['emoji' => '🍑', 'nombre' => 'Apetecible', 'trait' => 'apetecible'],
+    ['emoji' => '🎭', 'nombre' => 'Teatral', 'trait' => 'teatral'],
+    ['emoji' => '🌙', 'nombre' => 'Seductora', 'trait' => 'seductora'],
+    ['emoji' => '💎', 'nombre' => 'Brillante', 'trait' => 'brillante'],
+    ['emoji' => '🍓', 'nombre' => 'Tentación', 'trait' => 'tentacion'],
+    ['emoji' => '🎨', 'nombre' => 'Conceptual', 'trait' => 'conceptual'],
+    ['emoji' => '🌻', 'nombre' => 'Soleada', 'trait' => 'soleada'],
+    ['emoji' => '🍒', 'nombre' => 'Pecaminosa', 'trait' => 'pecaminosa'],
+    ['emoji' => '🎭', 'nombre' => 'Camaleón', 'trait' => 'camaleon'],
+    ['emoji' => '🌈', 'nombre' => 'Fantástica', 'trait' => 'fantastica'],
+    ['emoji' => '🍯', 'nombre' => 'Embriagadora', 'trait' => 'embriagadora'],
+    ['emoji' => '🎪', 'nombre' => 'Circunstancial', 'trait' => 'circunstancial'],
+    ['emoji' => '🌺', 'nombre' => 'Floral', 'trait' => 'floral'],
+    ['emoji' => '💫', 'nombre' => 'Galáctica', 'trait' => 'galactica'],
+    ['emoji' => '🍑', 'nombre' => 'Jugosa', 'trait' => 'jugosa'],
+    ['emoji' => '🎭', 'nombre' => 'Performática', 'trait' => 'performatica'],
+    ['emoji' => '🌙', 'nombre' => 'Lunar', 'trait' => 'lunar'],
+    ['emoji' => '💎', 'nombre' => 'Preciosa', 'trait' => 'preciosa'],
+    ['emoji' => '🍓', 'nombre' => 'Sabrosura', 'trait' => 'sabrosura']
+];
+
+// Función para generar 12 características aleatorias
+function generarCaracteristicas($pool) {
+    $caracteristicasAleatorias = $pool;
+    shuffle($caracteristicasAleatorias);
+    return array_slice($caracteristicasAleatorias, 0, 12);
+}
+
+// Verificar si es un refresh o usuario nuevo
+if (isset($_GET['refresh']) || !isset($_SESSION['caracteristicas_usuario'])) {
+    $_SESSION['caracteristicas_usuario'] = generarCaracteristicas($caracteristicasPool);
+    $_SESSION['session_id'] = session_id();
+}
+
+$caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sugerir Nombre de Usuario - Valora</title>
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <title>Crear Tu Perfil - Valora</title>
+    <link rel="stylesheet" href="../../assets/css/styles.css">
     <style>
-        .ai-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        body {
+            background: linear-gradient(135deg, #ee6f92 0%, #8b5a83 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
         }
         
-        .ai-header {
+        .wizard-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .wizard-header {
             text-align: center;
             margin-bottom: 30px;
+            color: white;
         }
         
-        .ai-header h2 {
-            color: #882A57;
-            font-family: 'Poppins', sans-serif;
+        .wizard-header h1 {
+            font-size: 28px;
             font-weight: 600;
             margin-bottom: 10px;
         }
         
-        .ai-header p {
-            color: #666;
+        .wizard-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .wizard-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            color: white;
             font-size: 14px;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-weight: 600;
+        }
+        
+        .step.active .step-number {
+            background: white;
+            color: #882A57;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '→';
+            margin: 0 20px;
+            opacity: 0.7;
+        }
+        
+        .block {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .block-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .block-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        
+        .block-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #882A57;
             margin: 0;
+        }
+        
+        .characteristics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .characteristic-item {
+            padding: 12px 15px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .characteristic-item:hover {
+            border-color: #ee6f92;
+            background: #fdf7f9;
+        }
+        
+        .characteristic-item.selected {
+            border-color: #882A57;
+            background: #882A57;
+            color: white;
+        }
+        
+        .username-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        /* Asegurar que no haya más de 4 columnas en pantallas grandes */
+        @media (min-width: 768px) {
+            .username-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                max-width: 100%;
+            }
+        }
+        
+        .username-item {
+            padding: 15px 10px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+        
+        .username-item:hover {
+            border-color: #ee6f92;
+            transform: translateY(-2px);
+        }
+        
+        .username-item.selected {
+            border-color: #882A57;
+            background: #882A57;
+            color: white;
+        }
+        
+        .username-text {
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.2;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Responsive para nombres más largos */
+        @media (max-width: 768px) {
+            .username-text {
+                font-size: 13px;
+            }
+        }
+        
+        .availability-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .platform-check {
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .platform-check.available {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .platform-check.unavailable {
+            border-color: #dc3545;
+            background: #fff8f8;
+        }
+        
+        .platform-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .platform-status {
+            font-size: 14px;
+        }
+        
+        .continue-btn {
+            background: linear-gradient(135deg, #ee6f92 0%, #8b5a83 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            min-width: 200px;
+        }
+        
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .continue-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 15px auto;
+            min-width: 180px;
+            justify-content: center;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #20c997, #28a745);
+        }
+        
+        .refresh-btn:hover .icon {
+            transform: rotate(90deg);
+        }
+        
+        .refresh-btn .icon {
+            font-size: 16px;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-block;
+        }
+        
+        .refresh-btn:active {
+            transform: translateY(0px) scale(0.98);
+        }
+        
+        .refresh-btn.loading .icon {
+            animation: elegantRotate 1s ease-in-out infinite;
+        }
+        
+        @keyframes elegantRotate {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3); }
+            50% { box-shadow: 0 8px 30px rgba(40, 167, 69, 0.6); }
+        }
+        
+        .characteristics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0 10px;
+        }
+        
+        .characteristics-title {
+            color: #882A57;
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .session-info {
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
         }
         
         .input-group {
             display: flex;
             gap: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
         
         .input-group input {
             flex: 1;
             padding: 14px 16px;
-            border: 1px solid #ee6f92;
+            border: 2px solid #ee6f92;
             border-radius: 12px;
             font-size: 16px;
             font-family: 'Poppins', sans-serif;
@@ -57,149 +474,432 @@
             box-shadow: 0 0 0 3px rgba(136, 42, 87, 0.1);
         }
         
-        .btn-ai {
-            padding: 14px 24px;
-            background: linear-gradient(135deg, #ee6f92, #882A57);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #882A57;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
         }
         
-        .btn-ai:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(238, 111, 146, 0.3);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        .btn-ai:disabled {
-            background: #ccc;
-            transform: none;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-        
-        .suggestions-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .suggestions-list li {
+        .navigation-menu {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
             padding: 15px 20px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            cursor: pointer;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
             transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 8px;
+            border: 2px solid transparent;
         }
         
-        .suggestions-list li:hover {
-            background: #fff;
-            border-color: #ee6f92;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(238, 111, 146, 0.1);
+        .nav-btn.primary {
+            background: linear-gradient(135deg, #ee6f92, #882A57);
+            color: white;
         }
         
-        .suggestions-list li.loading {
-            text-align: center;
+        .nav-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 111, 146, 0.3);
+        }
+        
+        .nav-btn.secondary {
+            background: white;
             color: #882A57;
-            font-style: italic;
-            cursor: default;
+            border-color: #ee6f92;
         }
         
-        .suggestions-list li.error {
-            background: #fee;
-            border-color: #fcc;
-            color: #c33;
-            cursor: default;
+        .nav-btn.secondary:hover {
+            background: #ee6f92;
+            color: white;
         }
         
-        .username-text {
-            font-weight: 500;
+        .nav-btn.tertiary {
+            background: transparent;
+            color: #666;
+            border-color: #ddd;
+        }
+        
+        .nav-btn.tertiary:hover {
+            background: #f5f5f5;
             color: #333;
         }
         
-        .select-badge {
-            background: #ee6f92;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
+        @media (max-width: 768px) {
+            .navigation-menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
+                max-width: 250px;
+            }
         }
         
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #882A57;
+        .help-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ee6f92, #882A57);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(238, 111, 146, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .help-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(238, 111, 146, 0.4);
+        }
+        
+        .help-menu {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 999;
+            min-width: 250px;
+        }
+        
+        .help-menu.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .help-option {
+            display: block;
+            padding: 12px 15px;
+            margin: 5px 0;
             text-decoration: none;
-            font-weight: 500;
-            padding: 10px 20px;
-            border: 1px solid #ee6f92;
+            color: #333;
             border-radius: 8px;
             transition: all 0.3s ease;
+            border: 1px solid transparent;
         }
         
-        .back-link:hover {
-            background: #ee6f92;
-            color: white;
-            text-decoration: none;
+        .help-option:hover {
+            background: #f8f9fa;
+            border-color: #ee6f92;
+            color: #882A57;
+        }
+        
+        .help-option .icon {
+            margin-right: 10px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <div class="ai-container">
-        <div class="ai-header">
-            <img src="/assets/images/logos/logo_valora.png" alt="Valora Logo" style="height: 60px; margin-bottom: 15px;">
-            <h2>✨ Sugerir nombre de usuario con IA</h2>
-            <p>Describe tu estilo o personalidad para recibir sugerencias únicas y elegantes</p>
+    <div class="wizard-container">
+        <div class="wizard-header">
+            <h1>🌟 Crear Tu Perfil Perfecto</h1>
+            <p>Descubre el nombre de usuario ideal para ti en 3 simples pasos</p>
         </div>
-
-        <div class="input-group">
-            <input type="text" id="userPrompt" placeholder="Ej: elegante, internacional, creativa, misteriosa..." maxlength="100">
-            <button id="btnGenerarNombre" class="btn-ai">🤖 Sugerir con IA</button>
-        </div>
-
-        <ul id="sugerenciasIA" class="suggestions-list"></ul>
         
-        <div style="text-align: center;">
-            <a href="/views/register.php" class="back-link">← Volver al registro</a>
+        <div class="wizard-steps">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <span>Cuéntanos sobre ti</span>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <span>IA crea sugerencias</span>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <span>Verificar disponibilidad</span>
+            </div>
+        </div>
+
+        <!-- Bloque 1: Características del Usuario -->
+        <div class="block" id="block1">
+            <div class="block-header">
+                <div class="block-icon">👤</div>
+                <h3 class="block-title">Cuéntanos sobre ti</h3>
+            </div>
+            
+            <form id="characteristicsForm">
+                <div class="input-group">
+                    <input type="text" name="edad" placeholder="Tu edad (ej: 25)" required>
+                </div>
+                
+                <!-- Información de sesión -->
+                <div class="session-info">
+                    ✨ Sesión activa: <?php echo substr($_SESSION['session_id'], 0, 8); ?>... | Características únicas generadas para ti
+                </div>
+                
+                <div class="characteristics-header">
+                    <h4 class="characteristics-title">Selecciona tus características:</h4>
+                    <button type="button" class="refresh-btn" onclick="refreshCharacteristics()">
+                        <span class="icon">🔄</span>
+                        <span>Nuevas opciones</span>
+                    </button>
+                </div>
+                
+                <div class="characteristics-grid" id="characteristicsGrid">
+                    <?php foreach ($caracteristicasActuales as $caracteristica): ?>
+                        <div class="characteristic-item" data-trait="<?php echo htmlspecialchars($caracteristica['trait']); ?>">
+                            <?php echo $caracteristica['emoji']; ?> <?php echo htmlspecialchars($caracteristica['nombre']); ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <button type="submit" class="continue-btn" id="generateBtn">
+                    🤖 Generar Nombres con IA
+                </button>
+                
+                <div style="text-align: center; margin-top: 25px; color: #666; font-size: 14px;">
+                    <div style="margin-bottom: 12px;">
+                        ¿Ya tienes una cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión</a>
+                    </div>
+                    <div>
+                        <a href="password_reset.php" style="color: #882A57; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bloque 2: Sugerencias de IA -->
+        <div class="block" id="block2" style="display: none;">
+            <div class="block-header">
+                <div class="block-icon">🤖</div>
+                <h3 class="block-title">Sugerencias Personalizadas de IA</h3>
+            </div>
+            
+            <div class="loading" id="loading" style="text-align: center; margin: 20px 0; display: none;">
+                <div class="spinner"></div>
+                <p>Nuestra IA está creando nombres únicos para ti...</p>
+            </div>
+            
+            <div id="suggestionsContainer" style="display: none;">
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Selecciona el nombre que más te guste:
+                </p>
+                <div class="username-grid" id="usernameGrid">
+                    <!-- Las sugerencias aparecerán aquí -->
+                </div>
+                
+                <button type="button" class="continue-btn" id="checkAvailabilityBtn" style="display: none;">
+                    🔍 Verificar Disponibilidad
+                </button>
+                
+                <button type="button" class="continue-btn" id="backToStep1Btn" style="background: #6c757d; margin-top: 15px;">
+                    ← Volver a Características
+                </button>
+            </div>
+        </div>
+
+        <!-- Bloque 3: Verificación de Disponibilidad -->
+        <div class="block" id="block3" style="display: none;">
+            <div class="block-header">
+                <div class="block-icon">🔍</div>
+                <h3 class="block-title">Disponibilidad en Plataformas</h3>
+            </div>
+            
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                Verificando disponibilidad de "<strong id="selectedUsername"></strong>" en las plataformas:
+            </p>
+            
+            <div class="availability-grid" id="availabilityGrid">
+                <div class="platform-check" id="valoraCheck">
+                    <div class="platform-name">Valora.vip</div>
+                    <div class="platform-status">Verificando...</div>
+                </div>
+                <div class="platform-check" id="chaturbateCheck">
+                    <div class="platform-name">Chaturbate</div>
+                    <div class="platform-status">Verificando...</div>
+                </div>
+                <div class="platform-check" id="stripchatCheck">
+                    <div class="platform-name">Stripchat</div>
+                    <div class="platform-status">Verificando...</div>
+                </div>
+            </div>
+            
+            <button type="button" class="continue-btn" id="continueBtn" style="display: none;">
+                ✅ Continuar con el Registro
+            </button>
+            
+            <button type="button" class="continue-btn" id="backToStep2Btn" style="background: #6c757d; margin-top: 15px;">
+                ← Volver a Sugerencias
+            </button>
         </div>
     </div>
 
     <script>
-        document.getElementById("btnGenerarNombre").addEventListener("click", async () => {
-            const prompt = document.getElementById("userPrompt").value.trim();
-            const list = document.getElementById("sugerenciasIA");
-            const btn = document.getElementById("btnGenerarNombre");
+        let selectedUsername = '';
+        let selectedCharacteristics = [];
 
-            if (!prompt) {
-                alert("Por favor escribe al menos una palabra clave sobre tu estilo.");
+        // Función para refrescar características con animación elegante
+        function refreshCharacteristics() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const icon = refreshBtn.querySelector('.icon');
+            const text = refreshBtn.querySelector('span:not(.icon)');
+            
+            // Prevenir múltiples clics
+            if (refreshBtn.disabled) return;
+            
+            // Estado de carga elegante
+            refreshBtn.disabled = true;
+            refreshBtn.classList.add('loading');
+            
+            // Cambiar texto y estilo
+            text.textContent = 'Generando...';
+            refreshBtn.style.background = 'linear-gradient(135deg, #17a2b8, #138496)';
+            refreshBtn.style.transform = 'scale(0.98)';
+            
+            // Animación de las características actuales
+            const currentItems = document.querySelectorAll('.characteristic-item');
+            currentItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.transform = 'scale(0.95)';
+                    item.style.opacity = '0.6';
+                }, index * 50);
+            });
+            
+            // Limpiar selecciones actuales
+            selectedCharacteristics = [];
+            
+            // Feedback visual adicional
+            setTimeout(() => {
+                refreshBtn.style.animation = 'pulseGlow 0.6s ease-in-out';
+            }, 300);
+            
+            // Recargar página con parámetro refresh
+            setTimeout(() => {
+                window.location.href = window.location.pathname + '?refresh=1';
+            }, 800);
+        }
+
+        // Validación de edad en tiempo real
+        const edadInput = document.querySelector('input[name="edad"]');
+        edadInput.addEventListener('input', function() {
+            const edad = parseInt(this.value);
+            
+            if (!isNaN(edad) && edad < 18) {
+                this.style.borderColor = '#dc3545';
+                this.style.backgroundColor = '#fff5f5';
+                
+                // Mostrar advertencia visual
+                let warning = document.getElementById('age-warning');
+                if (!warning) {
+                    warning = document.createElement('div');
+                    warning.id = 'age-warning';
+                    warning.style.cssText = `
+                        color: #dc3545;
+                        font-size: 12px;
+                        margin-top: 5px;
+                        padding: 8px 12px;
+                        background: #fff5f5;
+                        border: 1px solid #dc3545;
+                        border-radius: 6px;
+                        font-weight: 500;
+                    `;
+                    warning.innerHTML = '⚠️ Debes tener 18 años o más para usar Valora.vip';
+                    this.parentNode.appendChild(warning);
+                }
+            } else {
+                this.style.borderColor = '#ee6f92';
+                this.style.backgroundColor = '#fafafa';
+                
+                // Remover advertencia si existe
+                const warning = document.getElementById('age-warning');
+                if (warning) {
+                    warning.remove();
+                }
+            }
+        });
+
+        // Manejar selección de características
+        document.querySelectorAll('.characteristic-item').forEach(item => {
+            item.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const trait = this.dataset.trait;
+                
+                if (this.classList.contains('selected')) {
+                    selectedCharacteristics.push(trait);
+                } else {
+                    selectedCharacteristics = selectedCharacteristics.filter(t => t !== trait);
+                }
+            });
+        });
+
+        // Manejar envío del formulario de características
+        document.getElementById('characteristicsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const edad = formData.get('edad');
+            
+            if (!edad || selectedCharacteristics.length === 0) {
+                alert('Por favor completa tu edad y selecciona al menos una característica.');
+                return;
+            }
+            
+            // Validación de edad mínima (18 años)
+            const edadNumerica = parseInt(edad);
+            if (isNaN(edadNumerica) || edadNumerica < 18) {
+                window.location.href = 'age_restriction.php';
                 return;
             }
 
-            // Estado de carga
-            btn.disabled = true;
-            btn.innerHTML = "🔄 Generando...";
-            list.innerHTML = '<li class="loading">🧠 La IA está creando sugerencias personalizadas...</li>';
+            // Mostrar paso 2 y ocultar paso 1
+            document.getElementById('block1').style.display = 'none';
+            document.getElementById('block2').style.display = 'block';
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+            document.getElementById('loading').style.display = 'block';
+
+            // Crear prompt para la IA
+            const prompt = `Soy una mujer de ${edad} años y mis características son: ${selectedCharacteristics.join(', ')}. Sugiere nombres de usuario únicos y creativos para plataformas de cámara web.`;
 
             try {
-                const response = await fetch("/controllers/usernameGenerator.php", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                    body: "prompt=" + encodeURIComponent(prompt)
+                const response = await fetch('../../controllers/login/usernameGenerator.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'prompt=' + encodeURIComponent(prompt)
                 });
 
                 const data = await response.json();
-                list.innerHTML = "";
 
                 if (data.error) {
                     throw new Error(data.error);
@@ -207,59 +907,276 @@
 
                 // Procesar respuesta de OpenAI
                 const content = data.choices[0].message.content;
-                const suggestions = content.split(/\d+\.\s*/).filter(name => name.trim());
+                const suggestions = content.split(/\d+\.\s*/).filter(name => name.trim()).slice(0, 8);
 
-                if (suggestions.length === 0) {
-                    throw new Error("No se generaron sugerencias válidas");
-                }
+                // Ocultar loading y mostrar sugerencias
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('suggestionsContainer').style.display = 'block';
 
                 // Mostrar sugerencias
-                suggestions.forEach((name, index) => {
-                    const cleanName = name.trim().replace(/[^\w\s]/g, '');
-                    if (cleanName) {
-                        const li = document.createElement("li");
-                        li.innerHTML = `
-                            <span class="username-text">${cleanName}</span>
-                            <span class="select-badge">Seleccionar</span>
-                        `;
+                const usernameGrid = document.getElementById('usernameGrid');
+                usernameGrid.innerHTML = '';
+
+                suggestions.forEach((name) => {
+                    let cleanName = name.trim().replace(/[^\w]/g, '');
+                    
+                    // Limitar a máximo 14 caracteres
+                    if (cleanName.length > 14) {
+                        cleanName = cleanName.substring(0, 14);
+                    }
+                    
+                    if (cleanName && cleanName.length > 2) {
+                        const div = document.createElement('div');
+                        div.className = 'username-item';
+                        div.innerHTML = `<div class="username-text">${cleanName}</div>`;
                         
-                        li.onclick = () => {
-                            // Aquí podrías integrar con el formulario de registro
-                            if (confirm(`¿Usar "${cleanName}" como nombre de usuario?`)) {
-                                // Redirigir al registro con el nombre preseleccionado
-                                window.location.href = `/views/register.php?suggested_username=${encodeURIComponent(cleanName)}`;
-                            }
-                        };
+                        div.addEventListener('click', function() {
+                            document.querySelectorAll('.username-item').forEach(item => {
+                                item.classList.remove('selected');
+                            });
+                            this.classList.add('selected');
+                            selectedUsername = cleanName;
+                            document.getElementById('checkAvailabilityBtn').style.display = 'block';
+                        });
                         
-                        list.appendChild(li);
+                        usernameGrid.appendChild(div);
                     }
                 });
 
-                if (list.children.length === 0) {
-                    throw new Error("No se pudieron procesar las sugerencias");
-                }
-
             } catch (error) {
-                console.error("Error:", error);
-                list.innerHTML = `
-                    <li class="error">
-                        ❌ Error: ${error.message}
-                        <br><small>Verifica tu conexión e inténtalo nuevamente</small>
-                    </li>
+                console.error('Error:', error);
+                document.getElementById('loading').innerHTML = `
+                    <p style="color: #dc3545;">❌ Error al generar sugerencias: ${error.message}</p>
+                    <button type="button" onclick="location.reload()" class="continue-btn">Intentar Nuevamente</button>
                 `;
-            } finally {
-                // Restaurar botón
-                btn.disabled = false;
-                btn.innerHTML = "🤖 Sugerir con IA";
             }
         });
 
-        // Permitir envío con Enter
-        document.getElementById("userPrompt").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                document.getElementById("btnGenerarNombre").click();
+        // Manejar verificación de disponibilidad
+        document.getElementById('checkAvailabilityBtn').addEventListener('click', function() {
+            if (!selectedUsername) return;
+
+            // Mostrar paso 3 y ocultar paso 2
+            document.getElementById('block2').style.display = 'none';
+            document.getElementById('block3').style.display = 'block';
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step3').classList.add('active');
+            document.getElementById('selectedUsername').textContent = selectedUsername;
+
+            // Verificar disponibilidad en todas las plataformas
+            checkAllPlatformsAvailability(selectedUsername);
+        });
+
+        // Verificar disponibilidad en Valora
+        async function checkValoraAvailability(username) {
+            try {
+                const response = await fetch('../../controllers/login/AuthController.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'action=check_username&username=' + encodeURIComponent(username)
+                });
+                
+                const available = await response.text() === 'available';
+                
+                const valoraCheck = document.getElementById('valoraCheck');
+                valoraCheck.className = available ? 'platform-check available' : 'platform-check unavailable';
+                valoraCheck.querySelector('.platform-status').textContent = available ? '✅ Disponible' : '❌ No disponible';
+                
+            } catch (error) {
+                const valoraCheck = document.getElementById('valoraCheck');
+                valoraCheck.className = 'platform-check unavailable';
+                valoraCheck.querySelector('.platform-status').textContent = '❌ Error verificando';
+            }
+        }
+
+        // Función para verificar disponibilidad en todas las plataformas
+        async function checkAllPlatformsAvailability(username) {
+            let availableCount = 0;
+            let totalPlatforms = 3;
+            
+            // Verificar Valora.vip (real)
+            await checkValoraAvailability(username);
+            
+            // Simular verificación en Chaturbate (más realista)
+            setTimeout(() => {
+                const isAvailable = Math.random() > 0.3; // 70% probabilidad de estar disponible
+                const chaturbateCheck = document.getElementById('chaturbateCheck');
+                
+                if (isAvailable) {
+                    chaturbateCheck.className = 'platform-check available';
+                    chaturbateCheck.querySelector('.platform-status').textContent = '✅ Disponible';
+                    availableCount++;
+                } else {
+                    chaturbateCheck.className = 'platform-check unavailable';
+                    chaturbateCheck.querySelector('.platform-status').textContent = '❌ No disponible';
+                }
+                
+                checkIfCanContinue();
+            }, 1000);
+            
+            // Simular verificación en Stripchat (más realista)  
+            setTimeout(() => {
+                const isAvailable = Math.random() > 0.4; // 60% probabilidad de estar disponible
+                const stripchatCheck = document.getElementById('stripchatCheck');
+                
+                if (isAvailable) {
+                    stripchatCheck.className = 'platform-check available';
+                    stripchatCheck.querySelector('.platform-status').textContent = '✅ Disponible';
+                    availableCount++;
+                } else {
+                    stripchatCheck.className = 'platform-check unavailable';
+                    stripchatCheck.querySelector('.platform-status').textContent = '❌ No disponible';
+                }
+                
+                checkIfCanContinue();
+            }, 1500);
+            
+            // Función para verificar si se puede continuar
+            function checkIfCanContinue() {
+                const allChecks = document.querySelectorAll('.platform-check');
+                const availableChecks = document.querySelectorAll('.platform-check.available');
+                const unavailableChecks = document.querySelectorAll('.platform-check.unavailable');
+                
+                // Solo mostrar el botón si todas las verificaciones están completas
+                if (availableChecks.length + unavailableChecks.length === totalPlatforms) {
+                    const continueBtn = document.getElementById('continueBtn');
+                    
+                    if (availableChecks.length === totalPlatforms) {
+                        // Todas las plataformas disponibles
+                        continueBtn.style.display = 'block';
+                        continueBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                        continueBtn.innerHTML = '✅ Continuar con el Registro';
+                        continueBtn.disabled = false;
+                    } else {
+                        // Al menos una plataforma no disponible
+                        continueBtn.style.display = 'block';
+                        continueBtn.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+                        continueBtn.innerHTML = '❌ No se puede continuar - Username no disponible';
+                        continueBtn.disabled = true;
+                        continueBtn.style.cursor = 'not-allowed';
+                        continueBtn.style.opacity = '0.7';
+                        
+                        // Agregar mensaje explicativo
+                        let warningMsg = document.getElementById('availability-warning');
+                        if (!warningMsg) {
+                            warningMsg = document.createElement('div');
+                            warningMsg.id = 'availability-warning';
+                            warningMsg.style.cssText = `
+                                background: #fff3cd;
+                                border: 1px solid #ffeaa7;
+                                border-radius: 8px;
+                                padding: 15px;
+                                margin-top: 20px;
+                                color: #856404;
+                                text-align: center;
+                                font-size: 14px;
+                            `;
+                            warningMsg.innerHTML = `
+                                <strong>⚠️ El nombre de usuario no está disponible en todas las plataformas.</strong><br>
+                                Por favor, regresa y selecciona otro nombre de usuario.
+                            `;
+                            continueBtn.parentNode.insertBefore(warningMsg, continueBtn.nextSibling);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Continuar al registro
+        document.getElementById('continueBtn').addEventListener('click', function() {
+            if (selectedUsername) {
+                window.location.href = `register.php?suggested_username=${encodeURIComponent(selectedUsername)}`;
+            }
+        });
+
+        // Botón volver del Paso 2 al Paso 1
+        document.getElementById('backToStep1Btn').addEventListener('click', function() {
+            // Ocultar paso 2 y mostrar paso 1
+            document.getElementById('block2').style.display = 'none';
+            document.getElementById('block1').style.display = 'block';
+            
+            // Actualizar indicadores de pasos
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step1').classList.add('active');
+            
+            // Limpiar selección de username si existe
+            selectedUsername = '';
+            document.querySelectorAll('.username-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.getElementById('checkAvailabilityBtn').style.display = 'none';
+        });
+
+        // Botón volver del Paso 3 al Paso 2
+        document.getElementById('backToStep2Btn').addEventListener('click', function() {
+            // Ocultar paso 3 y mostrar paso 2
+            document.getElementById('block3').style.display = 'none';
+            document.getElementById('block2').style.display = 'block';
+            
+            // Actualizar indicadores de pasos
+            document.getElementById('step3').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+            
+            // Ocultar el botón de continuar final
+            document.getElementById('continueBtn').style.display = 'none';
+        });
+
+        // Manejar menú de ayuda flotante
+        document.getElementById('helpBtn').addEventListener('click', function() {
+            const menu = document.getElementById('helpMenu');
+            menu.classList.toggle('show');
+        });
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const helpBtn = document.getElementById('helpBtn');
+            const helpMenu = document.getElementById('helpMenu');
+            
+            if (!helpBtn.contains(e.target) && !helpMenu.contains(e.target)) {
+                helpMenu.classList.remove('show');
             }
         });
     </script>
+
+    <!-- Botón flotante de ayuda y menú -->
+    <button class="help-button" id="helpBtn" title="Opciones y ayuda">
+        ❓
+    </button>
+    
+    <div class="help-menu" id="helpMenu">
+        <h4 style="margin: 0 0 15px; color: #882A57; font-size: 16px;">🚀 Opciones Rápidas</h4>
+        
+        <a href="register.php" class="help-option">
+            <span class="icon">📝</span>
+            Registro Manual
+        </a>
+        
+        <a href="login.php" class="help-option">
+            <span class="icon">🔑</span>
+            Iniciar Sesión
+        </a>
+        
+        <a href="password_reset.php" class="help-option">
+            <span class="icon">🔒</span>
+            Recuperar Contraseña
+        </a>
+        
+        <a href="../../index.php" class="help-option">
+            <span class="icon">🏠</span>
+            Página de Inicio
+        </a>
+        
+        <hr style="margin: 15px 0; border: none; height: 1px; background: #eee;">
+        
+        <a href="mailto:soporte@valora.vip" class="help-option">
+            <span class="icon">📧</span>
+            Contactar Soporte
+        </a>
+        
+        <a href="#" onclick="location.reload()" class="help-option">
+            <span class="icon">🔄</span>
+            Reiniciar Proceso
+        </a>
+    </div>
 </body>
 </html>

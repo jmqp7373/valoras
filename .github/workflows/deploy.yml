@@ -1,20 +1,18 @@
-name: 🚀 Deploy Valora.vip to Production
+name: 🚀 Deploy Valora.vip - AI Username System & Complete Platform
 
-# Se ejecuta cuando hay push a la rama main
+# Despliegue automático cuando hay cambios en main
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: 🌐 Deploy to Production Server
+    name: 🌐 Deploy Complete Valora Platform
     
     steps:
-    # 1. Checkout del código
+    # 1. Checkout del código con toda la nueva funcionalidad
     - name: 📥 Checkout Repository
       uses: actions/checkout@v4
       
@@ -23,30 +21,48 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.1'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo, mysql, gd
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, mysql, gd, curl
         
     # 3. Install Composer Dependencies
     - name: 📦 Install Dependencies
       run: |
-        composer install --no-dev --optimize-autoloader --no-interaction
+        if [ -f composer.json ]; then
+          composer install --no-dev --optimize-autoloader --no-interaction
+          echo "✅ Composer dependencies installed"
+        else
+          echo "ℹ️ No composer.json found, skipping composer install"
+        fi
         
-    # 4. Validate PHP Syntax
-    - name: 🧪 Validate Code Quality
+    # 4. Validate PHP Syntax and System
+    - name: 🧪 Validate Complete System
       run: |
-        echo "🔍 Validando sintaxis PHP..."
-        find . -name "*.php" -exec php -l {} \;
+        echo "🔍 Validando sintaxis PHP en todo el sistema..."
+        find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
         echo "✅ Validación de sintaxis completada"
         
-        echo "📊 Estadísticas del proyecto:"
-        echo "📄 Archivos PHP: $(find . -name '*.php' | wc -l)"
-        echo "📁 Directorios: $(find . -type d | wc -l)"
-        echo "📋 Archivos totales: $(find . -type f | wc -l)"
+        echo "📊 Estadísticas del sistema completo:"
+        echo "📄 Archivos PHP: $(find . -name '*.php' -not -path './vendor/*' | wc -l)"
+        echo "🤖 Sistema de IA: $(ls -la controllers/login/usernameGenerator.php 2>/dev/null && echo 'Presente' || echo 'No encontrado')"
+        echo "🎯 Wizard IA: $(ls -la views/login/registranteUserAvailavilitySelect.php 2>/dev/null && echo 'Presente' || echo 'No encontrado')"
+        echo "🔑 Sistema Auth: $(ls -la controllers/login/AuthController.php 2>/dev/null && echo 'Presente' || echo 'No encontrado')"
+        echo "� Reset Password: $(ls -la controllers/login/PasswordResetController.php 2>/dev/null && echo 'Presente' || echo 'No encontrado')"
+        echo "👥 Panel Admin: $(ls -la views/admin/ 2>/dev/null && echo 'Presente' || echo 'No encontrado')"
         
-    # 5. Prepare Deployment Files
-    - name: 📁 Prepare Files for Deployment
+    # 5. Prepare Complete System for Deployment
+    - name: 📁 Prepare Complete Platform
       run: |
-        echo "📋 Archivos principales del sistema:"
+        echo "📋 Sistema completo listo para deployment:"
+        echo "🏠 Estructura principal:"
         ls -la
+        echo ""
+        echo "🎯 Controladores:"
+        ls -la controllers/login/ 2>/dev/null || echo "⚠️ Directorio controllers/login no encontrado"
+        echo ""
+        echo "👁️ Vistas principales:"
+        ls -la views/login/ 2>/dev/null || echo "⚠️ Directorio views/login no encontrado"
+        echo ""
+        echo "🔧 Panel administrativo:"
+        ls -la views/admin/ 2>/dev/null || echo "⚠️ Directorio views/admin no encontrado"
         
         echo "🔍 Verificando estructura MVC:"
         echo "📁 Controllers: $(ls -1 controllers/ 2>/dev/null | wc -l) archivos"
@@ -71,8 +87,8 @@ jobs:
         echo "�📁 Directorio destino: /public_html/"
         echo "🌐 Protocolo: FTP"
         
-    # 7. Deploy vía FTP (con mejor manejo de errores)
-    - name: 🚀 Deploy to Production Server (FTP)
+    # 7. Deploy Complete Platform to Hostinger
+    - name: 🚀 Deploy Complete Platform (FTP)
       id: ftp-deploy
       continue-on-error: true
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -82,6 +98,69 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
         port: ${{ secrets.FTP_PORT || 21 }}
+        local-dir: ./
+        server-dir: /public_html/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/vendor/**
+          **/.env*
+          **/.DS_Store
+          **/Thumbs.db
+          **/*.log
+          **/composer.lock
+          **/*.md
+          **/README*
+          **/.github/**
+          **/tests/**
+          **/*.bat
+          **/*.sh
+          **/import_database.bat
+          **/setup-ai.sh
+        dry-run: false
+
+    # 8. Verificación post-deployment
+    - name: ✅ Post-Deployment System Check
+      if: steps.ftp-deploy.outcome == 'success'
+      run: |
+        echo "🎉 ¡DEPLOYMENT EXITOSO!"
+        echo "================================"
+        echo "🌐 Sitio Web: https://valora.vip"
+        echo "🔐 Login: https://valora.vip/views/login/login.php"
+        echo "📝 Registro IA: https://valora.vip/views/login/registranteUserAvailavilitySelect.php"
+        echo "🔑 Reset Password: https://valora.vip/views/login/password_reset.php"
+        echo "🔧 Panel Admin: https://valora.vip/views/admin"
+        echo "📊 System Check: https://valora.vip/views/admin/checksTests/system-check.php"
+        echo "================================"
+        echo "🤖 NUEVAS FUNCIONALIDADES DESPLEGADAS:"
+        echo "✅ Sistema de IA para generación de usernames"
+        echo "✅ Wizard de 3 pasos con 100 características"
+        echo "✅ Validación de disponibilidad en tiempo real"
+        echo "✅ Sistema de recuperación de contraseña por email/SMS"
+        echo "✅ Panel administrativo completo"
+        echo "✅ Restricciones de edad y validaciones"
+        echo "✅ Arquitectura MVC completa"
+        echo "================================"
+
+    # 9. Manejar errores de deployment
+    - name: ❌ Handle Deployment Failure
+      if: steps.ftp-deploy.outcome == 'failure'
+      run: |
+        echo "❌ DEPLOYMENT FALLÓ"
+        echo "================================"
+        echo "🔍 Possible issues:"
+        echo "- Verificar credenciales FTP en GitHub Secrets"
+        echo "- Confirmar que el servidor está disponible"
+        echo "- Revisar permisos en /public_html/"
+        echo "- Verificar que no hay archivos bloqueados"
+        echo "================================"
+        echo "🛠️ Para debug:"
+        echo "1. Ir a GitHub Actions y revisar logs detallados"
+        echo "2. Verificar los secrets: FTP_HOST, FTP_USERNAME, FTP_PASSWORD, FTP_PORT"
+        echo "3. Probar conexión FTP manualmente"
+        echo "================================"
+        exit 1
         server-dir: /public_html/
         local-dir: ./
         log-level: verbose

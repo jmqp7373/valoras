@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
-require_once '../controllers/AuthController.php';
+require_once '../../controllers/login/AuthController.php';
 
 $authController = new AuthController();
 $registerResult = null;
@@ -8,7 +8,7 @@ $registerResult = null;
 // Verificar si ya está logueado
 startSessionSafely();
 if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: /index.php');
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -26,12 +26,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Valora</title>
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
 <body>
     <div class="login-container">
         <!-- Incluir el logo de Valora ubicado en assets/images/logo_valoras.png -->
-        <img src="/assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
+        <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
         <h2>Crear Cuenta</h2>
         
         <?php if($registerResult): ?>
@@ -72,15 +72,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="username">Nombre de Usuario:</label>
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <input type="text" id="username" placeholder="Elige tu nombre de usuario único" name="username" style="flex: 1;" required>
-                    <a href="/views/login/registranteUserAvailavilitySelect.php" target="_blank" 
-                       style="padding: 12px 16px; background: linear-gradient(135deg, #ee6f92, #882A57); color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: all 0.3s ease;"
+                    <a href="registranteUserAvailavilitySelect.php" 
+                       style="padding: 12px 16px; background: linear-gradient(135deg, #ee6f92, #882A57); color: white; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;"
                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(238, 111, 146, 0.3)'"
-                       onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
-                        ✨ IA
+                       onmouseout="this.style.transform='none'; this.style.boxShadow='none'"
+                       title="Ir al asistente IA para crear tu nombre perfecto">
+                        <span style="font-size: 16px;">🤖</span>
+                        <span>Crear con IA</span>
                     </a>
                 </div>
                 <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
-                    💡 Usa el botón "IA" para generar sugerencias únicas con inteligencia artificial
+                    💡 Usa "Crear con IA" para comenzar el proceso guiado de 3 pasos y encontrar tu nombre perfecto
                 </small>
             </div>
             
@@ -94,7 +96,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="custom-select" style="position: relative; width: 110px;">
                         <div class="select-display" style="padding: 14px 12px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
                             <div class="selected-option" style="display: flex; align-items: center;">
-                                <img src="/assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
+                                <img src="../../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
                                 <span>+57</span>
                             </div>
                             <span class="dropdown-arrow" style="transform: rotate(0deg); transition: transform 0.3s;">▼</span>
@@ -103,37 +105,37 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="select-dropdown" style="position: absolute; top: 100%; left: 0; width: 200px; background: white; border: 1px solid #ee6f92; border-top: none; border-radius: 0 0 12px 12px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none;">
                             <!-- Colombia siempre de primero -->
                             <div class="option" data-value="+57" data-country="co" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
+                                <img src="../../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
                                 <span>Colombia (+57)</span>
                             </div>
                             
                             <!-- Resto de países en orden alfabético -->
                             <div class="option" data-value="+54" data-country="ar" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/ar.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Argentina">
+                                <img src="../../assets/images/flags/ar.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Argentina">
                                 <span>Argentina (+54)</span>
                             </div>
                             <div class="option" data-value="+56" data-country="cl" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/cl.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Chile">
+                                <img src="../../assets/images/flags/cl.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Chile">
                                 <span>Chile (+56)</span>
                             </div>
                             <div class="option" data-value="+593" data-country="ec" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/ec.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Ecuador">
+                                <img src="../../assets/images/flags/ec.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Ecuador">
                                 <span>Ecuador (+593)</span>
                             </div>
                             <div class="option" data-value="+1" data-country="us" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/us.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Estados Unidos">
+                                <img src="../../assets/images/flags/us.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Estados Unidos">
                                 <span>Estados Unidos (+1)</span>
                             </div>
                             <div class="option" data-value="+52" data-country="mx" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/mx.png" style="width: 20px; height: auto; margin-right: 8px;" alt="México">
+                                <img src="../../assets/images/flags/mx.png" style="width: 20px; height: auto; margin-right: 8px;" alt="México">
                                 <span>México (+52)</span>
                             </div>
                             <div class="option" data-value="+51" data-country="pe" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/pe.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Perú">
+                                <img src="../../assets/images/flags/pe.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Perú">
                                 <span>Perú (+51)</span>
                             </div>
                             <div class="option" data-value="+58" data-country="ve" style="padding: 10px 16px; cursor: pointer; display: flex; align-items: center; transition: background-color 0.2s; border-bottom: 1px solid #f0f0f0;">
-                                <img src="/assets/images/flags/ve.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Venezuela">
+                                <img src="../../assets/images/flags/ve.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Venezuela">
                                 <span>Venezuela (+58)</span>
                             </div>
                         </div>
@@ -145,10 +147,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             <button type="submit" class="btn-submit">Registrarse</button>
         </form>
         
-        <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
-            ¿Ya tienes una cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión</a>
-            <span style="margin: 0 8px;">•</span>
-            <a href="password_reset.php" style="color: #882A57; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+        <div style="text-align: center; margin-top: 25px; color: #666; font-size: 14px;">
+            <div style="margin-bottom: 12px;">
+                ¿Ya tienes una cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión</a>
+            </div>
+            <div>
+                <a href="password_reset.php" style="color: #882A57; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+            </div>
         </div>
         
     </div>

@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
-require_once '../controllers/AuthController.php';
+require_once '../../controllers/login/AuthController.php';
 
 $authController = new AuthController();
 $loginResult = null;
@@ -8,7 +8,7 @@ $loginResult = null;
 // Verificar si ya está logueado
 startSessionSafely();
 if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: ../index.php');
+    header('Location: ../../index.php');
     exit();
 }
 
@@ -27,12 +27,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Valora</title>
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
 <body>
     <div class="login-container">
         <!-- Incluir el logo de Valora ubicado en assets/images/logo_valoras.png -->
-        <img src="/assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
+        <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
         <h2>Iniciar Sesión</h2>
         
         <?php if($loginResult && !$loginResult['success']): ?>
@@ -63,7 +63,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
         
         <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
-            ¿Aún no tienes una cuenta? <a href="register.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Regístrate aquí</a>
+            ¿Aún no tienes una cuenta? <a href="registranteUserAvailavilitySelect.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Regístrate aquí</a>
         </div>
     </div>
 </body>

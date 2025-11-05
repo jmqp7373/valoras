@@ -10,13 +10,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificación del Sistema - Valora.vip</title>
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="../../../assets/css/styles.css">
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-card">
             <div class="brand">
-                <img src="/assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo">
+                <img src="../../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo">
                 <h1>🔍 Verificación del Sistema</h1>
             </div>
             
@@ -25,15 +25,15 @@
                 
                 <?php
                 // Verificar CSS
-                $cssExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/assets/css/styles.css');
+                $cssExists = file_exists(__DIR__ . '/../../../assets/css/styles.css');
                 echo "<p>" . ($cssExists ? "✅" : "❌") . " CSS: /assets/css/styles.css</p>";
                 
-                // Verificar Logo  
-                $logoExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/assets/images/logos/logo_valora.png');
+                // Verificar logo
+                $logoExists = file_exists(__DIR__ . '/../../../assets/images/logos/logo_valora.png');
                 echo "<p>" . ($logoExists ? "✅" : "❌") . " Logo: /assets/images/logos/logo_valora.png</p>";
                 
                 // Verificar banderas
-                $flagsDir = $_SERVER['DOCUMENT_ROOT'] . '/assets/images/flags/';
+                $flagsDir = __DIR__ . '/../../../assets/images/flags/';
                 $flags = ['co.png', 'ar.png', 'cl.png', 'ec.png', 'us.png', 'mx.png', 'pe.png', 've.png'];
                 $flagsOk = 0;
                 foreach($flags as $flag) {
@@ -43,7 +43,7 @@
                 
                 // Verificar base de datos
                 try {
-                    require_once 'config/database.php';
+                    require_once __DIR__ . '/../../../config/database.php';
                     $db = new Database();
                     $conn = $db->getConnection();
                     if ($conn) {
@@ -60,40 +60,40 @@
                 
                 // Verificar configuración de IA
                 echo "<h4>🤖 Sistema de Inteligencia Artificial:</h4>";
-                $configExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/config/config.php');
+                $configExists = file_exists(__DIR__ . '/../../../config/config.php');
                 echo "<p>" . ($configExists ? "✅" : "⚠️") . " Archivo config/config.php: " . ($configExists ? "Existe" : "Falta - copiar de config/config.example.php") . "</p>";
                 
                 if ($configExists) {
-                    require_once $_SERVER['DOCUMENT_ROOT'] . '/config/config.php';
+                    require_once __DIR__ . '/../../../config/config.php';
                     $apiKeyConfigured = defined('OPENAI_API_KEY') && OPENAI_API_KEY !== 'sk-ejemplo-pon-tu-api-key-aqui-1234567890';
                     echo "<p>" . ($apiKeyConfigured ? "✅" : "⚠️") . " API Key OpenAI: " . ($apiKeyConfigured ? "Configurada" : "Falta configurar") . "</p>";
                 } else {
                     echo "<p>⚠️ API Key OpenAI: No verificable (config/config.php faltante)</p>";
                 }
                 
-                $aiGeneratorExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/controllers/usernameGenerator.php');
-                echo "<p>" . ($aiGeneratorExists ? "✅" : "❌") . " Generador IA: controllers/usernameGenerator.php</p>";
+                $aiGeneratorExists = file_exists(__DIR__ . '/../../../controllers/login/usernameGenerator.php');
+                echo "<p>" . ($aiGeneratorExists ? "✅" : "❌") . " Generador IA: controllers/login/usernameGenerator.php</p>";
                 
-                $aiViewExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/views/login/registranteUserAvailavilitySelect.php');
+                $aiViewExists = file_exists(__DIR__ . '/../../login/registranteUserAvailavilitySelect.php');
                 echo "<p>" . ($aiViewExists ? "✅" : "❌") . " Interfaz IA: views/login/registranteUserAvailavilitySelect.php</p>";
                 
                 // Verificar archivos principales
                 $files = [
-                    'index.php' => 'Dashboard principal',
-                    'views/login.php' => 'Login',
-                    'views/register.php' => 'Registro con IA', 
-                    'views/password_reset.php' => 'Recuperar contraseña',
-                    'views/reset_password.php' => 'Reset contraseña',
-                    'controllers/AuthController.php' => 'Controlador Auth',
-                    'controllers/PasswordResetController.php' => 'Controlador Reset',
-                    'models/Usuario.php' => 'Modelo Usuario',
-                    'services/EmailService.php' => 'Servicio Email'
+                    '../../../index.php' => 'Dashboard principal',
+                    '../../login/login.php' => 'Login',
+                    '../../login/register.php' => 'Registro con IA', 
+                    '../../login/password_reset.php' => 'Recuperar contraseña',
+                    '../../login/reset_password.php' => 'Reset contraseña',
+                    '../../../controllers/login/AuthController.php' => 'Controlador Auth',
+                    '../../../controllers/login/PasswordResetController.php' => 'Controlador Reset',
+                    '../../../models/Usuario.php' => 'Modelo Usuario',
+                    '../../../services/EmailService.php' => 'Servicio Email'
                 ];
                 
                 echo "<h4>📄 Archivos del Sistema:</h4>";
                 foreach($files as $file => $desc) {
-                    $exists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/' . $file);
-                    echo "<p>" . ($exists ? "✅" : "❌") . " $desc ($file)</p>";
+                    $exists = file_exists(__DIR__ . '/' . $file);
+                    echo "<p>" . ($exists ? "✅" : "❌") . " $desc (" . basename($file) . ")</p>";
                 }
                 
                 // Info del servidor
@@ -106,10 +106,10 @@
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="/views/login.php" style="background: #ee6f92; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                <a href="../../login/login.php" style="background: #ee6f92; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     🔐 Ir al Login
                 </a>
-                <a href="/views/register.php" style="background: #8b5a83; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-left: 10px;">
+                <a href="../../login/register.php" style="background: #8b5a83; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-left: 10px;">
                     📝 Ir al Registro
                 </a>
             </div>

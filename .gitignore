@@ -28,6 +28,9 @@ yarn-error.log*
 *.bak
 *.backup
 *.swp
+
+# Configuración sensible (API Keys)
+config.php
 *.swo
 *~
 

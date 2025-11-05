@@ -69,6 +69,22 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             
             <div class="form-group">
+                <label for="username">Nombre de Usuario:</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="text" id="username" placeholder="Elige tu nombre de usuario único" name="username" style="flex: 1;" required>
+                    <a href="/views/login/registranteUserAvailavilitySelect.php" target="_blank" 
+                       style="padding: 12px 16px; background: linear-gradient(135deg, #ee6f92, #882A57); color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 500; white-space: nowrap; transition: all 0.3s ease;"
+                       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(238, 111, 146, 0.3)'"
+                       onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                        ✨ IA
+                    </a>
+                </div>
+                <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                    💡 Usa el botón "IA" para generar sugerencias únicas con inteligencia artificial
+                </small>
+            </div>
+            
+            <div class="form-group">
                 <label for="phone_number">Número de Celular:</label>
                 <div style="display: flex; gap: 8px;">
                     <!-- Select oculto para envío del formulario -->
@@ -332,7 +348,54 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             });
         });
+        
+        // Manejar sugerencias de IA desde URL
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const suggestedUsername = urlParams.get('suggested_username');
+            
+            if (suggestedUsername) {
+                const usernameField = document.getElementById('username');
+                if (usernameField) {
+                    usernameField.value = suggestedUsername;
+                    usernameField.style.background = '#e8f5e8';
+                    usernameField.style.borderColor = '#4CAF50';
+                    
+                    // Mostrar notificación temporal
+                    const notification = document.createElement('div');
+                    notification.innerHTML = '✨ Nombre sugerido por IA aplicado exitosamente';
+                    notification.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #4CAF50;
+                        color: white;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        z-index: 9999;
+                        animation: slideIn 0.3s ease;
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    // Remover notificación después de 3 segundos
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 3000);
+                    
+                    // Limpiar URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        });
     </script>
+    
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
     
 </body>
 </html>

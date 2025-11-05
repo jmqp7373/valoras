@@ -65,6 +65,7 @@ class AuthController {
             $cedula = trim($_POST['Numero_de_cedula']);
             $nombres = trim($_POST['first_name']);
             $apellidos = trim($_POST['last_name']);
+            $username = trim($_POST['username']);
             $codigo_pais = trim($_POST['country_code']);
             $celular = trim($_POST['phone_number']);
 
@@ -75,10 +76,10 @@ class AuthController {
             $password_temp = $cedula . '123';
 
             // Validar que los campos requeridos no estén vacíos
-            if(empty($cedula) || empty($nombres) || empty($apellidos) || empty($celular)) {
+            if(empty($cedula) || empty($nombres) || empty($apellidos) || empty($username) || empty($celular)) {
                 return [
                     'success' => false,
-                    'message' => 'Por favor complete todos los campos obligatorios'
+                    'message' => 'Por favor complete todos los campos obligatorios incluyendo el nombre de usuario'
                 ];
             }
 

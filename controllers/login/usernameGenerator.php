@@ -29,11 +29,11 @@ if (empty($input)) {
 $data = [
     "model" => "gpt-4",
     "messages" => [
-        ["role" => "system", "content" => "Eres un generador de nombres de usuario elegantes, originales y con un toque de sensualidad profesional. Devuelve exactamente cinco nombres únicos, fáciles de pronunciar y de recordar. Formato: cada nombre en una línea numerada (1. nombre, 2. nombre, etc.)"],
-        ["role" => "user", "content" => "Genera 5 nombres de usuario basados en: " . $input]
+        ["role" => "system", "content" => "Eres un experto generador de nombres de usuario para plataformas de webcam. Crea nombres compuestos ÚNICAMENTE por: un nombre femenino corto (3-5 letras) + un adjetivo sensual/atractivo. IMPORTANTE: Devuelve exactamente 10 nombres en formato numerado (1. nombre, 2. nombre, etc.). Ejemplos: MiaSiren, LunaFire, SofiaBold, etc. Máximo 14 caracteres cada nombre."],
+        ["role" => "user", "content" => "Genera 10 nombres de usuario con estructura: [nombre femenino corto] + [adjetivo]. Basado en: " . $input]
     ],
-    "temperature" => 0.85,
-    "max_tokens" => 200
+    "temperature" => 0.9,
+    "max_tokens" => 300
 ];
 
 // Verificar que la API key esté configurada

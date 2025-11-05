@@ -256,15 +256,28 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         
         .username-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             margin-top: 15px;
         }
         
-        /* Asegurar que no haya más de 4 columnas en pantallas grandes */
+        /* Responsive grid para 10 elementos */
+        @media (min-width: 480px) {
+            .username-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
         @media (min-width: 768px) {
             .username-grid {
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .username-grid {
+                grid-template-columns: repeat(5, 1fr);
                 max-width: 100%;
             }
         }
@@ -702,17 +715,17 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         <div class="block" id="block2" style="display: none;">
             <div class="block-header">
                 <div class="block-icon">🤖</div>
-                <h3 class="block-title">Sugerencias Personalizadas de IA</h3>
+                <h3 class="block-title">10 Sugerencias Personalizadas de IA</h3>
             </div>
             
             <div class="loading" id="loading" style="text-align: center; margin: 20px 0; display: none;">
                 <div class="spinner"></div>
-                <p>Nuestra IA está creando nombres únicos para ti...</p>
+                <p>🤖 IA creando 10 nombres únicos: [Nombre femenino] + [Adjetivo atractivo]...</p>
             </div>
             
             <div id="suggestionsContainer" style="display: none;">
                 <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                    Selecciona el nombre que más te guste:
+                    ✨ Nuestra IA ha creado <strong>10 nombres únicos</strong> combinando nombres femeninos cortos + adjetivos atractivos:
                 </p>
                 <div class="username-grid" id="usernameGrid">
                     <!-- Las sugerencias aparecerán aquí -->
@@ -889,8 +902,8 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             document.getElementById('step2').classList.add('active');
             document.getElementById('loading').style.display = 'block';
 
-            // Crear prompt para la IA
-            const prompt = `Soy una mujer de ${edad} años y mis características son: ${selectedCharacteristics.join(', ')}. Sugiere nombres de usuario únicos y creativos para plataformas de cámara web.`;
+            // Crear prompt específico para la IA
+            const prompt = `Mujer de ${edad} años con características: ${selectedCharacteristics.join(', ')}. Necesito 10 nombres de usuario para webcam con formato: [nombre femenino corto de 3-5 letras] + [adjetivo sensual/atractivo]. Ejemplos: MiaFire, LunaWild, SofiaBold, AnaSiren, etc. Máximo 14 caracteres cada uno.`;
 
             try {
                 const response = await fetch('../../controllers/login/usernameGenerator.php', {
@@ -905,15 +918,15 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
                     throw new Error(data.error);
                 }
 
-                // Procesar respuesta de OpenAI
+                // Procesar respuesta de OpenAI - ahora esperamos 10 nombres
                 const content = data.choices[0].message.content;
-                const suggestions = content.split(/\d+\.\s*/).filter(name => name.trim()).slice(0, 8);
+                const suggestions = content.split(/\d+\.\s*/).filter(name => name.trim()).slice(0, 10);
 
                 // Ocultar loading y mostrar sugerencias
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('suggestionsContainer').style.display = 'block';
 
-                // Mostrar sugerencias
+                // Mostrar sugerencias - grid para 10 nombres
                 const usernameGrid = document.getElementById('usernameGrid');
                 usernameGrid.innerHTML = '';
 

@@ -174,13 +174,3 @@ jobs:
           echo "   4. Deploy manual temporal"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
         fi
-          **/README.md
-          **/.github/**
-          **/deploy/**
-          
-    # 7. Notificación de éxito
-    - name: Deployment Success
-      run: |
-        echo "✅ Deployment completado exitosamente!"
-        echo "🌐 Tu sitio web está disponible en valora.vip"
-        echo "📄 Archivos subidos: index.php, index.html, info.php, .htaccess"

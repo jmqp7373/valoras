@@ -41,11 +41,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Contraseña - Valora</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>
     <div class="login-container">
-        <img src="../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
+        <img src="/assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
         <h2>🔑 Nueva Contraseña</h2>
         
         <?php if($result): ?>

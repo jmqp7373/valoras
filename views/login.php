@@ -27,12 +27,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Valora</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>
     <div class="login-container">
         <!-- Incluir el logo de Valora ubicado en assets/images/logo_valoras.png -->
-        <img src="../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
+        <img src="/assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
         <h2>Iniciar Sesión</h2>
         
         <?php if($loginResult && !$loginResult['success']): ?>

@@ -5,12 +5,12 @@
  */
 
 // Verificar si existe el archivo de configuración
-$configPath = __DIR__ . '/../config.php';
+$configPath = __DIR__ . '/../config/config.php';
 if (!file_exists($configPath)) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'error' => 'Configuración no encontrada. Por favor contacta al administrador.',
-        'details' => 'El archivo config.php no existe. Copia config.example.php como config.php y configura tu API Key.'
+        'details' => 'El archivo config/config.php no existe. Copia config/config.example.php como config/config.php y configura tu API Key.'
     ]);
     exit;
 }

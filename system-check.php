@@ -60,15 +60,15 @@
                 
                 // Verificar configuración de IA
                 echo "<h4>🤖 Sistema de Inteligencia Artificial:</h4>";
-                $configExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/config.php');
-                echo "<p>" . ($configExists ? "✅" : "⚠️") . " Archivo config.php: " . ($configExists ? "Existe" : "Falta - copiar de config.example.php") . "</p>";
+                $configExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/config/config.php');
+                echo "<p>" . ($configExists ? "✅" : "⚠️") . " Archivo config/config.php: " . ($configExists ? "Existe" : "Falta - copiar de config/config.example.php") . "</p>";
                 
                 if ($configExists) {
-                    require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+                    require_once $_SERVER['DOCUMENT_ROOT'] . '/config/config.php';
                     $apiKeyConfigured = defined('OPENAI_API_KEY') && OPENAI_API_KEY !== 'sk-ejemplo-pon-tu-api-key-aqui-1234567890';
                     echo "<p>" . ($apiKeyConfigured ? "✅" : "⚠️") . " API Key OpenAI: " . ($apiKeyConfigured ? "Configurada" : "Falta configurar") . "</p>";
                 } else {
-                    echo "<p>⚠️ API Key OpenAI: No verificable (config.php faltante)</p>";
+                    echo "<p>⚠️ API Key OpenAI: No verificable (config/config.php faltante)</p>";
                 }
                 
                 $aiGeneratorExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/controllers/usernameGenerator.php');

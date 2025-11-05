@@ -15,15 +15,15 @@ Valora.vip ahora incluye **generación inteligente de nombres de usuario** usand
 
 ```bash
 # Copiar plantilla
-cp config.example.php config.php
+cp config/config.example.php config/config.php
 
 # Editar con tu API Key
-nano config.php  # o usar tu editor favorito
+nano config/config.php  # o usar tu editor favorito
 ```
 
 ### 2. Configurar API Key de OpenAI
 
-En `config.php`, cambiar:
+En `config/config.php`, cambiar:
 ```php
 define('OPENAI_API_KEY', 'sk-ejemplo-pon-tu-api-key-aqui-1234567890');
 ```
@@ -61,17 +61,17 @@ AI_SETUP_INSTRUCTIONS.md      # Este archivo
 
 ### Error: "Configuración no encontrada"
 ```bash
-# Verificar que config.php existe
-ls -la config.php
+# Verificar que config/config.php existe
+ls -la config/config.php
 
 # Si no existe, crearlo desde plantilla
-cp config.example.php config.php
+cp config/config.example.php config/config.php
 ```
 
 ### Error: "API Key de OpenAI no configurada"
 ```bash
-# Editar config.php
-nano config.php
+# Editar config/config.php
+nano config/config.php
 
 # Verificar que la línea sea así:
 # define('OPENAI_API_KEY', 'sk-tu-api-key-real');
@@ -119,7 +119,7 @@ En `controllers/usernameGenerator.php`, línea ~35:
 ```
 
 ### Cambiar modelo de IA
-En `config.php`:
+En `config/config.php`:
 ```php
 define('AI_MODEL', 'gpt-3.5-turbo');  // Más económico
 // o
@@ -127,7 +127,7 @@ define('AI_MODEL', 'gpt-4');          // Más inteligente
 ```
 
 ### Ajustar creatividad
-En `config.php`:
+En `config/config.php`:
 ```php
 define('AI_TEMPERATURE', 0.7);   // Más conservador
 define('AI_TEMPERATURE', 1.0);   // Más creativo

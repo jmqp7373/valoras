@@ -4,17 +4,17 @@
 
 echo "🚀 Configurando Valora.vip..."
 
-# Verificar si config.php existe
-if [ ! -f "config.php" ]; then
-    echo "📝 Creando config.php desde plantilla..."
-    cp config.example.php config.php
-    echo "✅ config.php creado"
+# Verificar si config/config.php existe
+if [ ! -f "config/config.php" ]; then
+    echo "📝 Creando config/config.php desde plantilla..."
+    cp config/config.example.php config/config.php
+    echo "✅ config/config.php creado"
     echo ""
-    echo "⚠️  IMPORTANTE: Edita config.php y agrega tu API Key de OpenAI"
+    echo "⚠️  IMPORTANTE: Edita config/config.php y agrega tu API Key de OpenAI"
     echo "   Línea a modificar: define('OPENAI_API_KEY', 'tu-api-key-aqui');"
     echo ""
 else
-    echo "✅ config.php ya existe"
+    echo "✅ config/config.php ya existe"
 fi
 
 # Verificar permisos de directorios
@@ -33,7 +33,7 @@ echo "🔍 Verificando archivos del sistema IA..."
 files_to_check=(
     "controllers/usernameGenerator.php"
     "views/login/registranteUserAvailavilitySelect.php"
-    "config.example.php"
+    "config/config.example.php"
 )
 
 for file in "${files_to_check[@]}"; do
@@ -48,7 +48,7 @@ echo ""
 echo "🎉 Configuración completada!"
 echo ""
 echo "📋 PRÓXIMOS PASOS:"
-echo "1. Editar config.php con tu API Key de OpenAI"
+echo "1. Editar config/config.php con tu API Key de OpenAI"
 echo "2. Probar la funcionalidad en: views/login/registranteUserAvailavilitySelect.php"
 echo "3. Integrar con el registro en: views/register.php"
 echo ""

@@ -2,9 +2,9 @@
 /**
  * Archivo de configuración de ejemplo para Valora.vip
  * INSTRUCCIONES:
- * 1. Copia este archivo como 'config/config.php'
+ * 1. Copia este archivo como 'config.php' (en esta misma carpeta config/)
  * 2. Reemplaza los valores de ejemplo con tus credenciales reales
- * 3. NO subas config/config.php al repositorio (está en .gitignore)
+ * 3. NO subas config.php al repositorio (está en .gitignore)
  */
 
 // =================================

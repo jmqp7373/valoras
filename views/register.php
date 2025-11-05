@@ -130,7 +130,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
         
         <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
-            ¿Ya tienes una cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión aquí</a>
+            ¿Ya tienes una cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión</a>
+            <span style="margin: 0 8px;">•</span>
+            <a href="password_reset.php" style="color: #882A57; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
         </div>
         
     </div>
@@ -332,10 +334,5 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     </script>
     
-    <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
-        ¿Ya tienes cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión</a>
-        <span style="margin: 0 8px;">•</span>
-        <a href="password_reset.php" style="color: #882A57; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
-    </div>
 </body>
 </html>

@@ -8,11 +8,30 @@ function startSessionSafely() {
 
 // Configuración de la base de datos
 class Database {
-    private $host = 'localhost';
-    private $db_name = 'valora_db';
-    private $username = 'root';
-    private $password = '';
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
     private $conn;
+    
+    public function __construct() {
+        // Detectar si estamos en producción o desarrollo
+        $isProduction = isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'valora.vip';
+        
+        if ($isProduction) {
+            // Configuración para producción (hosting)
+            $this->host = 'localhost'; // En hosting compartido suele ser localhost
+            $this->db_name = 'u179023609_orvlvi';
+            $this->username = 'u179023609_orvlvi';
+            $this->password = 'Reylondres7373.';
+        } else {
+            // Configuración para desarrollo local (XAMPP)
+            $this->host = 'localhost';
+            $this->db_name = 'valora_db';
+            $this->username = 'root';
+            $this->password = '';
+        }
+    }
 
     // Método para conectar a la base de datos
     public function getConnection() {
@@ -31,6 +50,12 @@ class Database {
 
         return $this->conn;
     }
+}
+
+// Función auxiliar para obtener conexión a la base de datos
+function getDBConnection() {
+    $database = new Database();
+    return $database->getConnection();
 }
 
 // Función para verificar si el usuario está logueado

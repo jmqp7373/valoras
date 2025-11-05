@@ -58,11 +58,30 @@
                     echo "<p>❌ Base de Datos: Error - " . $e->getMessage() . "</p>";
                 }
                 
+                // Verificar configuración de IA
+                echo "<h4>🤖 Sistema de Inteligencia Artificial:</h4>";
+                $configExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+                echo "<p>" . ($configExists ? "✅" : "⚠️") . " Archivo config.php: " . ($configExists ? "Existe" : "Falta - copiar de config.example.php") . "</p>";
+                
+                if ($configExists) {
+                    require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+                    $apiKeyConfigured = defined('OPENAI_API_KEY') && OPENAI_API_KEY !== 'sk-ejemplo-pon-tu-api-key-aqui-1234567890';
+                    echo "<p>" . ($apiKeyConfigured ? "✅" : "⚠️") . " API Key OpenAI: " . ($apiKeyConfigured ? "Configurada" : "Falta configurar") . "</p>";
+                } else {
+                    echo "<p>⚠️ API Key OpenAI: No verificable (config.php faltante)</p>";
+                }
+                
+                $aiGeneratorExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/controllers/usernameGenerator.php');
+                echo "<p>" . ($aiGeneratorExists ? "✅" : "❌") . " Generador IA: controllers/usernameGenerator.php</p>";
+                
+                $aiViewExists = file_exists($_SERVER['DOCUMENT_ROOT'] . '/views/login/registranteUserAvailavilitySelect.php');
+                echo "<p>" . ($aiViewExists ? "✅" : "❌") . " Interfaz IA: views/login/registranteUserAvailavilitySelect.php</p>";
+                
                 // Verificar archivos principales
                 $files = [
                     'index.php' => 'Dashboard principal',
                     'views/login.php' => 'Login',
-                    'views/register.php' => 'Registro', 
+                    'views/register.php' => 'Registro con IA', 
                     'views/password_reset.php' => 'Recuperar contraseña',
                     'views/reset_password.php' => 'Reset contraseña',
                     'controllers/AuthController.php' => 'Controlador Auth',

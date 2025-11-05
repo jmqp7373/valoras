@@ -1,5 +1,21 @@
 <?php
-require_once __DIR__ . '/../config.php'; // La API Key se guarda en config.php
+/**
+ * Generador de nombres de usuario con IA - OpenAI GPT-4
+ * Valora.vip - Sistema de sugerencias inteligentes
+ */
+
+// Verificar si existe el archivo de configuración
+$configPath = __DIR__ . '/../config.php';
+if (!file_exists($configPath)) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'error' => 'Configuración no encontrada. Por favor contacta al administrador.',
+        'details' => 'El archivo config.php no existe. Copia config.example.php como config.php y configura tu API Key.'
+    ]);
+    exit;
+}
+
+require_once $configPath;
 
 header('Content-Type: application/json; charset=utf-8');
 

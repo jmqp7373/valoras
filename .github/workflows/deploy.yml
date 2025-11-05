@@ -67,8 +67,9 @@ jobs:
         echo "📡 FTP Host configurado: $(echo '${{ secrets.FTP_HOST }}' | sed 's/./*/g')"
         echo "👤 FTP User configurado: $(echo '${{ secrets.FTP_USERNAME }}' | sed 's/./*/g')"  
         echo "🔐 FTP Pass configurado: $(if [ -n '${{ secrets.FTP_PASSWORD }}' ]; then echo '***SET***'; else echo '***NOT SET***'; fi)"
-        echo "📁 Directorio destino: /public_html/"
-        echo "🌐 Protocolo: FTP puerto 21"
+        echo "� FTP Port configurado: ${{ secrets.FTP_PORT || 21 }}"
+        echo "�📁 Directorio destino: /public_html/"
+        echo "🌐 Protocolo: FTP"
         
     # 7. Deploy vía FTP (con mejor manejo de errores)
     - name: 🚀 Deploy to Production Server (FTP)
@@ -80,7 +81,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
-        port: 21
+        port: ${{ secrets.FTP_PORT || 21 }}
         server-dir: /public_html/
         local-dir: ./
         log-level: verbose
@@ -108,7 +109,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
-        port: 21
+        port: ${{ secrets.FTP_PORT || 21 }}
         server-dir: /
         local-dir: ./
         log-level: verbose

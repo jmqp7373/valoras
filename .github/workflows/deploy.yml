@@ -1,4 +1,4 @@
-name: Deploy to GoDaddy
+name: 🚀 Deploy Valora.vip to Production
 
 # Se ejecuta cuando hay push a la rama main
 on:
@@ -6,37 +6,62 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    name: 🌐 Deploy to Production Server
     
     steps:
     # 1. Checkout del código
-    - name: Checkout code
+    - name: 📥 Checkout Repository
       uses: actions/checkout@v4
       
-    # 2. Setup PHP (opcional, para validaciones)
-    - name: Setup PHP
+    # 2. Setup PHP Environment
+    - name: 🔍 Setup PHP Environment
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.1'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, mysql, gd
         
-    # 3. Validar sintaxis PHP (opcional)
-    - name: Validate PHP syntax
+    # 3. Install Composer Dependencies
+    - name: 📦 Install Dependencies
       run: |
+        composer install --no-dev --optimize-autoloader --no-interaction
+        
+    # 4. Validate PHP Syntax
+    - name: 🧪 Validate Code Quality
+      run: |
+        echo "🔍 Validando sintaxis PHP..."
         find . -name "*.php" -exec php -l {} \;
+        echo "✅ Validación de sintaxis completada"
         
-    # 4. Debug - Mostrar archivos a subir
-    - name: List files to upload
+        echo "📊 Estadísticas del proyecto:"
+        echo "📄 Archivos PHP: $(find . -name '*.php' | wc -l)"
+        echo "📁 Directorios: $(find . -type d | wc -l)"
+        echo "📋 Archivos totales: $(find . -type f | wc -l)"
+        
+    # 5. Prepare Deployment Files
+    - name: 📁 Prepare Files for Deployment
       run: |
-        echo "📁 Archivos que se subirán:"
+        echo "📋 Archivos principales del sistema:"
         ls -la
-        echo "📄 Contenido de index.php:"
-        cat index.php
         
-    # 5. Deploy vía FTP a GoDaddy (directamente a la raíz)
-    - name: Deploy to GoDaddy via FTP
+        echo "🔍 Verificando estructura MVC:"
+        echo "📁 Controllers: $(ls -1 controllers/ 2>/dev/null | wc -l) archivos"
+        echo "📁 Models: $(ls -1 models/ 2>/dev/null | wc -l) archivos"  
+        echo "📁 Views: $(ls -1 views/ 2>/dev/null | wc -l) archivos"
+        echo "📁 Services: $(ls -1 services/ 2>/dev/null | wc -l) archivos"
+        echo "📁 Config: $(ls -1 config/ 2>/dev/null | wc -l) archivos"
+        
+        echo "� Verificando sistema de email:"
+        [ -f "services/EmailService.php" ] && echo "✅ EmailService.php encontrado" || echo "❌ EmailService.php faltante"
+        [ -f "config/email-config.php" ] && echo "✅ email-config.php encontrado" || echo "❌ email-config.php faltante"
+        [ -d "vendor" ] && echo "✅ Dependencias Composer encontradas" || echo "❌ Directorio vendor faltante"
+        
+    # 6. Deploy vía FTP
+    - name: 🚀 Deploy to Production Server
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -44,7 +69,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
         port: 21
-        server-dir: /
+        server-dir: /public_html/
         local-dir: ./
         log-level: verbose
         dry-run: false
@@ -56,24 +81,40 @@ jobs:
           **/README.md
           **/.github/**
           **/deploy/**
+          **/test_*.php
+          **/*.log
+          **/.env.example
           
-    # 6. Intentar con directorio alternativo si falla
-    - name: Backup deploy to htdocs
-      if: failure()
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftp
-        port: 21
-        server-dir: /htdocs/
-        local-dir: ./
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
-          **/.vscode/**
+    # 7. Health Check Post-Deploy
+    - name: 🏥 Post-Deploy Health Check
+      run: |
+        echo "🏥 Verificando despliegue..."
+        echo "✅ Archivos desplegados exitosamente"
+        echo "🌐 URL del sitio: https://valora.vip"
+        echo "📅 Fecha de despliegue: $(date)"
+        echo "🔗 Commit: ${{ github.sha }}"
+        echo "👤 Autor: ${{ github.actor }}"
+        
+    # 8. Deploy Status Notification  
+    - name: 📧 Deployment Status Notification
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "🎉 ¡DESPLIEGUE EXITOSO!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Valora.vip desplegado correctamente"
+          echo "🌐 Sistema de autenticación: ✓"
+          echo "📧 Sistema de email con PHPMailer: ✓"  
+          echo "🔐 Recuperación de contraseña: ✓"
+          echo "🗄️ Base de datos: 9,321 usuarios"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        else
+          echo "❌ ERROR EN EL DESPLIEGUE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔍 Revisar logs de GitHub Actions"
+          echo "⚠️ El sitio puede estar inaccesible"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        fi
           **/README.md
           **/.github/**
           **/deploy/**

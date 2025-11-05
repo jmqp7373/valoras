@@ -1,0 +1,23 @@
+{
+    "name": "valora/website",
+    "description": "Sistema web de Valora con autenticación y recuperación de contraseña",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Valora Team"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@php -r \"echo 'PHPMailer instalado correctamente para Valora.vip\\n';\""
+        ]
+    }
+}

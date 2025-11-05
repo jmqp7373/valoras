@@ -58,3 +58,25 @@ build/
 # Archivos de prueba local
 test/
 tests/
+test_*.php
+debug_*.php
+
+# 📧 Configuraciones sensibles de email
+config/email-config-production.php
+
+# 🗄️ Logs del sistema
+*.log
+logs/
+error.log
+access.log
+
+# 📦 Composer lock (se regenera automáticamente)
+composer.lock
+
+# 🔐 Archivos de sesión locales  
+sessions/
+session_data/
+
+# 💻 Cache de desarrollo
+opcache/
+.php_cs.cache

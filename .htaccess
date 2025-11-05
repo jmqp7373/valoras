@@ -9,3 +9,31 @@ AddDefaultCharset UTF-8
     Order allow,deny
     Deny from all
 </Files>
+
+# Bloquear acceso a archivos sensibles del proyecto
+<Files "*.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "update_passwords.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "cleanup_users_table.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Proteger directorio config
+<FilesMatch "^(config)/">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Proteger archivos de respaldo y temporales
+<FilesMatch "\.(bak|log|tmp|temp)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

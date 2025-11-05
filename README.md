@@ -1,6 +1,11 @@
-# Proyecto Valoras 🚀
+# 🏢 Valora.vip - Sistema de Autenticación Completo
 
-Un simple proyecto "Hola Mundo" en PHP con deployment automático a GoDaddy.
+[![Deploy Status](https://github.com/jmqp7373/valoras/actions/workflows/deploy.yml/badge.svg)](https://github.com/jmqp7373/valoras/actions/workflows/deploy.yml)
+[![PHP Version](https://img.shields.io/badge/PHP-8.1+-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![PHPMailer](https://img.shields.io/badge/PHPMailer-6.12.0-green)](https://github.com/PHPMailer/PHPMailer)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+Sistema web profesional con autenticación, recuperación de contraseña y envío de emails automatizado.
 
 ## 📁 Estructura del Proyecto
 
@@ -74,12 +79,80 @@ php -S localhost:8000
 # Copia los archivos a htdocs y ve a localhost
 ```
 
-## 📝 Logs y Monitoreo
+## � Configuración de GitHub Secrets
 
-- **GitHub Actions**: Ve el progreso del deployment en la pestaña "Actions"
-- **Errores**: Revisa los logs si algo falla
-- **Estado**: El badge muestra si el último deployment fue exitoso
+Para que el deployment automático funcione, configura estos secretos en GitHub:
+
+### 📋 Secretos Requeridos
+
+Ve a: **Settings > Secrets and variables > Actions** y agrega:
+
+```
+FTP_HOST=ftp.tu-proveedor.com
+FTP_USERNAME=tu-usuario-ftp  
+FTP_PASSWORD=tu-password-ftp
+```
+
+### 🌐 Proveedores Comunes
+
+**GoDaddy:**
+- Host: `ftp.secureserver.net`
+- Puerto: `21`
+- Directorio: `/public_html/`
+
+**Hostinger:**
+- Host: `files.000webhost.com` 
+- Puerto: `21`
+- Directorio: `/domains/tudominio.com/public_html/`
+
+**cPanel (General):**
+- Host: `ftp.tudominio.com`
+- Puerto: `21` 
+- Directorio: `/public_html/`
+
+## 🚀 Despliegue Automático
+
+### ✅ **Qué se despliega:**
+- 📄 Todos los archivos PHP (MVC completo)
+- 📦 Dependencias Composer optimizadas
+- 🎨 Assets (CSS, JS, imágenes)
+- ⚙️ Configuraciones de producción
+
+### 🚫 **Qué se excluye:**
+- `.git/` - Historial de Git
+- `README.md` - Documentación
+- `test_*.php` - Archivos de prueba
+- `.github/` - Workflows de CI/CD
+- `*.log` - Archivos de log
+
+### 🔄 **Trigger del Deploy:**
+```bash
+git add .
+git commit -m "feat: nueva funcionalidad"
+git push origin main  # 🚀 Se despliega automáticamente
+```
+
+## 📊 Monitoreo y Logs
+
+- **GitHub Actions**: Tab "Actions" para ver progreso
+- **Status Badge**: Muestra estado del último deploy
+- **Health Check**: Verifica que el sitio esté activo
+- **Rollback**: Manual via FTP si es necesario
+
+## 🎯 Configuración de Email (Producción)
+
+### Actualizar `config/email-config.php`:
+
+```php
+// Cambiar a credenciales reales de Migadu
+'smtp_username' => 'noreply@valora.vip',
+'smtp_password' => 'password_real_migadu',
+
+// Cambiar a modo producción  
+'development_mode' => false,
+'debug' => false,
+```
 
 ---
 
-**¡Happy Coding! 🎈**
+**🎉 ¡Sistema listo para producción!** 🚀

@@ -60,8 +60,20 @@ jobs:
         [ -f "config/email-config.php" ] && echo "✅ email-config.php encontrado" || echo "❌ email-config.php faltante"
         [ -d "vendor" ] && echo "✅ Dependencias Composer encontradas" || echo "❌ Directorio vendor faltante"
         
-    # 6. Deploy vía FTP
-    - name: 🚀 Deploy to Production Server
+    # 6. Debug - Verificar secretos (sin mostrar valores reales)
+    - name: 🔍 Debug Connection Info
+      run: |
+        echo "🔍 Verificando configuración de deploy..."
+        echo "📡 FTP Host configurado: $(echo '${{ secrets.FTP_HOST }}' | sed 's/./*/g')"
+        echo "👤 FTP User configurado: $(echo '${{ secrets.FTP_USERNAME }}' | sed 's/./*/g')"  
+        echo "🔐 FTP Pass configurado: $(if [ -n '${{ secrets.FTP_PASSWORD }}' ]; then echo '***SET***'; else echo '***NOT SET***'; fi)"
+        echo "📁 Directorio destino: /public_html/"
+        echo "🌐 Protocolo: FTP puerto 21"
+        
+    # 7. Deploy vía FTP (con mejor manejo de errores)
+    - name: 🚀 Deploy to Production Server (FTP)
+      id: ftp-deploy
+      continue-on-error: true
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -85,8 +97,46 @@ jobs:
           **/*.log
           **/.env.example
           
-    # 7. Health Check Post-Deploy
+    # 8. Retry con directorio alternativo si falla
+    - name: 🔄 Retry Deploy (Alternative Directory)
+      if: steps.ftp-deploy.outcome == 'failure'
+      id: ftp-retry
+      continue-on-error: true
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftp
+        port: 21
+        server-dir: /
+        local-dir: ./
+        log-level: verbose
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.vscode/**
+          **/README.md
+          **/.github/**
+          
+    # 9. Determinar resultado del deploy
+    - name: 📊 Deploy Result Analysis  
+      run: |
+        if [ "${{ steps.ftp-deploy.outcome }}" == "success" ]; then
+          echo "✅ FTP Deploy exitoso en /public_html/"
+          echo "DEPLOY_STATUS=success" >> $GITHUB_ENV
+        elif [ "${{ steps.ftp-retry.outcome }}" == "success" ]; then
+          echo "✅ FTP Deploy exitoso en directorio raíz /"
+          echo "DEPLOY_STATUS=success" >> $GITHUB_ENV
+        else
+          echo "❌ Ambos intentos de FTP fallaron"
+          echo "DEPLOY_STATUS=failed" >> $GITHUB_ENV
+        fi
+        
+    # 10. Health Check Post-Deploy (solo si deploy exitoso)
     - name: 🏥 Post-Deploy Health Check
+      if: env.DEPLOY_STATUS == 'success'
       run: |
         echo "🏥 Verificando despliegue..."
         echo "✅ Archivos desplegados exitosamente"
@@ -95,11 +145,11 @@ jobs:
         echo "🔗 Commit: ${{ github.sha }}"
         echo "👤 Autor: ${{ github.actor }}"
         
-    # 8. Deploy Status Notification  
+    # 11. Deploy Status Notification  
     - name: 📧 Deployment Status Notification
       if: always()
       run: |
-        if [ "${{ job.status }}" == "success" ]; then
+        if [ "${{ env.DEPLOY_STATUS }}" == "success" ]; then
           echo "🎉 ¡DESPLIEGUE EXITOSO!"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "✅ Valora.vip desplegado correctamente"
@@ -111,8 +161,16 @@ jobs:
         else
           echo "❌ ERROR EN EL DESPLIEGUE"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🔍 Revisar logs de GitHub Actions"
-          echo "⚠️ El sitio puede estar inaccesible"
+          echo "🔍 Problema: Credenciales FTP incorrectas"
+          echo "📋 Solución: Verificar GitHub Secrets:"
+          echo "   - FTP_HOST: IP o dominio del servidor"
+          echo "   - FTP_USERNAME: Usuario FTP"  
+          echo "   - FTP_PASSWORD: Contraseña FTP"
+          echo "🆘 Alternativas:"
+          echo "   1. Verificar credenciales en hosting panel"
+          echo "   2. Probar conexión con FileZilla"
+          echo "   3. Cambiar a SFTP si FTP no funciona"
+          echo "   4. Deploy manual temporal"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
         fi
           **/README.md

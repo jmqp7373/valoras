@@ -1,0 +1,49 @@
+name: 🚀 Deploy Valora.vip via SFTP (Alternative)
+
+# Workflow alternativo usando SFTP en lugar de FTP
+# Úsalo si el servidor no soporta FTP regular
+
+on:
+  workflow_dispatch:  # Solo ejecución manual
+  
+jobs:
+  deploy-sftp:
+    runs-on: ubuntu-latest
+    name: 🔐 Deploy via SFTP (Secure)
+    
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Setup PHP Environment  
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, mysql, gd
+        
+    - name: 📦 Install Dependencies
+      run: |
+        composer install --no-dev --optimize-autoloader --no-interaction
+        
+    - name: 🔐 Deploy via SFTP
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}  
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: 22
+        local_path: './'
+        remote_path: '/public_html/'
+        args: '-o ConnectTimeout=5'
+        
+    - name: 📧 SFTP Deploy Status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ SFTP Deploy exitoso"
+          echo "🔐 Conexión segura establecida"
+          echo "🌐 Sitio: https://valora.vip"
+        else
+          echo "❌ SFTP Deploy falló"
+          echo "🔍 Verifica que el servidor soporte SFTP en puerto 22"
+        fi

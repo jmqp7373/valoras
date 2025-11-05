@@ -1,4 +1,8 @@
 <?php
+/**
+ * Valora.vip - Dashboard Principal
+ * Deploy Test: Nov 5, 2025 - FTP Credentials Updated
+ */
 require_once 'config/database.php';
 startSessionSafely();
 

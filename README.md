@@ -7,6 +7,8 @@
 
 Sistema web profesional con autenticación, recuperación de contraseña y envío de emails automatizado.
 
+> 🚀 **Estado del Deploy:** Configuración FTP corregida - Testing credenciales actualizadas (Nov 5, 2025)
+
 ## 📁 Estructura del Proyecto
 
 ```

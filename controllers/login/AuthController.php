@@ -1,17 +1,20 @@
 <?php
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../models/Usuario.php';
+require_once __DIR__ . '/../TwilioController.php';
 
 startSessionSafely();
 
 class AuthController {
     private $db;
     private $usuario;
+    private $twilioController;
 
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
         $this->usuario = new Usuario($this->db);
+        $this->twilioController = new TwilioController();
     }
 
     // Método para manejar el login
@@ -104,11 +107,23 @@ class AuthController {
             $result = $this->usuario->create();
             
             if($result['success']) {
-                return [
-                    'success' => true,
-                    'message' => 'Usuario registrado exitosamente. Su código temporal de acceso es: ' . $codigo_temporal . '. Use este código para iniciar sesión.',
-                    'redirect' => 'login.php'
-                ];
+                // Enviar código de verificación por SMS
+                $smsResult = $this->sendVerificationCodeSMS($celular, $codigo_temporal, $cedula);
+                
+                if($smsResult['success']) {
+                    return [
+                        'success' => true,
+                        'message' => 'Usuario registrado exitosamente. Se ha enviado un código de verificación de 6 dígitos a tu número de celular. Usa este código para iniciar sesión.',
+                        'redirect' => 'login.php'
+                    ];
+                } else {
+                    // Si falla el SMS, mostrar el código en pantalla como respaldo
+                    return [
+                        'success' => true,
+                        'message' => 'Usuario registrado exitosamente. Tu código temporal de acceso es: ' . $codigo_temporal . '. Use este código para iniciar sesión. (SMS no disponible)',
+                        'redirect' => 'login.php'
+                    ];
+                }
             } else {
                 return [
                     'success' => false,
@@ -154,6 +169,70 @@ class AuthController {
         
         echo 'invalid';
         return;
+    }
+
+    // Método para enviar código de verificación por SMS
+    private function sendVerificationCodeSMS($celular, $codigo, $cedula) {
+        try {
+            // Formatear el número de celular
+            $phone = $this->twilioController->formatColombianNumber($celular);
+            $validPhone = $this->twilioController->validatePhoneNumber($phone);
+            
+            if(!$validPhone) {
+                return [
+                    'success' => false,
+                    'error' => 'El número de celular no es válido.'
+                ];
+            }
+            
+            // Enviar SMS usando TwilioController
+            $smsResult = $this->twilioController->sendVerificationCode($validPhone, $codigo);
+            
+            if($smsResult['success']) {
+                // Guardar el código en la tabla de tokens para verificación posterior
+                $this->saveVerificationToken($cedula, $codigo);
+                
+                return [
+                    'success' => true,
+                    'message' => 'Código de verificación enviado por SMS.'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'error' => $smsResult['error']
+                ];
+            }
+            
+        } catch(Exception $e) {
+            error_log("Error enviando SMS de registro: " . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'Error al enviar el código por SMS.'
+            ];
+        }
+    }
+    
+    // Método para guardar el token de verificación en la base de datos
+    private function saveVerificationToken($cedula, $codigo) {
+        try {
+            // Usar la misma tabla que usa el sistema de reset de contraseña
+            $stmt = $this->db->prepare("
+                INSERT INTO password_reset_tokens (cedula, token, expires_at, method, created_at) 
+                VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE), 'sms', NOW())
+                ON DUPLICATE KEY UPDATE 
+                token = VALUES(token), 
+                expires_at = VALUES(expires_at), 
+                created_at = VALUES(created_at)
+            ");
+            
+            // La tabla usa token como VARCHAR(6), no necesita hash
+            $stmt->execute([$cedula, $codigo]);
+            
+            return true;
+        } catch(Exception $e) {
+            error_log("Error guardando token de verificación: " . $e->getMessage());
+            return false;
+        }
     }
 
     // Método para cerrar sesión

@@ -397,6 +397,83 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             cursor: not-allowed;
             transform: none;
         }
+
+        /* Estilos mejorados para el botón verde de continuar */
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            margin: 25px auto 0;
+            min-width: 260px;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #34ce57 0%, #17a2b8 100%);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+            transition: all 0.1s ease;
+        }
+
+        /* Estilos mejorados para la confirmación de selección */
+        .selected-username-display {
+            text-align: center;
+            padding: 20px 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            border: 2px solid #28a745;
+            margin: 15px 0;
+        }
+
+        .selected-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .check-icon {
+            font-size: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .selected-text {
+            color: #495057;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .selected-username {
+            color: #28a745;
+            font-size: 20px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+        }
+
+        .username-description {
+            color: #6c757d;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.4;
+            font-style: italic;
+        }
         
         .refresh-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
@@ -816,6 +893,38 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 font-size: 14px;
                 margin: 20px auto 0;
             }
+
+            /* Estilos móviles para el botón verde mejorado */
+            .btn-primary {
+                padding: 14px 24px;
+                font-size: 15px;
+                min-width: 240px;
+                margin: 20px auto 0;
+                border-radius: 12px;
+            }
+
+            /* Estilos móviles para la confirmación de selección */
+            .selected-username-display {
+                padding: 16px 12px;
+                margin: 12px 0;
+            }
+
+            .selected-badge {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .selected-text {
+                font-size: 14px;
+            }
+
+            .selected-username {
+                font-size: 18px;
+            }
+
+            .username-description {
+                font-size: 13px;
+            }
             
             .refresh-btn {
                 padding: 10px 20px; /* Botón refresh más pequeño */
@@ -930,6 +1039,38 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             }
             
             .platform-status {
+                font-size: 12px;
+            }
+
+            /* Estilos para móviles muy pequeños - Botón verde mejorado */
+            .btn-primary {
+                padding: 12px 20px;
+                font-size: 14px;
+                min-width: 200px;
+                margin: 15px auto 0;
+                border-radius: 10px;
+            }
+
+            /* Estilos para móviles muy pequeños - Confirmación de selección */
+            .selected-username-display {
+                padding: 12px 8px;
+                margin: 10px 0;
+                border-radius: 12px;
+            }
+
+            .selected-badge {
+                gap: 4px;
+            }
+
+            .selected-text {
+                font-size: 13px;
+            }
+
+            .selected-username {
+                font-size: 16px;
+            }
+
+            .username-description {
                 font-size: 12px;
             }
         }
@@ -1681,11 +1822,13 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             const content = document.getElementById('nameAnalysisContent');
             
             content.innerHTML = `
-                <div style="text-align: center; padding: 15px;">
-                    <h4 style="color: #882A57; margin: 0; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span>✅</span> Has seleccionado: <strong>${username}</strong>
-                    </h4>
-                    <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">
+                <div class="selected-username-display">
+                    <div class="selected-badge">
+                        <span class="check-icon">✅</span>
+                        <span class="selected-text">Has seleccionado:</span>
+                        <span class="selected-username">${username}</span>
+                    </div>
+                    <p class="username-description">
                         Nombre único generado por IA basado en tus características personales
                     </p>
                 </div>

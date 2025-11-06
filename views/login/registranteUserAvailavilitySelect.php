@@ -123,6 +123,12 @@ if (isset($_GET['refresh']) || !isset($_SESSION['caracteristicas_usuario'])) {
 }
 
 $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
+
+// Validación: Asegurar que hay características disponibles
+if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
+    $_SESSION['caracteristicas_usuario'] = generarCaracteristicas($caracteristicasPool);
+    $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -796,8 +802,86 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
     </div>
 
     <script>
+        // Variables globales
         let selectedUsername = '';
         let selectedCharacteristics = [];
+
+        // Asegurar que el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing event listeners...');
+            initializeEventListeners();
+        });
+
+        function initializeEventListeners() {
+            try {
+                // Manejar selección de características
+                const characteristicItems = document.querySelectorAll('.characteristic-item');
+                console.log('Found', characteristicItems.length, 'characteristic items');
+                
+                characteristicItems.forEach((item, index) => {
+                    item.addEventListener('click', function() {
+                        console.log('Characteristic clicked:', this.dataset.trait);
+                        this.classList.toggle('selected');
+                        const trait = this.dataset.trait;
+                        
+                        if (this.classList.contains('selected')) {
+                            selectedCharacteristics.push(trait);
+                        } else {
+                            selectedCharacteristics = selectedCharacteristics.filter(t => t !== trait);
+                        }
+                        console.log('Selected characteristics:', selectedCharacteristics);
+                    });
+                });
+
+                // Resto de event listeners
+                setupFormHandlers();
+                
+            } catch (error) {
+                console.error('Error initializing event listeners:', error);
+            }
+        }
+
+        function setupFormHandlers() {
+            // Manejar validación de edad
+            const edadInput = document.querySelector('input[name="edad"]');
+            if (edadInput) {
+                edadInput.addEventListener('input', function() {
+                    const edad = parseInt(this.value);
+                    
+                    if (!isNaN(edad) && edad < 18) {
+                        this.style.borderColor = '#dc3545';
+                        this.style.backgroundColor = '#fff5f5';
+                        
+                        // Mostrar advertencia visual
+                        let warning = document.getElementById('age-warning');
+                        if (!warning) {
+                            warning = document.createElement('div');
+                            warning.id = 'age-warning';
+                            warning.style.cssText = `
+                                color: #dc3545;
+                                font-size: 12px;
+                                margin-top: 5px;
+                                padding: 8px 12px;
+                                background: #fff5f5;
+                                border: 1px solid #dc3545;
+                                border-radius: 6px;
+                                font-weight: 500;
+                            `;
+                            warning.innerHTML = '⚠️ Debes tener 18 años o más para usar Valora.vip';
+                            this.parentNode.appendChild(warning);
+                        }
+                    } else {
+                        this.style.borderColor = '#ee6f92';
+                        this.style.backgroundColor = '#fafafa';
+                        
+                        // Remover advertencia si existe
+                        const warning = document.getElementById('age-warning');
+                        if (warning) {
+                            warning.remove();
+                        }
+                    }
+                });
+            }
 
         // Función para refrescar características con animación elegante
         function refreshCharacteristics() {
@@ -842,57 +926,9 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         }
 
         // Validación de edad en tiempo real
-        const edadInput = document.querySelector('input[name="edad"]');
-        edadInput.addEventListener('input', function() {
-            const edad = parseInt(this.value);
-            
-            if (!isNaN(edad) && edad < 18) {
-                this.style.borderColor = '#dc3545';
-                this.style.backgroundColor = '#fff5f5';
-                
-                // Mostrar advertencia visual
-                let warning = document.getElementById('age-warning');
-                if (!warning) {
-                    warning = document.createElement('div');
-                    warning.id = 'age-warning';
-                    warning.style.cssText = `
-                        color: #dc3545;
-                        font-size: 12px;
-                        margin-top: 5px;
-                        padding: 8px 12px;
-                        background: #fff5f5;
-                        border: 1px solid #dc3545;
-                        border-radius: 6px;
-                        font-weight: 500;
-                    `;
-                    warning.innerHTML = '⚠️ Debes tener 18 años o más para usar Valora.vip';
-                    this.parentNode.appendChild(warning);
-                }
-            } else {
-                this.style.borderColor = '#ee6f92';
-                this.style.backgroundColor = '#fafafa';
-                
-                // Remover advertencia si existe
-                const warning = document.getElementById('age-warning');
-                if (warning) {
-                    warning.remove();
-                }
-            }
-        });
+        } // Fin de setupFormHandlers
 
-        // Manejar selección de características
-        document.querySelectorAll('.characteristic-item').forEach(item => {
-            item.addEventListener('click', function() {
-                this.classList.toggle('selected');
-                const trait = this.dataset.trait;
-                
-                if (this.classList.contains('selected')) {
-                    selectedCharacteristics.push(trait);
-                } else {
-                    selectedCharacteristics = selectedCharacteristics.filter(t => t !== trait);
-                }
-            });
-        });
+        // Código movido a initializeEventListeners()
 
         // Manejar envío del formulario de características
         document.getElementById('characteristicsForm').addEventListener('submit', async function(e) {

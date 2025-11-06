@@ -140,16 +140,20 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
     <style>
         body {
             background: linear-gradient(135deg, #ee6f92 0%, #8b5a83 100%);
+            background-attachment: fixed; /* Fondo fijo para evitar distorsión */
             min-height: 100vh;
+            height: auto; /* Permitir que el body crezca según el contenido */
             margin: 0;
-            padding-top: 80px; /* Padding superior mucho mayor para evitar ocultarse */
+            padding: 120px 0 60px 0; /* Padding masivo superior y inferior */
             font-family: 'Poppins', sans-serif;
         }
         
         .wizard-container {
             max-width: 900px;
-            margin: 60px auto 20px auto; /* Margen superior aumentado significativamente */
-            padding: 60px 20px 40px 20px; /* Padding superior aún mayor para máxima seguridad */
+            margin: 0 auto; /* Sin margen superior adicional ya que el body tiene padding */
+            padding: 40px 20px 60px 20px; /* Padding equilibrado */
+            position: relative;
+            z-index: 1;
         }
         
         .wizard-header {
@@ -684,19 +688,36 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
 
         /* Estilo específico para el contenedor de análisis */
         #nameAnalysisContainer {
-            scroll-margin-top: 150px; /* Espacio aumentado para evitar ocultarse */
-            margin-top: 30px !important;
-            margin-bottom: 30px !important;
+            scroll-margin-top: 180px; /* Espacio masivo para evitar ocultarse */
+            margin-top: 40px !important;
+            margin-bottom: 40px !important;
+            position: relative;
+            z-index: 10;
         }
         
         /* Prevenir scroll automático no deseado */
         html {
             scroll-behavior: auto; /* Evitar scroll suave automático */
+            height: 100%;
+            background: linear-gradient(135deg, #ee6f92 0%, #8b5a83 100%);
+            background-attachment: fixed;
         }
         
         /* Asegurar espacio suficiente en toda la página */
         .wizard-container * {
             scroll-margin-top: 150px;
+        }
+        
+        /* Fondo adicional para páginas largas */
+        html::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ee6f92 0%, #8b5a83 100%);
+            z-index: -1;
         }
 
         /* Responsive para análisis detallado */
@@ -717,7 +738,15 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             }
             
             #nameAnalysisContainer {
-                scroll-margin-top: 100px;
+                scroll-margin-top: 120px;
+            }
+            
+            body {
+                padding-top: 100px; /* Aún más padding en móviles */
+            }
+            
+            .wizard-container {
+                padding: 30px 15px 40px 15px;
             }
         }
 

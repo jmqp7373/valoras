@@ -144,14 +144,14 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             min-height: 100vh;
             height: auto; /* Permitir que el body crezca según el contenido */
             margin: 0;
-            padding: 60px 0 60px 0; /* Padding reducido pero suficiente para no ocultarse */
+            padding: 40px 0 60px 0; /* Padding reducido 30% más (de 60px a 40px) */
             font-family: 'Poppins', sans-serif;
         }
         
         .wizard-container {
             max-width: 900px;
             margin: 0 auto; /* Sin margen superior adicional ya que el body tiene padding */
-            padding: 20px 20px 60px 20px; /* Padding superior reducido para acercar el título */
+            padding: 15px 20px 60px 20px; /* Padding superior reducido 30% más (de 20px a 15px) */
             position: relative;
             z-index: 1;
         }
@@ -742,11 +742,11 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             }
             
             body {
-                padding-top: 50px; /* Padding reducido en móviles */
+                padding-top: 35px; /* Padding reducido 30% más en móviles (de 50px a 35px) */
             }
             
             .wizard-container {
-                padding: 15px 15px 40px 15px; /* Padding superior reducido en móviles */
+                padding: 10px 15px 40px 15px; /* Padding superior reducido 30% más en móviles (de 15px a 10px) */
             }
         }
 

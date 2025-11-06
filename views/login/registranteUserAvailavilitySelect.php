@@ -724,9 +724,15 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             </div>
             
             <div id="suggestionsContainer" style="display: none;">
-                <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                    ✨ Nuestra IA ha creado <strong>10 nombres únicos</strong> combinando nombres femeninos cortos + adjetivos atractivos:
-                </p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <p style="color: #666; margin: 0; flex: 1; min-width: 200px;">
+                        ✨ Nuestra IA ha creado <strong>10 nombres únicos</strong> combinando nombres femeninos cortos + adjetivos atractivos:
+                    </p>
+                    <button type="button" class="refresh-btn" onclick="refreshUsernames()" id="refreshUsernamesBtn">
+                        <span class="icon">🔄</span>
+                        <span>Nuevas opciones</span>
+                    </button>
+                </div>
                 <div class="username-grid" id="usernameGrid">
                     <!-- Las sugerencias aparecerán aquí -->
                 </div>
@@ -979,6 +985,136 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             // Verificar disponibilidad en todas las plataformas
             checkAllPlatformsAvailability(selectedUsername);
         });
+
+        // Función para refrescar nombres de usuario (Paso 2)
+        async function refreshUsernames() {
+            const refreshBtn = document.getElementById('refreshUsernamesBtn');
+            const icon = refreshBtn.querySelector('.icon');
+            const text = refreshBtn.querySelector('span:not(.icon)');
+            
+            // Prevenir múltiples clicks
+            if (refreshBtn.disabled) return;
+            
+            // Animación de inicio
+            refreshBtn.disabled = true;
+            refreshBtn.classList.add('loading');
+            icon.textContent = '⏳';
+            text.textContent = 'Generando...';
+            refreshBtn.style.background = 'linear-gradient(135deg, #17a2b8, #138496)';
+            refreshBtn.style.transform = 'scale(0.98)';
+            
+            // Animar los nombres existentes (fade out)
+            const currentItems = document.querySelectorAll('.username-item');
+            currentItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.transform = 'scale(0.95)';
+                    item.style.opacity = '0.6';
+                }, index * 30);
+            });
+            
+            // Limpiar selección actual
+            selectedUsername = '';
+            document.getElementById('checkAvailabilityBtn').style.display = 'none';
+            
+            // Obtener datos del formulario anterior
+            const formData = new FormData(document.getElementById('characteristicsForm'));
+            const edad = formData.get('edad');
+            
+            // Crear nuevo prompt con variación para obtener nombres diferentes
+            const timestamp = Date.now();
+            const prompt = `Mujer de ${edad} años con características: ${selectedCharacteristics.join(', ')}. IMPORTANTE: Genera 10 nombres COMPLETAMENTE DIFERENTES a los anteriores. Formato: [nombre femenino corto 3-5 letras] + [adjetivo sensual/atractivo]. Variación ${timestamp}. Ejemplos: EmmaFire, ZoeSiren, AvaBold, etc. Máximo 14 caracteres.`;
+
+            try {
+                await new Promise(resolve => setTimeout(resolve, 800)); // Pequeña pausa para la animación
+                
+                const response = await fetch('../../controllers/login/usernameGenerator.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'prompt=' + encodeURIComponent(prompt)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Procesar nueva respuesta de la IA
+                const content = data.choices[0].message.content;
+                const suggestions = content.split(/\d+\.\s*/).filter(name => name.trim()).slice(0, 10);
+
+                // Actualizar grid con nuevos nombres (animación de entrada)
+                const usernameGrid = document.getElementById('usernameGrid');
+                usernameGrid.innerHTML = '';
+
+                suggestions.forEach((name, index) => {
+                    let cleanName = name.trim().replace(/[^\w]/g, '');
+                    
+                    // Limitar a máximo 14 caracteres
+                    if (cleanName.length > 14) {
+                        cleanName = cleanName.substring(0, 14);
+                    }
+                    
+                    if (cleanName && cleanName.length > 2) {
+                        const div = document.createElement('div');
+                        div.className = 'username-item';
+                        div.innerHTML = `<div class="username-text">${cleanName}</div>`;
+                        div.style.opacity = '0';
+                        div.style.transform = 'translateY(20px)';
+                        
+                        div.addEventListener('click', function() {
+                            document.querySelectorAll('.username-item').forEach(item => {
+                                item.classList.remove('selected');
+                            });
+                            this.classList.add('selected');
+                            selectedUsername = cleanName;
+                            document.getElementById('checkAvailabilityBtn').style.display = 'block';
+                        });
+                        
+                        usernameGrid.appendChild(div);
+                        
+                        // Animación de entrada escalonada
+                        setTimeout(() => {
+                            div.style.transition = 'all 0.4s ease';
+                            div.style.opacity = '1';
+                            div.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+
+                // Restablecer botón
+                setTimeout(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.classList.remove('loading');
+                    icon.textContent = '🔄';
+                    text.textContent = 'Nuevas opciones';
+                    refreshBtn.style.background = '';
+                    refreshBtn.style.transform = '';
+                    
+                    // Efecto de éxito
+                    refreshBtn.style.animation = 'pulseGlow 0.6s ease-in-out';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Mostrar error y restaurar botón
+                refreshBtn.disabled = false;
+                refreshBtn.classList.remove('loading');
+                icon.textContent = '❌';
+                text.textContent = 'Error - Intentar de nuevo';
+                refreshBtn.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+                
+                // Restaurar después de 3 segundos
+                setTimeout(() => {
+                    icon.textContent = '🔄';
+                    text.textContent = 'Nuevas opciones';
+                    refreshBtn.style.background = '';
+                    refreshBtn.style.transform = '';
+                }, 3000);
+            }
+        }
 
         // Verificar disponibilidad en Valora
         async function checkValoraAvailability(username) {

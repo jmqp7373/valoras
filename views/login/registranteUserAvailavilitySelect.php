@@ -142,14 +142,14 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             background: linear-gradient(135deg, #ee6f92 0%, #8b5a83 100%);
             min-height: 100vh;
             margin: 0;
-            padding-top: 20px;
+            padding-top: 80px; /* Padding superior mucho mayor para evitar ocultarse */
             font-family: 'Poppins', sans-serif;
         }
         
         .wizard-container {
             max-width: 900px;
-            margin: 20px auto;
-            padding: 40px 20px 20px 20px; /* Más padding superior para evitar ocultarse bajo la barra del navegador */
+            margin: 60px auto 20px auto; /* Margen superior aumentado significativamente */
+            padding: 60px 20px 40px 20px; /* Padding superior aún mayor para máxima seguridad */
         }
         
         .wizard-header {
@@ -684,8 +684,19 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
 
         /* Estilo específico para el contenedor de análisis */
         #nameAnalysisContainer {
-            scroll-margin-top: 120px; /* Espacio para evitar ocultarse bajo barras del navegador */
-            margin-top: 20px !important;
+            scroll-margin-top: 150px; /* Espacio aumentado para evitar ocultarse */
+            margin-top: 30px !important;
+            margin-bottom: 30px !important;
+        }
+        
+        /* Prevenir scroll automático no deseado */
+        html {
+            scroll-behavior: auto; /* Evitar scroll suave automático */
+        }
+        
+        /* Asegurar espacio suficiente en toda la página */
+        .wizard-container * {
+            scroll-margin-top: 150px;
         }
 
         /* Responsive para análisis detallado */
@@ -1538,35 +1549,25 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 🎉 <strong>¡Perfecto!</strong> Has seleccionado <strong>${username}</strong>. Descubre por qué es ideal para ti:
             `;
             
+            // Guardar la posición de scroll actual ANTES de mostrar el contenedor
+            const currentScrollY = window.scrollY;
+            
             // Mostrar el contenedor con animación
             container.style.display = 'block';
             container.style.opacity = '0';
             container.style.transform = 'translateY(-10px)';
-            
-            // Prevenir scroll automático no deseado
-            const currentScrollY = window.scrollY;
             
             setTimeout(() => {
                 container.style.transition = 'all 0.3s ease';
                 container.style.opacity = '1';
                 container.style.transform = 'translateY(0)';
                 
-                // Mantener la posición de scroll actual o hacer scroll suave al contenido
+                // MANTENER la posición de scroll exactamente donde estaba
+                // Esto previene que la página "salte" o se oculte
                 setTimeout(() => {
-                    // Verificar si el análisis está visible en pantalla
-                    const containerRect = container.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
-                    
-                    // Solo hacer scroll si el análisis no está completamente visible
-                    if (containerRect.bottom > viewportHeight || containerRect.top < 100) {
-                        // Scroll suave al análisis, dejando espacio en la parte superior
-                        const targetPosition = container.offsetTop - 120; // 120px de margen superior
-                        window.scrollTo({
-                            top: Math.max(0, targetPosition),
-                            behavior: 'smooth'
-                        });
-                    }
-                }, 350); // Esperar a que termine la animación
+                    window.scrollTo(0, currentScrollY);
+                }, 50);
+                
             }, 10);
         }
 
@@ -1639,14 +1640,18 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                         div.className = 'username-item';
                         div.innerHTML = `<div class="username-text">${cleanName}</div>`;
                         
-                        div.addEventListener('click', function() {
+                        div.addEventListener('click', function(e) {
+                            // Prevenir cualquier comportamiento de scroll por defecto
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
                             document.querySelectorAll('.username-item').forEach(item => {
                                 item.classList.remove('selected');
                             });
                             this.classList.add('selected');
                             selectedUsername = cleanName;
                             
-                            // Mostrar explicación personalizada del nombre
+                            // Mostrar explicación personalizada del nombre SIN cambiar scroll
                             showNameAnalysis(cleanName);
                             
                             document.getElementById('checkAvailabilityBtn').style.display = 'block';

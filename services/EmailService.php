@@ -67,6 +67,49 @@ class EmailService {
             ];
         }
     }
+
+    /**
+     * Enviar email con código de verificación de 6 dígitos
+     */
+    public function sendVerificationCodeEmail($recipientEmail, $recipientName, $code) {
+        try {
+            $mail = $this->createMailer();
+            
+            // Destinatario
+            $toEmail = $this->config['development_mode'] ? $this->config['development_email'] : $recipientEmail;
+            $mail->addAddress($toEmail, $recipientName);
+            
+            // Asunto
+            $mail->Subject = '🔒 Código de Recuperación - Valora.vip';
+            
+            // Contenido del email
+            $mail->isHTML(true);
+            $mail->Body = $this->generateVerificationCodeTemplate($recipientName, $code);
+            $mail->AltBody = $this->generateVerificationCodeTextVersion($recipientName, $code);
+            
+            // Enviar email
+            $result = $mail->send();
+            
+            if($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Código de verificación enviado exitosamente',
+                    'recipient' => $toEmail
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Error al enviar el código: ' . $mail->ErrorInfo
+                ];
+            }
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error del servidor de email: ' . $e->getMessage()
+            ];
+        }
+    }
     
     /**
      * Crear instancia configurada de PHPMailer
@@ -299,6 +342,134 @@ Web: www.valora.vip
             error_log("Error enviando email de contacto: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Generar template HTML para código de verificación
+     */
+    private function generateVerificationCodeTemplate($userName, $code) {
+        return "
+        <html>
+        <head>
+            <title>Código de Verificación - Valora.vip</title>
+            <style>
+                body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; }
+                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #ee6f92; padding-bottom: 20px; }
+                .logo { width: 120px; height: auto; margin-bottom: 15px; }
+                .code-box { 
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                    border: 2px solid #ee6f92; 
+                    border-radius: 15px; 
+                    text-align: center; 
+                    padding: 25px; 
+                    margin: 25px 0; 
+                    box-shadow: 0 4px 12px rgba(238, 111, 146, 0.1);
+                }
+                .code { 
+                    font-size: 36px; 
+                    font-weight: bold; 
+                    color: #ee6f92; 
+                    letter-spacing: 6px;
+                    font-family: 'Courier New', monospace;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .warning { 
+                    background: #fff3cd; 
+                    border: 1px solid #ffeaa7; 
+                    border-radius: 8px; 
+                    padding: 15px; 
+                    margin: 20px 0; 
+                    font-size: 14px; 
+                }
+                .footer { 
+                    text-align: center; 
+                    color: #666; 
+                    font-size: 12px; 
+                    margin-top: 30px; 
+                    border-top: 1px solid #dee2e6; 
+                    padding-top: 20px; 
+                }
+                .security-tips { 
+                    background: #e7f3ff; 
+                    border-left: 4px solid #007bff; 
+                    padding: 15px; 
+                    margin: 20px 0; 
+                    font-size: 14px; 
+                }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <img src='https://valora.vip/assets/images/logos/logo_valora.png' alt='Valora.vip' class='logo'>
+                    <h1 style='color: #ee6f92; margin: 0; font-size: 24px;'>Recuperación de Contraseña</h1>
+                    <p style='color: #666; margin: 10px 0 0 0; font-size: 16px;'>Hola, $userName</p>
+                </div>
+                
+                <p style='font-size: 16px; margin-bottom: 20px;'>
+                    Has solicitado recuperar tu contraseña. Tu código de verificación es:
+                </p>
+                
+                <div class='code-box'>
+                    <div class='code'>$code</div>
+                    <p style='margin: 15px 0 0 0; color: #666; font-size: 14px;'>
+                        Ingresa este código en la página de recuperación
+                    </p>
+                </div>
+                
+                <div class='warning'>
+                    <p style='margin: 0 0 10px 0;'><strong>⏰ Este código expira en 10 minutos.</strong></p>
+                    <p style='margin: 0;'>Si no solicitaste este código, ignora este mensaje.</p>
+                </div>
+                
+                <div class='security-tips'>
+                    <p style='margin: 0 0 10px 0;'><strong>💡 Consejos de seguridad:</strong></p>
+                    <ul style='margin: 0; padding-left: 20px;'>
+                        <li>Nunca compartas este código con nadie</li>
+                        <li>Valora nunca te pedirá el código por teléfono</li>
+                        <li>Usa una contraseña nueva y segura</li>
+                    </ul>
+                </div>
+                
+                <div class='footer'>
+                    <p>Este es un mensaje automático de Valora.vip</p>
+                    <p>© " . date('Y') . " Valora.vip - Todos los derechos reservados</p>
+                    <p>¿Necesitas ayuda? <a href='mailto:soporte@valora.vip' style='color: #ee6f92;'>Contacta soporte</a></p>
+                </div>
+            </div>
+        </body>
+        </html>";
+    }
+
+    /**
+     * Generar versión de texto plano para código de verificación
+     */
+    private function generateVerificationCodeTextVersion($userName, $code) {
+        return "
+VALORA.VIP - CÓDIGO DE VERIFICACIÓN
+
+Hola $userName,
+
+Has solicitado recuperar tu contraseña. Tu código de verificación es:
+
+$code
+
+Ingresa este código en la página de recuperación.
+
+⏰ IMPORTANTE: Este código expira en 10 minutos.
+
+CONSEJOS DE SEGURIDAD:
+- Nunca compartas este código con nadie
+- Valora nunca te pedirá el código por teléfono  
+- Usa una contraseña nueva y segura
+
+Si no solicitaste este código, puedes ignorar este email de forma segura.
+
+--
+Valora Team
+Soporte: soporte@valora.vip
+";
     }
 }
 ?>

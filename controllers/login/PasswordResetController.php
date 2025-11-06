@@ -193,70 +193,10 @@ class PasswordResetController {
     
     private function sendEmailCode($email, $code, $userName = 'Usuario') {
         try {
-            $subject = "🔒 Código de Recuperación - Valora.vip";
-            $message = "
-            <html>
-            <head>
-                <title>Código de Recuperación</title>
-                <style>
-                    body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { text-align: center; margin-bottom: 30px; }
-                    .logo { width: 120px; height: auto; }
-                    .code-box { 
-                        background: #f8f9fa; 
-                        border: 2px solid #ee6f92; 
-                        border-radius: 12px; 
-                        text-align: center; 
-                        padding: 20px; 
-                        margin: 20px 0; 
-                    }
-                    .code { 
-                        font-size: 32px; 
-                        font-weight: bold; 
-                        color: #ee6f92; 
-                        letter-spacing: 4px;
-                        font-family: 'Courier New', monospace;
-                    }
-                    .warning { color: #666; font-size: 14px; margin-top: 20px; }
-                    .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
-                </style>
-            </head>
-            <body>
-                <div class='container'>
-                    <div class='header'>
-                        <img src='https://valora.vip/assets/images/logos/logo_valora.png' alt='Valora.vip' class='logo'>
-                        <h2 style='color: #ee6f92; margin: 15px 0 5px 0;'>Recuperación de Contraseña</h2>
-                        <p style='color: #666; margin: 5px 0;'>Hola, $userName</p>
-                    </div>
-                    
-                    <p>Has solicitado recuperar tu contraseña. Tu código de verificación es:</p>
-                    
-                    <div class='code-box'>
-                        <div class='code'>$code</div>
-                        <p style='margin: 10px 0 0 0; color: #666;'>Ingresa este código en la página de recuperación</p>
-                    </div>
-                    
-                    <div class='warning'>
-                        <p><strong>⏰ Este código expira en 10 minutos.</strong></p>
-                        <p>🔒 Si no solicitaste este código, ignora este mensaje.</p>
-                        <p>💡 Por tu seguridad, nunca compartas este código con nadie.</p>
-                    </div>
-                    
-                    <div class='footer'>
-                        <p>Este es un mensaje automático de Valora.vip</p>
-                        <p>© " . date('Y') . " Valora.vip - Todos los derechos reservados</p>
-                    </div>
-                </div>
-            </body>
-            </html>";
+            // Usar EmailService para el envío con el nuevo método
+            $emailResult = $this->emailService->sendVerificationCodeEmail($email, $userName, $code);
             
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-            $headers .= "From: Valora.vip <noreply@valora.vip>\r\n";
-            $headers .= "Reply-To: soporte@valora.vip\r\n";
-            
-            return mail($email, $subject, $message, $headers);
+            return $emailResult['success'] ?? false;
             
         } catch(Exception $e) {
             error_log("Error enviando email con código: " . $e->getMessage());

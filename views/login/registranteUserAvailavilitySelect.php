@@ -739,6 +739,15 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
                 <button type="button" class="continue-btn" id="backToStep1Btn" style="background: #6c757d; margin-top: 15px;">
                     ← Volver a Características
                 </button>
+                
+                <div style="text-align: center; margin-top: 25px; color: #666; font-size: 14px;">
+                    <div style="margin-bottom: 12px;">
+                        ¿Ya tienes una cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión</a>
+                    </div>
+                    <div>
+                        <a href="password_reset.php" style="color: #882A57; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -775,6 +784,15 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             <button type="button" class="continue-btn" id="backToStep2Btn" style="background: #6c757d; margin-top: 15px;">
                 ← Volver a Sugerencias
             </button>
+            
+            <div style="text-align: center; margin-top: 25px; color: #666; font-size: 14px;">
+                <div style="margin-bottom: 12px;">
+                    ¿Ya tienes una cuenta? <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">Inicia sesión</a>
+                </div>
+                <div>
+                    <a href="password_reset.php" style="color: #882A57; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+                </div>
+            </div>
         </div>
     </div>
 

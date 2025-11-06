@@ -4,34 +4,35 @@ require_once '../../controllers/login/PasswordResetController.php';
 
 $passwordController = new PasswordResetController();
 $result = null;
-$tokenValid = false;
+$step = 1; // 1 = Ingresar código, 2 = Nueva contraseña
 $cedula = '';
 
-// Verificar token del enlace
-if(isset($_GET['token'])) {
-    $tokenResult = $passwordController->validateToken($_GET['token']);
-    if($tokenResult['success']) {
-        $tokenValid = true;
-        $cedula = $tokenResult['cedula'];
-    } else {
-        $result = $tokenResult;
+// Determinar paso actual
+if(isset($_POST['cedula']) && isset($_POST['code'])) {
+    $step = 2;
+    $cedula = $_POST['cedula'];
+    $code = $_POST['code'];
+    
+    // Verificar código
+    $codeResult = $passwordController->verifyCode($cedula, $code);
+    if(!$codeResult['success']) {
+        $step = 1;
+        $result = $codeResult;
     }
-} else {
-    $result = [
-        'success' => false,
-        'message' => 'Enlace inválido. Solicita un nuevo enlace de recuperación.'
-    ];
 }
 
-// Procesar nueva contraseña
-if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
+// Procesar nueva contraseña (paso 2)
+if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'])) {
     if($_POST['password'] !== $_POST['confirm_password']) {
         $result = [
             'success' => false,
             'message' => 'Las contraseñas no coinciden'
         ];
     } else {
-        $result = $passwordController->resetPassword($_GET['token'], $_POST['password']);
+        $result = $passwordController->resetPassword($_POST['cedula'], $_POST['code'], $_POST['password']);
+        if($result['success']) {
+            $step = 3; // Éxito
+        }
     }
 }
 ?>
@@ -40,16 +41,66 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Contraseña - Valora</title>
+    <title>Recuperar Contraseña - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <style>
+        .code-input {
+            font-size: 24px;
+            letter-spacing: 8px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border: 2px solid #ee6f92;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+        .code-input:focus {
+            outline: none;
+            border-color: #d63384;
+            box-shadow: 0 0 0 3px rgba(238, 111, 146, 0.1);
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: bold;
+            border: 2px solid #dee2e6;
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        .step.active {
+            background: #ee6f92;
+            border-color: #ee6f92;
+            color: white;
+        }
+        .step.completed {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
-        <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
-        <h2>🔑 Nueva Contraseña</h2>
+        <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo">
+        <h2>🔑 Recuperar Contraseña</h2>
+        
+        <div class="step-indicator">
+            <div class="step <?php echo $step >= 1 ? ($step > 1 ? 'completed' : 'active') : ''; ?>">1</div>
+            <div class="step <?php echo $step >= 2 ? ($step > 2 ? 'completed' : 'active') : ''; ?>">2</div>
+        </div>
         
         <?php if($result): ?>
-            <?php if($result['success']): ?>
+            <?php if($result['success'] && $step == 3): ?>
                 <div class="alert alert-success" style="background-color: #efe; border: 1px solid #cfc; color: #3c3; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
                     ✅ <?php echo htmlspecialchars($result['message']); ?>
                 </div>
@@ -64,25 +115,56 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
                 <div class="alert alert-error" style="background-color: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
                     ❌ <?php echo htmlspecialchars($result['message']); ?>
                 </div>
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <button type="button" onclick="window.location.href='password_reset.php'" class="btn-submit">
-                        🔄 Solicitar Nuevo Enlace
-                    </button>
-                </div>
             <?php endif; ?>
-            
-        <?php elseif($tokenValid): ?>
-            
+        <?php endif; ?>
+        
+        <?php if($step == 1): ?>
             <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                Crea una nueva contraseña segura para tu cuenta
+                Ingresa el código de 6 dígitos que recibiste y tu número de cédula
+            </p>
+            
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="cedula">Número de Cédula:</label>
+                    <input type="text" id="cedula" name="cedula" placeholder="Tu número de cédula" required 
+                           value="<?php echo htmlspecialchars($_POST['cedula'] ?? ''); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="code">Código de Verificación:</label>
+                    <input type="text" id="code" name="code" class="code-input" 
+                           placeholder="123456" maxlength="6" required 
+                           pattern="[0-9]{6}" title="Debe ser un código de 6 dígitos">
+                </div>
+                
+                <div style="background-color: #e7f3ff; border: 1px solid #b8daff; border-radius: 8px; padding: 15px; margin: 20px 0; font-size: 14px;">
+                    <strong>💡 ¿No recibiste el código?</strong>
+                    <ul style="margin: 10px 0 0 20px; color: #666;">
+                        <li>Revisa tu carpeta de spam o correo no deseado</li>
+                        <li>Verifica que tu número de celular esté correcto</li>
+                        <li>El código expira en 10 minutos</li>
+                        <li><a href="password_reset.php" style="color: #ee6f92;">Solicitar nuevo código</a></li>
+                    </ul>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    🔍 Verificar Código
+                </button>
+            </form>
+            
+        <?php elseif($step == 2): ?>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                Código verificado ✅ Ahora crea una nueva contraseña segura
             </p>
             
             <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
                 <strong>👤 Usuario:</strong> <?php echo htmlspecialchars($cedula); ?>
             </div>
             
-            <form action="" method="POST" id="resetForm">
+            <form method="POST" action="" id="resetForm">
+                <input type="hidden" name="cedula" value="<?php echo htmlspecialchars($cedula); ?>">
+                <input type="hidden" name="code" value="<?php echo htmlspecialchars($code); ?>">
+                
                 <div class="form-group">
                     <label for="password">Nueva Contraseña:</label>
                     <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" required minlength="6">
@@ -109,15 +191,21 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
                     🔐 Actualizar Contraseña
                 </button>
             </form>
-            
         <?php endif; ?>
         
         <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-            ¿Necesitas ayuda? <a href="mailto:soporte@valora.vip" style="color: #882A57; text-decoration: none; font-weight: 500;">Contacta soporte</a>
+            <div style="margin-bottom: 12px;">
+                <a href="login.php" style="color: #882A57; text-decoration: none; font-weight: 500;">← Volver al inicio de sesión</a>
+            </div>
+            <div>
+                ¿Necesitas ayuda? <a href="mailto:soporte@valora.vip" style="color: #882A57; text-decoration: none; font-weight: 500;">Contacta soporte</a>
+            </div>
         </div>
     </div>
 
     <script>
+        // Solo aplicar scripts si estamos en el paso 2
+        <?php if($step == 2): ?>
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirm_password');
         const strengthMeter = document.getElementById('strengthMeter');
@@ -126,7 +214,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
         
         function checkPasswordStrength(password) {
             let strength = 0;
-            let feedback = [];
             
             if (password.length >= 6) strength += 1;
             if (password.length >= 8) strength += 1;
@@ -193,7 +280,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
         
         confirmPasswordInput.addEventListener('input', updateSubmitButton);
         
-        // Prevenir envío si las contraseñas no son válidas
         document.getElementById('resetForm').addEventListener('submit', function(e) {
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
@@ -210,6 +296,28 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $tokenValid) {
                 return false;
             }
         });
+        <?php endif; ?>
+        
+        // Formatear input de código para que solo acepte números
+        <?php if($step == 1): ?>
+        document.getElementById('code').addEventListener('input', function(e) {
+            // Solo permitir números
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Limitar a 6 dígitos
+            if (this.value.length > 6) {
+                this.value = this.value.slice(0, 6);
+            }
+        });
+        
+        // Auto-enviar cuando se ingresen 6 dígitos
+        document.getElementById('code').addEventListener('input', function(e) {
+            if (this.value.length === 6 && document.getElementById('cedula').value.length > 0) {
+                // Opcional: auto-enviar el formulario
+                // document.querySelector('form').submit();
+            }
+        });
+        <?php endif; ?>
     </script>
 </body>
 </html>

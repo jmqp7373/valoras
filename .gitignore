@@ -18,6 +18,9 @@ desktop.ini
 .vscode/launch.json
 .vscode/extensions.json
 
+# Configuraciones sensibles
+config/twilioSmsConfig.php
+
 # Logs y archivos de depuración
 *.log
 npm-debug.log*

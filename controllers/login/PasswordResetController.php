@@ -2,16 +2,19 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../models/Usuario.php';
 require_once __DIR__ . '/../../services/EmailService.php';
+require_once __DIR__ . '/../TwilioController.php';
 
 class PasswordResetController {
     private $db;
     private $usuario;
     private $emailService;
+    private $twilioController;
     
     public function __construct() {
         $this->db = new Database();
         $this->usuario = new Usuario($this->db->getConnection());
         $this->emailService = new EmailService();
+        $this->twilioController = new TwilioController();
     }
     
     public function findUser($identifier, $method = 'cedula') {
@@ -105,9 +108,9 @@ class PasswordResetController {
         }
     }
     
-    public function sendResetLink($identifier, $method, $identificationMethod = 'cedula') {
+    public function sendResetCode($identifier, $method, $identificationMethod = 'cedula') {
         try {
-            // Obtener datos del usuario nuevamente
+            // Obtener datos del usuario
             $result = $this->findUser($identifier, $identificationMethod);
             if(!$result['success']) {
                 return $result;
@@ -115,90 +118,217 @@ class PasswordResetController {
             
             $user = $result['user_data'];
             
-            // Generar token único y seguro
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', strtotime('+1 hour')); // Expira en 1 hora
+            // Generar código de 6 dígitos
+            $code = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $expires = date('Y-m-d H:i:s', strtotime('+10 minutes')); // Expira en 10 minutos
             
-            // Guardar el token en la base de datos
+            // Guardar el código en la base de datos
             $pdo = $this->db->getConnection();
             
-            // Crear tabla de tokens si no existe
+            // Crear tabla de tokens si no existe (con nueva estructura)
             $this->createPasswordResetTable($pdo);
             
-            // Insertar token
-            $stmt = $pdo->prepare("
-                INSERT INTO password_reset_tokens (cedula, token, method, expires_at, created_at) 
-                VALUES (?, ?, ?, ?, NOW())
-                ON DUPLICATE KEY UPDATE 
-                token = VALUES(token), 
-                method = VALUES(method), 
-                expires_at = VALUES(expires_at), 
-                created_at = NOW()
-            ");
-            $stmt->execute([$user['cedula'], $token, $method, $expires]);
+            // Limpiar códigos expirados del usuario
+            $stmt = $pdo->prepare("DELETE FROM password_reset_tokens WHERE cedula = ? AND expires_at < NOW()");
+            $stmt->execute([$user['cedula']]);
             
-            // Crear enlace de reseteo
-            $resetLink = "http://localhost/valora.vip/views/login/reset_password.php?token=" . $token;
+            // Insertar nuevo código
+            $stmt = $pdo->prepare("
+                INSERT INTO password_reset_tokens (cedula, token, method, expires_at, created_at, used) 
+                VALUES (?, ?, ?, ?, NOW(), 0)
+            ");
+            $stmt->execute([$user['cedula'], $code, $method, $expires]);
             
             // Enviar según el método seleccionado
             if($method === 'email') {
-                // Envío real de email usando EmailService
-                // Construir nombre completo de forma segura
-                $nombres = isset($user['nombres']) && !empty($user['nombres']) ? $user['nombres'] : 'Usuario';
-                $apellidos = isset($user['apellidos']) && !empty($user['apellidos']) ? $user['apellidos'] : '';
-                $nombreCompleto = trim($nombres . ' ' . $apellidos);
+                $emailResult = $this->sendEmailCode($user['email'], $code, $user['nombres'] ?? 'Usuario');
                 
-                $emailResult = $this->emailService->sendPasswordResetEmail(
-                    $user['email'],
-                    $nombreCompleto,
-                    $resetLink,
-                    $user['cedula']
-                );
-                
-                if($emailResult['success']) {
+                if($emailResult) {
                     return [
                         'success' => true,
-                        'message' => 'Se ha enviado un enlace de recuperación a tu correo electrónico.'
+                        'message' => 'Se ha enviado un código de verificación a tu correo electrónico. El código expira en 10 minutos.'
                     ];
                 } else {
                     return [
                         'success' => false,
-                        'message' => 'Error al enviar el email: ' . $emailResult['message']
+                        'message' => 'Error al enviar el código por email. Inténtalo de nuevo.'
                     ];
                 }
-            } else {
-                // SMS - mantener simulación por ahora (requiere integración con Twilio/etc.)
-                $this->simulateSMSSend($user['codigo_pais'] . $user['celular'], $resetLink);
-                return [
-                    'success' => true,
-                    'message' => 'Se ha enviado un enlace de recuperación a tu número de celular.'
-                ];
+            } else if($method === 'sms') {
+                // Formatear número de teléfono
+                $phone = $user['codigo_pais'] . $user['celular'];
+                $phone = $this->twilioController->formatColombianNumber($phone);
+                $validPhone = $this->twilioController->validatePhoneNumber($phone);
+                
+                if(!$validPhone) {
+                    return [
+                        'success' => false,
+                        'message' => 'El número de teléfono registrado no es válido.'
+                    ];
+                }
+                
+                $smsResult = $this->twilioController->sendVerificationCode($validPhone, $code);
+                
+                if($smsResult['success']) {
+                    return [
+                        'success' => true,
+                        'message' => 'Se ha enviado un código de verificación a tu número de celular. El código expira en 10 minutos.'
+                    ];
+                } else {
+                    return [
+                        'success' => false,
+                        'message' => 'Error al enviar el código por SMS: ' . $smsResult['error']
+                    ];
+                }
             }
             
         } catch(Exception $e) {
+            error_log("Error en sendResetCode: " . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Error al enviar el enlace. Inténtalo de nuevo.'
+                'message' => 'Error al enviar el código. Inténtalo de nuevo.'
             ];
         }
     }
     
-    public function validateToken($token) {
+    private function sendEmailCode($email, $code, $userName = 'Usuario') {
+        try {
+            $subject = "🔒 Código de Recuperación - Valora.vip";
+            $message = "
+            <html>
+            <head>
+                <title>Código de Recuperación</title>
+                <style>
+                    body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { text-align: center; margin-bottom: 30px; }
+                    .logo { width: 120px; height: auto; }
+                    .code-box { 
+                        background: #f8f9fa; 
+                        border: 2px solid #ee6f92; 
+                        border-radius: 12px; 
+                        text-align: center; 
+                        padding: 20px; 
+                        margin: 20px 0; 
+                    }
+                    .code { 
+                        font-size: 32px; 
+                        font-weight: bold; 
+                        color: #ee6f92; 
+                        letter-spacing: 4px;
+                        font-family: 'Courier New', monospace;
+                    }
+                    .warning { color: #666; font-size: 14px; margin-top: 20px; }
+                    .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <img src='https://valora.vip/assets/images/logos/logo_valora.png' alt='Valora.vip' class='logo'>
+                        <h2 style='color: #ee6f92; margin: 15px 0 5px 0;'>Recuperación de Contraseña</h2>
+                        <p style='color: #666; margin: 5px 0;'>Hola, $userName</p>
+                    </div>
+                    
+                    <p>Has solicitado recuperar tu contraseña. Tu código de verificación es:</p>
+                    
+                    <div class='code-box'>
+                        <div class='code'>$code</div>
+                        <p style='margin: 10px 0 0 0; color: #666;'>Ingresa este código en la página de recuperación</p>
+                    </div>
+                    
+                    <div class='warning'>
+                        <p><strong>⏰ Este código expira en 10 minutos.</strong></p>
+                        <p>🔒 Si no solicitaste este código, ignora este mensaje.</p>
+                        <p>💡 Por tu seguridad, nunca compartas este código con nadie.</p>
+                    </div>
+                    
+                    <div class='footer'>
+                        <p>Este es un mensaje automático de Valora.vip</p>
+                        <p>© " . date('Y') . " Valora.vip - Todos los derechos reservados</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type:text/html;charset=UTF-8\r\n";
+            $headers .= "From: Valora.vip <noreply@valora.vip>\r\n";
+            $headers .= "Reply-To: soporte@valora.vip\r\n";
+            
+            return mail($email, $subject, $message, $headers);
+            
+        } catch(Exception $e) {
+            error_log("Error enviando email con código: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function verifyCode($cedula, $code) {
+        try {
+            $pdo = $this->db->getConnection();
+            
+            $stmt = $pdo->prepare("
+                SELECT * FROM password_reset_tokens 
+                WHERE cedula = ? AND token = ? AND used = 0 AND expires_at > NOW() 
+                ORDER BY created_at DESC LIMIT 1
+            ");
+            $stmt->execute([$cedula, $code]);
+            $record = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if($record) {
+                return [
+                    'success' => true,
+                    'message' => 'Código verificado correctamente'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Código inválido o expirado'
+                ];
+            }
+            
+        } catch(Exception $e) {
+            error_log("Error verificando código: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error al verificar el código'
+            ];
+        }
+    }
+    
+    public function markCodeUsed($cedula, $code) {
+        try {
+            $pdo = $this->db->getConnection();
+            $stmt = $pdo->prepare("
+                UPDATE password_reset_tokens 
+                SET used = 1, used_at = NOW() 
+                WHERE cedula = ? AND token = ? AND used = 0
+            ");
+            $stmt->execute([$cedula, $code]);
+            return true;
+        } catch(Exception $e) {
+            error_log("Error marcando código como usado: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function validateCode($cedula, $code) {
         try {
             $pdo = $this->db->getConnection();
             $stmt = $pdo->prepare("
                 SELECT cedula, method, expires_at 
                 FROM password_reset_tokens 
-                WHERE token = ? AND expires_at > NOW() AND used_at IS NULL
-                LIMIT 1
+                WHERE cedula = ? AND token = ? AND used = 0 AND expires_at > NOW()
+                ORDER BY created_at DESC LIMIT 1
             ");
-            $stmt->execute([$token]);
+            $stmt->execute([$cedula, $code]);
             $tokenData = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if(!$tokenData) {
                 return [
                     'success' => false,
-                    'message' => 'Token inválido o expirado'
+                    'message' => 'Código inválido o expirado'
                 ];
             }
             
@@ -211,20 +341,18 @@ class PasswordResetController {
         } catch(Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Error al validar el token'
+                'message' => 'Error al validar el código'
             ];
         }
     }
     
-    public function resetPassword($token, $newPassword) {
+    public function resetPassword($cedula, $code, $newPassword) {
         try {
-            // Validar token
-            $tokenResult = $this->validateToken($token);
-            if(!$tokenResult['success']) {
-                return $tokenResult;
+            // Validar código
+            $codeResult = $this->validateCode($cedula, $code);
+            if(!$codeResult['success']) {
+                return $codeResult;
             }
-            
-            $cedula = $tokenResult['cedula'];
             
             // Validar nueva contraseña
             if(strlen($newPassword) < 6) {
@@ -241,9 +369,8 @@ class PasswordResetController {
             $stmt = $pdo->prepare("UPDATE usuarios SET password = ? WHERE cedula = ?");
             $stmt->execute([$hashedPassword, $cedula]);
             
-            // Marcar token como usado
-            $stmt = $pdo->prepare("UPDATE password_reset_tokens SET used_at = NOW() WHERE token = ?");
-            $stmt->execute([$token]);
+            // Marcar código como usado
+            $this->markCodeUsed($cedula, $code);
             
             return [
                 'success' => true,
@@ -363,44 +490,19 @@ class PasswordResetController {
         CREATE TABLE IF NOT EXISTS password_reset_tokens (
             id INT AUTO_INCREMENT PRIMARY KEY,
             cedula VARCHAR(20) NOT NULL,
-            token VARCHAR(64) NOT NULL UNIQUE,
-            method ENUM('email', 'sms') NOT NULL,
+            token VARCHAR(6) NOT NULL,
+            method ENUM('email', 'sms') NOT NULL DEFAULT 'email',
             expires_at DATETIME NOT NULL,
             created_at DATETIME NOT NULL,
+            used TINYINT(1) DEFAULT 0,
             used_at DATETIME NULL,
             INDEX idx_cedula (cedula),
             INDEX idx_token (token),
-            INDEX idx_expires (expires_at)
+            INDEX idx_expires (expires_at),
+            INDEX idx_used (used)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ";
         $pdo->exec($sql);
-    }
-    
-    // Simulaciones para desarrollo - en producción reemplazar con APIs reales
-    private function simulateEmailSend($email, $resetLink) {
-        // Log para desarrollo
-        error_log("EMAIL enviado a: $email");
-        error_log("Enlace: $resetLink");
-        
-        // En producción integrar con:
-        // - SendGrid: https://sendgrid.com/
-        // - Mailgun: https://www.mailgun.com/
-        // - Amazon SES: https://aws.amazon.com/ses/
-        
-        return true;
-    }
-    
-    private function simulateSMSSend($phone, $resetLink) {
-        // Log para desarrollo
-        error_log("SMS enviado a: $phone");
-        error_log("Enlace: $resetLink");
-        
-        // En producción integrar con:
-        // - Twilio: https://www.twilio.com/
-        // - Amazon SNS: https://aws.amazon.com/sns/
-        // - Nexmo: https://www.vonage.com/
-        
-        return true;
     }
     
     private function getMethodName($method) {

@@ -42,7 +42,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             case 'send_reset':
                 $identifier = $_SESSION['reset_identifier'] ?? $_POST['cedula']; // Fallback para compatibilidad
                 $method = $_SESSION['reset_method'] ?? 'cedula';
-                $result = $passwordController->sendResetLink($identifier, $_POST['method'], $method);
+                $result = $passwordController->sendResetCode($identifier, $_POST['method'], $method);
                 if($result['success']) {
                     $step = 'sent';
                 }
@@ -197,7 +197,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-submit">Enviar Link</button>
+                <button type="submit" class="btn-submit">Enviar Código</button>
             </form>
 
             <script>
@@ -476,7 +476,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 
                 <button type="submit" id="sendButton" class="btn-submit">
-                    <span id="buttonText">📤 Enviar Enlace</span>
+                    <span id="buttonText">Enviar Código</span>
                     <span id="buttonLoader" class="loading-spinner" style="display: none;">
                         <span class="spinner"></span>
                         Enviando...

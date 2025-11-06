@@ -726,13 +726,18 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             
             <div id="suggestionsContainer" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                    <p style="color: #666; margin: 0; flex: 1; min-width: 200px;">
+                    <p id="usernameExplanation" style="color: #666; margin: 0; flex: 1; min-width: 200px;">
                         ✨ Nuestra IA ha creado <strong>10 nombres únicos</strong> combinando nombres femeninos cortos + adjetivos atractivos:
                     </p>
                     <button type="button" class="refresh-btn" onclick="refreshUsernames()" id="refreshUsernamesBtn">
                         <span class="icon">🔄</span>
                         <span>Nuevas opciones</span>
                     </button>
+                </div>
+                
+                <!-- Área para mostrar la explicación personalizada del nombre -->
+                <div id="nameAnalysisContainer" style="display: none; background: linear-gradient(135deg, #fff9fc, #fef5f8); border: 2px solid #ee6f92; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+                    <div id="nameAnalysisContent"></div>
                 </div>
                 <div class="username-grid" id="usernameGrid">
                     <!-- Las sugerencias aparecerán aquí -->
@@ -805,6 +810,110 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         // Variables globales
         let selectedUsername = '';
         let selectedCharacteristics = [];
+
+        // Función para analizar y explicar el nombre seleccionado
+        function generateNameExplanation(username, userCharacteristics) {
+            const nameParts = analyzeName(username);
+            const feminineName = nameParts.feminine;
+            const adjective = nameParts.adjective;
+            
+            // Traducciones y significados de nombres femeninos comunes
+            const feminineNames = {
+                'zoe': { spanish: 'Zoé', meaning: 'vida', origin: 'griego' },
+                'eve': { spanish: 'Eva', meaning: 'viviente', origin: 'hebreo' },
+                'mia': { spanish: 'Mía', meaning: 'mía/amada', origin: 'latino' },
+                'sky': { spanish: 'Cielo', meaning: 'cielo', origin: 'inglés' },
+                'lea': { spanish: 'Lea', meaning: 'pradera', origin: 'hebreo' },
+                'ivy': { spanish: 'Hiedra', meaning: 'hiedra', origin: 'inglés' },
+                'ray': { spanish: 'Rayo', meaning: 'rayo de luz', origin: 'inglés' },
+                'joy': { spanish: 'Alegría', meaning: 'gozo', origin: 'inglés' },
+                'lux': { spanish: 'Luz', meaning: 'luz', origin: 'latino' },
+                'gem': { spanish: 'Gema', meaning: 'piedra preciosa', origin: 'latino' }
+            };
+
+            // Traducciones de adjetivos comunes
+            const adjectives = {
+                'fire': { spanish: 'ardiente', meaning: 'llena de pasión y energía' },
+                'star': { spanish: 'estrella', meaning: 'brillante y destacada' },
+                'moon': { spanish: 'lunar', meaning: 'misteriosa y seductora' },
+                'wild': { spanish: 'salvaje', meaning: 'libre y aventurera' },
+                'sweet': { spanish: 'dulce', meaning: 'tierna y encantadora' },
+                'bold': { spanish: 'audaz', meaning: 'valiente y decidida' },
+                'pure': { spanish: 'pura', meaning: 'natural y genuina' },
+                'storm': { spanish: 'tormenta', meaning: 'intensa y poderosa' },
+                'rose': { spanish: 'rosa', meaning: 'delicada y hermosa' },
+                'sage': { spanish: 'sabia', meaning: 'inteligente y reflexiva' }
+            };
+
+            const feminineInfo = feminineNames[feminineName.toLowerCase()] || 
+                { spanish: feminineName, meaning: 'nombre único', origin: 'moderno' };
+            const adjectiveInfo = adjectives[adjective.toLowerCase()] || 
+                { spanish: adjective, meaning: 'característica especial' };
+
+            // Relacionar con características del usuario
+            const relationExplanation = explainNameRelation(feminineName, adjective, userCharacteristics);
+
+            return {
+                feminine: feminineInfo,
+                adjective: adjectiveInfo,
+                relation: relationExplanation,
+                fullName: username
+            };
+        }
+
+        // Función para dividir el nombre en partes
+        function analyzeName(username) {
+            // Lógica simple para dividir - puede mejorarse
+            const commonFeminineNames = ['zoe', 'eve', 'mia', 'sky', 'lea', 'ivy', 'ray', 'joy', 'lux', 'gem'];
+            
+            let feminineName = '';
+            let adjective = '';
+            
+            for (const name of commonFeminineNames) {
+                if (username.toLowerCase().startsWith(name)) {
+                    feminineName = name;
+                    adjective = username.slice(name.length);
+                    break;
+                }
+            }
+            
+            // Fallback si no encuentra coincidencia
+            if (!feminineName) {
+                const midPoint = Math.ceil(username.length / 2);
+                feminineName = username.slice(0, midPoint);
+                adjective = username.slice(midPoint);
+            }
+            
+            return { feminine: feminineName, adjective: adjective };
+        }
+
+        // Función para explicar la relación con las características del usuario
+        function explainNameRelation(feminineName, adjective, characteristics) {
+            const relations = {
+                'fire': ['atrevida', 'energetica', 'pasional', 'radiante'],
+                'star': ['brillante', 'radiante', 'glamourosa', 'elegante'],
+                'moon': ['misteriosa', 'seductora', 'nocturna', 'magnetica'],
+                'wild': ['aventurera', 'libre', 'natural', 'decidida'],
+                'sweet': ['dulce', 'tierna', 'delicada', 'coqueta'],
+                'bold': ['decidida', 'atrevida', 'valiente', 'dramatica'],
+                'pure': ['natural', 'inocente', 'delicada', 'libre'],
+                'storm': ['intensa', 'dramatica', 'poderosa', 'energetica'],
+                'rose': ['romantica', 'elegante', 'delicada', 'sensual'],
+                'sage': ['intelectual', 'reflexiva', 'sofisticada', 'mistica']
+            };
+
+            const relatedTraits = relations[adjective.toLowerCase()] || [];
+            const matchingTraits = characteristics.filter(trait => 
+                relatedTraits.some(related => trait.includes(related))
+            );
+
+            if (matchingTraits.length > 0) {
+                const femInfo = feminineNames[feminineName.toLowerCase()] || { meaning: 'belleza' };
+                return `Este nombre refleja perfectamente tu personalidad ${matchingTraits.join(', ')}, creando una identidad única que combina ${feminineName} (${femInfo.meaning}) con la esencia ${adjective.toLowerCase()} que seleccionaste.`;
+            } else {
+                return `Este nombre único combina ${feminineName} con ${adjective}, creando una identidad especial que refleja las características que seleccionaste en el paso anterior.`;
+            }
+        }
 
         // Asegurar que el DOM esté completamente cargado
         document.addEventListener('DOMContentLoaded', function() {
@@ -928,6 +1037,60 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         // Validación de edad en tiempo real
         } // Fin de setupFormHandlers
 
+        // Función para mostrar el análisis personalizado del nombre
+        function showNameAnalysis(username) {
+            const explanation = generateNameExplanation(username, selectedCharacteristics);
+            const container = document.getElementById('nameAnalysisContainer');
+            const content = document.getElementById('nameAnalysisContent');
+            
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <h4 style="color: #882A57; margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>✨</span> Análisis de tu nombre: <strong>${explanation.fullName}</strong>
+                    </h4>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div style="background: #f0f8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #4A90E2;">
+                        <strong style="color: #4A90E2;">🌸 Nombre Femenino:</strong><br>
+                        <span style="font-size: 16px; font-weight: 600;">${explanation.feminine.spanish}</span><br>
+                        <small style="color: #666;">Significa: "${explanation.feminine.meaning}" (${explanation.feminine.origin})</small>
+                    </div>
+                    
+                    <div style="background: #fff0f5; padding: 12px; border-radius: 8px; border-left: 4px solid #ee6f92;">
+                        <strong style="color: #ee6f92;">💫 Adjetivo:</strong><br>
+                        <span style="font-size: 16px; font-weight: 600;">${explanation.adjective.spanish}</span><br>
+                        <small style="color: #666;">${explanation.adjective.meaning}</small>
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px; border-radius: 10px; border: 1px solid #dee2e6;">
+                    <strong style="color: #495057; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span>🎯</span> ¿Por qué este nombre es perfecto para ti?
+                    </strong>
+                    <p style="margin: 0; color: #6c757d; font-size: 14px; line-height: 1.5;">
+                        ${explanation.relation}
+                    </p>
+                </div>
+            `;
+            
+            // Actualizar el texto explicativo principal
+            document.getElementById('usernameExplanation').innerHTML = `
+                🎉 <strong>¡Perfecto!</strong> Has seleccionado <strong>${username}</strong>. Aquí está el significado personalizado:
+            `;
+            
+            // Mostrar el contenedor con animación
+            container.style.display = 'block';
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.3s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
         // Código movido a initializeEventListeners()
 
         // Manejar envío del formulario de características
@@ -1003,6 +1166,10 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                             });
                             this.classList.add('selected');
                             selectedUsername = cleanName;
+                            
+                            // Mostrar explicación personalizada del nombre
+                            showNameAnalysis(cleanName);
+                            
                             document.getElementById('checkAvailabilityBtn').style.display = 'block';
                         });
                         
@@ -1042,6 +1209,17 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             
             // Prevenir múltiples clicks
             if (refreshBtn.disabled) return;
+            
+            // Ocultar análisis de nombre anterior
+            const analysisContainer = document.getElementById('nameAnalysisContainer');
+            if (analysisContainer) {
+                analysisContainer.style.display = 'none';
+            }
+            
+            // Restaurar texto explicativo original
+            document.getElementById('usernameExplanation').innerHTML = `
+                ✨ Nuestra IA ha creado <strong>10 nombres únicos</strong> combinando nombres femeninos cortos + adjetivos atractivos:
+            `;
             
             // Animación de inicio
             refreshBtn.disabled = true;

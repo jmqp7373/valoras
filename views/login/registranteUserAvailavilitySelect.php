@@ -777,7 +777,7 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
                 </div>
             </div>
             
-            <?php include_once '../../components/buttons/primaryButton.php'; ?>
+            <?php include_once '../../components/buttons/botonContinuar.php'; ?>
             <?php continueRegistrationButton(); ?>
             
             <button type="button" class="continue-btn" id="backToStep2Btn" style="background: #6c757d; margin-top: 15px;">

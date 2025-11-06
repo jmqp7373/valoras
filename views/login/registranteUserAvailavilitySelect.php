@@ -1637,129 +1637,29 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         // Validación de edad en tiempo real
         } // Fin de setupFormHandlers
 
-        // Función para mostrar el análisis detallado del nombre
+        // Función para mostrar confirmación simple del nombre seleccionado
         function showNameAnalysis(username) {
-            const explanation = generateNameExplanation(username, selectedCharacteristics);
             const container = document.getElementById('nameAnalysisContainer');
             const content = document.getElementById('nameAnalysisContent');
             
-            // Obtener las características del usuario
-            const userCharacteristics = selectedCharacteristics || [];
-            
             content.innerHTML = `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h4 style="color: #882A57; margin: 0 0 15px 0; font-size: 20px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span>✨</span> ¿Por qué <strong>${explanation.fullName}</strong> es perfecto para ti?
+                <div style="text-align: center; padding: 15px;">
+                    <h4 style="color: #882A57; margin: 0; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>✅</span> Has seleccionado: <strong>${username}</strong>
                     </h4>
-                </div>
-                
-                <!-- Características seleccionadas por el usuario -->
-                <div style="background: linear-gradient(135deg, #fff5f8, #f0f8ff); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #d4c5d9;">
-                    <h5 style="color: #882A57; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
-                        <span>👤</span> Tus Características Seleccionadas
-                    </h5>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        ${userCharacteristics.map(trait => `
-                            <span style="background: #882A57; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;">
-                                ${trait}
-                            </span>
-                        `).join('')}
-                    </div>
-                </div>
-                
-                <!-- Análisis del nombre -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; border-left: 4px solid #4A90E2;">
-                        <strong style="color: #4A90E2; display: block; margin-bottom: 8px;">🌸 Nombre Base</strong>
-                        <span style="font-size: 18px; font-weight: 700; color: #2c3e50; display: block;">${explanation.feminine.spanish}</span>
-                        <small style="color: #666; display: block; margin-top: 5px;">
-                            <strong>Significado:</strong> "${explanation.feminine.meaning}"<br>
-                            <strong>Origen:</strong> ${explanation.feminine.origin}
-                        </small>
-                    </div>
-                    
-                    <div style="background: #fff0f5; padding: 15px; border-radius: 10px; border-left: 4px solid #ee6f92;">
-                        <strong style="color: #ee6f92; display: block; margin-bottom: 8px;">💫 Adjetivo Personalizado</strong>
-                        <span style="font-size: 18px; font-weight: 700; color: #2c3e50; display: block;">${explanation.adjective.spanish}</span>
-                        <small style="color: #666; display: block; margin-top: 5px;">
-                            <strong>Representa:</strong> ${explanation.adjective.meaning}
-                        </small>
-                    </div>
-                </div>
-                
-                <!-- Conexión personalizada detallada -->
-                <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; border: 1px solid #dee2e6;">
-                    <h5 style="color: #495057; display: flex; align-items: center; gap: 8px; margin: 0 0 15px 0; font-size: 16px;">
-                        <span>🔗</span> Conexión Personalizada
-                    </h5>
-                    
-                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #28a745;">
-                        <strong style="color: #28a745; display: block; margin-bottom: 8px;">
-                            📊 ${explanation.relation.adjectiveExplanation}
-                        </strong>
-                    </div>
-                    
-                    ${explanation.relation.matchingTraits.length > 0 ? `
-                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <h6 style="color: #28a745; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
-                                <span>✅</span> Características que Coinciden Perfectamente:
-                            </h6>
-                            ${explanation.relation.connections.map(connection => `
-                                <div style="display: flex; align-items: center; gap: 10px; margin: 8px 0; padding: 10px; background: #f8f9fa; border-radius: 6px;">
-                                    <span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 15px; font-size: 12px; font-weight: 600;">
-                                        ${connection.trait}
-                                    </span>
-                                    <span style="color: #6c757d;">→</span>
-                                    <span style="color: #495057; font-size: 14px; flex: 1;">
-                                        ${connection.connection}
-                                    </span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : `
-                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <p style="margin: 0; color: #6c757d; font-style: italic;">
-                                ⭐ ${explanation.relation.fullExplanation}
-                            </p>
-                        </div>
-                    `}
-                    
-                    <!-- Resumen final -->
-                    <div style="background: linear-gradient(135deg, #882A57, #a64b73); color: white; padding: 15px; border-radius: 10px; text-align: center;">
-                        <strong style="display: block; margin-bottom: 8px; font-size: 16px;">💖 Resumen Personal</strong>
-                        <p style="margin: 0; font-size: 14px; line-height: 1.6;">
-                            <strong>${explanation.fullName}</strong> combina la esencia de "${explanation.feminine.meaning}" con la fuerza de ser "${explanation.adjective.spanish}", 
-                            creando una identidad digital que refleja auténticamente quien eres y las cualidades que más te representan.
-                        </p>
-                    </div>
+                    <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">
+                        Nombre único generado por IA basado en tus características personales
+                    </p>
                 </div>
             `;
             
             // Actualizar el texto explicativo principal
             document.getElementById('usernameExplanation').innerHTML = `
-                🎉 <strong>¡Perfecto!</strong> Has seleccionado <strong>${username}</strong>. Descubre por qué es ideal para ti:
+                🎉 <strong>¡Perfecto!</strong> Has seleccionado <strong>${username}</strong> como tu nombre de usuario.
             `;
             
-            // Guardar la posición de scroll actual ANTES de mostrar el contenedor
-            const currentScrollY = window.scrollY;
-            
-            // Mostrar el contenedor con animación
+            // Mostrar el contenedor de forma simple
             container.style.display = 'block';
-            container.style.opacity = '0';
-            container.style.transform = 'translateY(-10px)';
-            
-            setTimeout(() => {
-                container.style.transition = 'all 0.3s ease';
-                container.style.opacity = '1';
-                container.style.transform = 'translateY(0)';
-                
-                // MANTENER la posición de scroll exactamente donde estaba
-                // Esto previene que la página "salte" o se oculte
-                setTimeout(() => {
-                    window.scrollTo(0, currentScrollY);
-                }, 50);
-                
-            }, 10);
         }
 
         // Código movido a initializeEventListeners()

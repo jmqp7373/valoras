@@ -1,16 +1,31 @@
 <?php
+// Habilitar reporte de errores para diagnóstico
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 header('Content-Type: text/html; charset=UTF-8');
-require_once '../../controllers/login/PasswordResetController.php';
+
+try {
+    require_once '../../config/database.php';
+    require_once '../../controllers/login/PasswordResetController.php';
+} catch (Exception $e) {
+    die('Error al cargar archivos necesarios: ' . $e->getMessage());
+}
 
 $passwordController = new PasswordResetController();
 $result = null;
 $step = 'identify'; // 'identify', 'select_method', 'sent'
 
 // Verificar si ya está logueado
-startSessionSafely();
-if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: ../index.php');
-    exit();
+try {
+    startSessionSafely();
+    if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+        header('Location: ../index.php');
+        exit();
+    }
+} catch (Exception $e) {
+    // Si hay error con la sesión, continuar sin verificar login
+    error_log('Error en startSessionSafely: ' . $e->getMessage());
 }
 
 // Procesar formularios

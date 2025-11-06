@@ -10,7 +10,6 @@ class Usuario {
     public $numero_de_cedula;
     public $usuario;
     public $disponibilidad;
-    public $id_estado;
     public $id_referente;
     public $nombres;
     public $apellidos;
@@ -70,9 +69,9 @@ class Usuario {
     // Método para crear un nuevo usuario
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                 (cedula, nombres, apellidos, password, codigo_pais, celular, email, disponibilidad, id_estado) 
+                 (cedula, nombres, apellidos, password, codigo_pais, celular, email, disponibilidad) 
                  VALUES 
-                 (:cedula, :nombres, :apellidos, :password, :codigo_pais, :celular, :email, :disponibilidad, :id_estado)";
+                 (:cedula, :nombres, :apellidos, :password, :codigo_pais, :celular, :email, :disponibilidad)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -85,7 +84,6 @@ class Usuario {
         $this->celular = htmlspecialchars(strip_tags($this->celular));
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->disponibilidad = 0; // Por defecto no disponible
-        $this->id_estado = 1; // Por defecto activo
 
         // Bind valores
         $stmt->bindParam(':cedula', $this->cedula);
@@ -96,7 +94,6 @@ class Usuario {
         $stmt->bindParam(':celular', $this->celular);
         $stmt->bindParam(':email', $this->email);
         $stmt->bindParam(':disponibilidad', $this->disponibilidad);
-        $stmt->bindParam(':id_estado', $this->id_estado);
 
         if($stmt->execute()) {
             return true;

@@ -433,11 +433,11 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         /* Estilos mejorados para la confirmación de selección */
         .selected-username-display {
             text-align: center;
-            padding: 20px 15px;
+            padding: 8px 6px; /* Reducido de 12px 10px */
             background: transparent; /* Sin fondo adicional ya que el contenedor padre es verde */
-            border-radius: 16px;
+            border-radius: 10px; /* Reducido de 12px */
             border: none; /* Sin borde adicional */
-            margin: 15px 0;
+            margin: 4px 0; /* Reducido de 8px */
         }
 
         .selected-badge {
@@ -445,24 +445,24 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 4px; /* Reducido de 6px */
+            margin-bottom: 4px; /* Reducido de 8px */
         }
 
         .check-icon {
-            font-size: 20px;
+            font-size: 16px; /* Reducido de 18px */
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
         .selected-text {
             color: #495057;
-            font-size: 16px;
+            font-size: 13px; /* Reducido de 14px */
             font-weight: 500;
         }
 
         .selected-username {
             color: #28a745;
-            font-size: 20px;
+            font-size: 16px; /* Reducido de 18px */
             font-weight: 700;
             text-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
         }
@@ -470,8 +470,8 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         .username-description {
             color: #6c757d;
             margin: 0;
-            font-size: 14px;
-            line-height: 1.4;
+            font-size: 12px; /* Reducido de 13px */
+            line-height: 1.2; /* Reducido de 1.3 */
             font-style: italic;
         }
         
@@ -905,27 +905,27 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
 
             /* Estilos móviles para la confirmación de selección */
             .selected-username-display {
-                padding: 16px 12px;
-                margin: 12px 0;
+                padding: 6px 4px; /* Reducido de 10px 8px */
+                margin: 3px 0; /* Reducido de 6px */
                 background: transparent; /* Sin fondo adicional en móvil */
                 border: none; /* Sin borde adicional en móvil */
             }
 
             .selected-badge {
                 flex-direction: column;
-                gap: 6px;
+                gap: 2px; /* Reducido de 4px */
             }
 
             .selected-text {
-                font-size: 14px;
+                font-size: 12px; /* Reducido de 13px */
             }
 
             .selected-username {
-                font-size: 18px;
+                font-size: 14px; /* Reducido de 16px */
             }
 
             .username-description {
-                font-size: 13px;
+                font-size: 11px; /* Reducido de 12px */
             }
             
             .refresh-btn {
@@ -1055,27 +1055,27 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
 
             /* Estilos para móviles muy pequeños - Confirmación de selección */
             .selected-username-display {
-                padding: 12px 8px;
-                margin: 10px 0;
-                border-radius: 12px;
+                padding: 4px 3px; /* Reducido de 8px 6px */
+                margin: 2px 0; /* Reducido de 5px */
+                border-radius: 8px; /* Reducido de 10px */
                 background: transparent; /* Sin fondo adicional en móviles pequeños */
                 border: none; /* Sin borde adicional en móviles pequeños */
             }
 
             .selected-badge {
-                gap: 4px;
+                gap: 2px; /* Mantenido igual */
             }
 
             .selected-text {
-                font-size: 13px;
+                font-size: 11px; /* Reducido de 12px */
             }
 
             .selected-username {
-                font-size: 16px;
+                font-size: 13px; /* Reducido de 14px */
             }
 
             .username-description {
-                font-size: 12px;
+                font-size: 10px; /* Reducido de 11px */
             }
         }
 
@@ -1210,7 +1210,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 </div>
                 
                 <!-- Área para mostrar la explicación personalizada del nombre -->
-                <div id="nameAnalysisContainer" style="display: none; background: linear-gradient(135deg, #fff9fc, #fef5f8); border: 2px solid #ee6f92; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+                <div id="nameAnalysisContainer" style="display: none; background: linear-gradient(135deg, #fff9fc, #fef5f8); border: 2px solid #ee6f92; border-radius: 10px; padding: 8px; margin-bottom: 12px;">
                     <div id="nameAnalysisContent"></div>
                 </div>
                 <div class="username-grid" id="usernameGrid">
@@ -1825,12 +1825,12 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             const container = document.getElementById('nameAnalysisContainer');
             const content = document.getElementById('nameAnalysisContent');
             
-            // Cambiar completamente el estilo del contenedor a verde
+            // Cambiar completamente el estilo del contenedor a verde con menos padding
             container.style.background = 'linear-gradient(135deg, #e8f5e8, #f1f8f1)';
             container.style.border = '2px solid #28a745';
-            container.style.borderRadius = '15px';
-            container.style.padding = '20px';
-            container.style.marginBottom = '20px';
+            container.style.borderRadius = '10px'; /* Reducido de 12px */
+            container.style.padding = '8px'; /* Reducido de 12px */
+            container.style.marginBottom = '12px'; /* Reducido de 15px */
             
             content.innerHTML = `
                 <div class="selected-username-display">
@@ -1840,7 +1840,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                         <span class="selected-username">${username}</span>
                     </div>
                     <p class="username-description">
-                        Nombre único generado por IA basado en tus características personales
+                        Nombre único generado por IA
                     </p>
                 </div>
             `;
@@ -1981,12 +1981,12 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             const analysisContainer = document.getElementById('nameAnalysisContainer');
             if (analysisContainer) {
                 analysisContainer.style.display = 'none';
-                // Restaurar estilo original (rojo/rosa)
+                // Restaurar estilo original (rojo/rosa) con dimensiones compactas
                 analysisContainer.style.background = 'linear-gradient(135deg, #fff9fc, #fef5f8)';
                 analysisContainer.style.border = '2px solid #ee6f92';
-                analysisContainer.style.borderRadius = '15px';
-                analysisContainer.style.padding = '20px';
-                analysisContainer.style.marginBottom = '20px';
+                analysisContainer.style.borderRadius = '10px'; /* Reducido de 12px */
+                analysisContainer.style.padding = '8px'; /* Reducido de 12px */
+                analysisContainer.style.marginBottom = '12px'; /* Reducido de 15px */
             }
             
             // Restaurar texto explicativo original

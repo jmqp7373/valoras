@@ -111,6 +111,10 @@ class AuthController {
                 $smsResult = $this->sendVerificationCodeSMS($celular, $codigo_temporal, $cedula);
                 
                 if($smsResult['success']) {
+                    // Guardar la cédula en la sesión para pre-llenar el login
+                    $_SESSION['last_registered_cedula'] = $cedula;
+                    $_SESSION['sms_sent_at'] = time(); // Timestamp para el contador regresivo
+                    
                     return [
                         'success' => true,
                         'message' => 'Usuario registrado exitosamente. Se ha enviado un código de verificación de 6 dígitos a tu número de celular. Usa este código para iniciar sesión.',
@@ -235,6 +239,89 @@ class AuthController {
         }
     }
 
+    // Método para reenviar código de verificación
+    public function resendVerificationCode() {
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $cedula = trim($_POST['cedula']);
+            
+            if(empty($cedula)) {
+                return [
+                    'success' => false,
+                    'message' => 'Número de cédula requerido'
+                ];
+            }
+            
+            // Verificar que no haya pasado menos de 60 segundos del último envío
+            if(isset($_SESSION['sms_sent_at'])) {
+                $time_diff = time() - $_SESSION['sms_sent_at'];
+                if($time_diff < 60) {
+                    $remaining = 60 - $time_diff;
+                    return [
+                        'success' => false,
+                        'message' => "Debe esperar {$remaining} segundos antes de reenviar el código",
+                        'remaining_time' => $remaining
+                    ];
+                }
+            }
+            
+            try {
+                // Buscar el usuario por cédula
+                $stmt = $this->db->prepare("SELECT cedula, celular FROM usuarios WHERE cedula = :cedula LIMIT 1");
+                $stmt->bindParam(':cedula', $cedula);
+                $stmt->execute();
+                
+                if($stmt->rowCount() == 0) {
+                    return [
+                        'success' => false,
+                        'message' => 'Usuario no encontrado'
+                    ];
+                }
+                
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Generar nuevo código de 6 dígitos
+                $nuevo_codigo = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+                
+                // Actualizar la contraseña del usuario
+                $update_stmt = $this->db->prepare("UPDATE usuarios SET password = :password WHERE cedula = :cedula");
+                $hashed_password = password_hash($nuevo_codigo, PASSWORD_DEFAULT);
+                $update_stmt->bindParam(':password', $hashed_password);
+                $update_stmt->bindParam(':cedula', $cedula);
+                $update_stmt->execute();
+                
+                // Enviar nuevo código por SMS
+                $smsResult = $this->sendVerificationCodeSMS($user['celular'], $nuevo_codigo, $cedula);
+                
+                if($smsResult['success']) {
+                    // Actualizar timestamp del último envío
+                    $_SESSION['sms_sent_at'] = time();
+                    
+                    return [
+                        'success' => true,
+                        'message' => 'Nuevo código de verificación enviado a tu celular'
+                    ];
+                } else {
+                    return [
+                        'success' => false,
+                        'message' => 'Error al enviar el código: ' . $smsResult['error']
+                    ];
+                }
+                
+            } catch(Exception $e) {
+                error_log("Error en reenvío de código: " . $e->getMessage());
+                return [
+                    'success' => false,
+                    'message' => 'Error al procesar la solicitud'
+                ];
+            }
+        }
+        
+        return [
+            'success' => false,
+            'message' => 'Método no permitido'
+        ];
+    }
+
     // Método para cerrar sesión
     public function logout() {
         session_start();
@@ -251,6 +338,11 @@ if(isset($_POST['action'])) {
     switch($_POST['action']) {
         case 'check_username':
             echo $auth->checkUsername();
+            exit();
+        case 'resend_code':
+            $result = $auth->resendVerificationCode();
+            header('Content-Type: application/json');
+            echo json_encode($result);
             exit();
         default:
             echo 'invalid_action';

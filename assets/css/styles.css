@@ -93,6 +93,70 @@ body {
 .btn-submit:active {
     transform: translateY(0px);
 }
+
+/* Estilos para el botón de reenvío de código */
+.btn-resend {
+    background-color: #882A57;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin: 0 auto;
+    display: inline-block;
+}
+
+.btn-resend:hover:not(:disabled) {
+    background-color: #6d1f43;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(136, 42, 87, 0.3);
+}
+
+.btn-resend:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #cccccc;
+}
+
+.resend-section {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.countdown-text {
+    color: #666;
+    font-size: 13px;
+    margin-left: 10px;
+    font-weight: 500;
+}
+
+.resend-message {
+    margin-top: 10px;
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.resend-message .success {
+    color: #28a745;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.resend-message .error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
 .logo {
     display: block;
     margin: 0 auto 20px auto;

@@ -71,18 +71,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="form-group">
                 <label for="username">Nombre de Usuario:</label>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <input type="text" id="username" placeholder="Elige tu nombre de usuario único" name="username" style="flex: 1;" required>
+                    <input type="text" id="username" placeholder="Elige tu nombre de usuario único" name="username" style="flex: 1; background-color: #f5f5f5;" readonly required>
                     <a href="registranteUserAvailavilitySelect.php" 
                        style="padding: 12px 16px; background: linear-gradient(135deg, #ee6f92, #882A57); color: white; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;"
                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(238, 111, 146, 0.3)'"
                        onmouseout="this.style.transform='none'; this.style.boxShadow='none'"
-                       title="Ir al asistente IA para crear tu nombre perfecto">
+                       title="Ir al asistente IA para cambiar tu nombre de usuario">
                         <span style="font-size: 16px;">🤖</span>
-                        <span>Crear con IA</span>
+                        <span>Cambiar Nombre con IA</span>
                     </a>
                 </div>
                 <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
-                    💡 Usa "Crear con IA" para comenzar el proceso guiado de 3 pasos y encontrar tu nombre perfecto
+                    💡 Usa "Cambiar Nombre con IA" para comenzar el proceso guiado de 3 pasos y encontrar tu nombre perfecto
                 </small>
             </div>
             

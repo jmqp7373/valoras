@@ -120,3 +120,42 @@ select:focus {
     background-color: white;
     transform: translateY(-1px);
 }
+
+/* Botón primario reutilizable - Compatible con continue-btn existente */
+.btn-primary {
+    background: linear-gradient(135deg, #ee6f92 0%, #8b5a83 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin: 30px auto 0;
+    min-width: 200px;
+    text-decoration: none;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #d45087 0%, #6b1e42 100%);
+}
+
+.btn-primary:active {
+    transform: translateY(0px);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary i {
+    margin-right: 8px;
+}

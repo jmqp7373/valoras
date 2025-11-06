@@ -777,9 +777,8 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
                 </div>
             </div>
             
-            <button type="button" class="continue-btn" id="continueBtn" style="display: none;">
-                ✅ Continuar con el Registro
-            </button>
+            <?php include_once '../../components/buttons/primaryButton.php'; ?>
+            <?php continueRegistrationButton(); ?>
             
             <button type="button" class="continue-btn" id="backToStep2Btn" style="background: #6c757d; margin-top: 15px;">
                 ← Volver a Sugerencias
@@ -1193,6 +1192,8 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
                         continueBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
                         continueBtn.innerHTML = '✅ Continuar con el Registro';
                         continueBtn.disabled = false;
+                        continueBtn.style.cursor = 'pointer';
+                        continueBtn.style.opacity = '1';
                     } else {
                         // Al menos una plataforma no disponible
                         continueBtn.style.display = 'block';

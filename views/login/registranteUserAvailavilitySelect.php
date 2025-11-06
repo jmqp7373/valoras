@@ -840,6 +840,26 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             .info-box div {
                 font-size: 12px !important; /* Texto más pequeño */
             }
+            
+            /* Hacer que los rectángulos de disponibilidad se muestren en vertical en móvil */
+            .availability-grid {
+                grid-template-columns: 1fr; /* Una sola columna en móvil */
+                gap: 12px; /* Reducir espacio entre elementos */
+            }
+            
+            .platform-check {
+                padding: 15px; /* Menos padding en móvil */
+                margin-bottom: 0; /* Sin margen adicional */
+            }
+            
+            .platform-name {
+                font-size: 14px; /* Texto más pequeño */
+                margin-bottom: 6px;
+            }
+            
+            .platform-status {
+                font-size: 13px; /* Estado más pequeño */
+            }
         }
 
         /* Estilos adicionales para móviles muy pequeños */
@@ -893,6 +913,24 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 padding: 12px 20px;
                 min-width: 120px;
                 font-size: 13px;
+            }
+            
+            /* Optimización adicional para availabilidad en pantallas muy pequeñas */
+            .availability-grid {
+                gap: 10px; /* Menos espacio en pantallas muy pequeñas */
+            }
+            
+            .platform-check {
+                padding: 12px; /* Padding aún más compacto */
+            }
+            
+            .platform-name {
+                font-size: 13px;
+                margin-bottom: 5px;
+            }
+            
+            .platform-status {
+                font-size: 12px;
             }
         }
 

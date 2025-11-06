@@ -149,7 +149,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         .wizard-container {
             max-width: 900px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 40px 20px 20px 20px; /* Más padding superior para evitar ocultarse bajo la barra del navegador */
         }
         
         .wizard-header {
@@ -682,6 +682,12 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             animation: fadeInUp 0.5s ease-out;
         }
 
+        /* Estilo específico para el contenedor de análisis */
+        #nameAnalysisContainer {
+            scroll-margin-top: 120px; /* Espacio para evitar ocultarse bajo barras del navegador */
+            margin-top: 20px !important;
+        }
+
         /* Responsive para análisis detallado */
         @media (max-width: 768px) {
             .trait-connection {
@@ -697,6 +703,10 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             .characteristic-tag {
                 font-size: 11px;
                 padding: 3px 10px;
+            }
+            
+            #nameAnalysisContainer {
+                scroll-margin-top: 100px;
             }
         }
 
@@ -1533,10 +1543,30 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             container.style.opacity = '0';
             container.style.transform = 'translateY(-10px)';
             
+            // Prevenir scroll automático no deseado
+            const currentScrollY = window.scrollY;
+            
             setTimeout(() => {
                 container.style.transition = 'all 0.3s ease';
                 container.style.opacity = '1';
                 container.style.transform = 'translateY(0)';
+                
+                // Mantener la posición de scroll actual o hacer scroll suave al contenido
+                setTimeout(() => {
+                    // Verificar si el análisis está visible en pantalla
+                    const containerRect = container.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    
+                    // Solo hacer scroll si el análisis no está completamente visible
+                    if (containerRect.bottom > viewportHeight || containerRect.top < 100) {
+                        // Scroll suave al análisis, dejando espacio en la parte superior
+                        const targetPosition = container.offsetTop - 120; // 120px de margen superior
+                        window.scrollTo({
+                            top: Math.max(0, targetPosition),
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 350); // Esperar a que termine la animación
             }, 10);
         }
 

@@ -177,6 +177,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             display: flex;
             justify-content: center;
             margin-bottom: 40px;
+            flex-wrap: wrap;
         }
         
         .step {
@@ -239,7 +240,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         
         .characteristics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 12px;
             margin-top: 15px;
         }
@@ -742,11 +743,172 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             }
             
             body {
-                padding-top: 35px; /* Padding reducido 30% más en móviles (de 50px a 35px) */
+                padding: 25px 10px 40px 10px; /* Padding optimizado para móviles */
             }
             
             .wizard-container {
-                padding: 10px 15px 40px 15px; /* Padding superior reducido 30% más en móviles (de 15px a 10px) */
+                padding: 5px 10px 30px 10px; /* Padding más compacto para móviles */
+                margin: 0 5px;
+            }
+            
+            .wizard-header h1 {
+                font-size: 22px; /* Título más pequeño en móviles */
+                margin-bottom: 8px;
+            }
+            
+            .wizard-header p {
+                font-size: 14px; /* Subtítulo más pequeño */
+            }
+            
+            .wizard-steps {
+                margin-bottom: 20px; /* Menos espacio en móviles */
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .step {
+                font-size: 12px; /* Texto más pequeño en los pasos */
+            }
+            
+            .step-number {
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+                margin-right: 6px;
+            }
+            
+            .step:not(:last-child)::after {
+                margin: 0 10px; /* Menos espacio entre pasos */
+            }
+            
+            .block {
+                padding: 15px; /* Menos padding en los bloques */
+                margin-bottom: 15px;
+                border-radius: 15px;
+            }
+            
+            .block-header {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+            
+            .block-title {
+                font-size: 16px; /* Título más pequeño */
+            }
+            
+            .characteristics-grid {
+                grid-template-columns: repeat(2, 1fr); /* Solo 2 columnas en móvil */
+                gap: 8px;
+            }
+            
+            .characteristic-item {
+                padding: 8px 10px; /* Menos padding */
+                font-size: 12px;
+            }
+            
+            .input-group input {
+                padding: 12px 14px; /* Input más compacto */
+                font-size: 14px;
+            }
+            
+            .continue-btn {
+                padding: 12px 30px; /* Botón más compacto */
+                font-size: 14px;
+                margin: 20px auto 0;
+            }
+            
+            .refresh-btn {
+                padding: 10px 20px; /* Botón refresh más pequeño */
+                font-size: 12px;
+                min-width: 140px;
+            }
+            
+            .session-info {
+                font-size: 10px; /* Texto más pequeño */
+                padding: 6px 10px;
+            }
+            
+            .info-box {
+                padding: 10px !important; /* Caja de info más compacta */
+                margin: 10px 0 !important;
+            }
+            
+            .info-box h3 {
+                font-size: 14px !important; /* Título más pequeño */
+            }
+            
+            .info-box div {
+                font-size: 12px !important; /* Texto más pequeño */
+            }
+        }
+
+        /* Estilos adicionales para móviles muy pequeños */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px 5px 30px 5px; /* Aún más compacto */
+            }
+            
+            .wizard-container {
+                padding: 3px 8px 25px 8px;
+                margin: 0 3px;
+            }
+            
+            .wizard-header h1 {
+                font-size: 20px;
+                margin-bottom: 5px;
+            }
+            
+            .wizard-header p {
+                font-size: 13px;
+            }
+            
+            .wizard-steps {
+                flex-direction: column; /* Pasos en vertical para pantallas muy pequeñas */
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            
+            .step:not(:last-child)::after {
+                content: '↓'; /* Flecha hacia abajo */
+                margin: 5px 0;
+                transform: rotate(0deg);
+            }
+            
+            .block {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            
+            .characteristics-grid {
+                grid-template-columns: 1fr; /* Una sola columna en pantallas muy pequeñas */
+                gap: 6px;
+            }
+            
+            .characteristic-item {
+                padding: 10px 15px; /* Más padding vertical para facilitar el toque */
+                font-size: 13px;
+            }
+            
+            .refresh-btn {
+                padding: 12px 20px;
+                min-width: 120px;
+                font-size: 13px;
+            }
+        }
+
+        /* Estilos para tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .wizard-container {
+                padding: 20px 25px 50px 25px;
+            }
+            
+            .characteristics-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .block {
+                padding: 25px;
             }
         }
 

@@ -387,28 +387,46 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         }
         
         .refresh-btn {
-            background: linear-gradient(135deg, #FFB347, #4A90E2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
+            padding: 14px 28px;
+            border-radius: 15px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             margin: 15px auto;
             min-width: 180px;
             justify-content: center;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .refresh-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
         }
         
         .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 179, 71, 0.4);
-            background: linear-gradient(135deg, #4A90E2, #FFB347);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(118, 75, 162, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 50%, #f093fb 100%);
+        }
+        
+        .refresh-btn:hover::before {
+            left: 100%;
         }
         
         .refresh-btn:hover .icon {
@@ -422,22 +440,32 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         }
         
         .refresh-btn:active {
-            transform: translateY(0px) scale(0.98);
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.3);
+        }
+        
+        .refresh-btn.loading {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            animation: pulseGlow 2s ease-in-out infinite;
         }
         
         .refresh-btn.loading .icon {
-            animation: elegantRotate 1s ease-in-out infinite;
+            animation: elegantRotate 1.2s ease-in-out infinite;
         }
         
         @keyframes elegantRotate {
             0% { transform: rotate(0deg); }
-            50% { transform: rotate(180deg); }
+            50% { transform: rotate(180deg) scale(1.1); }
             100% { transform: rotate(360deg); }
         }
         
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 6px 20px rgba(255, 179, 71, 0.3); }
-            50% { box-shadow: 0 8px 30px rgba(74, 144, 226, 0.5); }
+            0%, 100% { 
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            50% { 
+                box-shadow: 0 8px 25px rgba(118, 75, 162, 0.5), 0 0 20px rgba(240, 147, 251, 0.3);
+            }
         }
         
         .characteristics-header {

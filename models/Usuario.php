@@ -86,9 +86,9 @@ class Usuario {
         }
 
         $query = "INSERT INTO " . $this->table_name . " 
-                 (cedula, nombres, apellidos, password, codigo_pais, celular, email, disponibilidad) 
+                 (cedula, nombres, apellidos, usuario, password, codigo_pais, celular, email, disponibilidad) 
                  VALUES 
-                 (:cedula, :nombres, :apellidos, :password, :codigo_pais, :celular, :email, :disponibilidad)";
+                 (:cedula, :nombres, :apellidos, :usuario, :password, :codigo_pais, :celular, :email, :disponibilidad)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -96,6 +96,7 @@ class Usuario {
         $this->cedula = htmlspecialchars(strip_tags($this->cedula));
         $this->nombres = htmlspecialchars(strip_tags($this->nombres));
         $this->apellidos = htmlspecialchars(strip_tags($this->apellidos));
+        $this->usuario = htmlspecialchars(strip_tags($this->usuario));
         $this->password = password_hash($this->password, PASSWORD_DEFAULT);
         $this->codigo_pais = htmlspecialchars(strip_tags($this->codigo_pais));
         $this->celular = htmlspecialchars(strip_tags($this->celular));
@@ -106,6 +107,7 @@ class Usuario {
         $stmt->bindParam(':cedula', $this->cedula);
         $stmt->bindParam(':nombres', $this->nombres);
         $stmt->bindParam(':apellidos', $this->apellidos);
+        $stmt->bindParam(':usuario', $this->usuario);
         $stmt->bindParam(':password', $this->password);
         $stmt->bindParam(':codigo_pais', $this->codigo_pais);
         $stmt->bindParam(':celular', $this->celular);

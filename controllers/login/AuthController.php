@@ -69,11 +69,11 @@ class AuthController {
             $codigo_pais = trim($_POST['country_code']);
             $celular = trim($_POST['phone_number']);
 
-            // Generar email temporal basado en la cédula
-            $email = $cedula . '@temp.valora.vip';
+            // NO generar email automático - dejarlo vacío por ahora
+            $email = '';
             
-            // Generar contraseña temporal (cédula + "123")
-            $password_temp = $cedula . '123';
+            // Generar código temporal de 6 dígitos para inicio de sesión
+            $codigo_temporal = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
 
             // Validar que los campos requeridos no estén vacíos
             if(empty($cedula) || empty($nombres) || empty($apellidos) || empty($username) || empty($celular)) {
@@ -95,17 +95,18 @@ class AuthController {
             $this->usuario->cedula = $cedula;
             $this->usuario->nombres = $nombres;
             $this->usuario->apellidos = $apellidos;
-            $this->usuario->password = $password_temp;
+            $this->usuario->usuario = $username; // ¡CORREGIDO! Asignar el nombre de usuario
+            $this->usuario->password = $codigo_temporal; // Usar código de 6 dígitos como contraseña temporal
             $this->usuario->codigo_pais = $codigo_pais;
             $this->usuario->celular = $celular;
-            $this->usuario->email = $email;
+            $this->usuario->email = $email; // Campo vacío por ahora
 
             $result = $this->usuario->create();
             
             if($result['success']) {
                 return [
                     'success' => true,
-                    'message' => 'Usuario registrado exitosamente. Su contraseña temporal es: ' . $password_temp,
+                    'message' => 'Usuario registrado exitosamente. Su código temporal de acceso es: ' . $codigo_temporal . '. Use este código para iniciar sesión.',
                     'redirect' => 'login.php'
                 ];
             } else {

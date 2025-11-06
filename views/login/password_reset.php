@@ -122,12 +122,72 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         .label-changing {
             animation: labelChange 0.3s ease;
         }
+        
+        /* Estilos para el indicador de pasos */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+        
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .step.active {
+            background: linear-gradient(135deg, #ee6f92 0%, #d63384 100%);
+            border-color: #ee6f92;
+            color: white;
+            box-shadow: 0 4px 12px rgba(238, 111, 146, 0.3);
+        }
+        
+        .step.completed {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        
+        .step-line {
+            width: 60px;
+            height: 3px;
+            background: #e9ecef;
+        }
+        
+        .step-line.active {
+            background: linear-gradient(90deg, #28a745 0%, #28a745 100%);
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
         <h2>🔐 Recuperar Contraseña</h2>
+        
+        <!-- Indicador de pasos -->
+        <div class="step-indicator">
+            <?php 
+            $currentStep = 1;
+            if($step === 'select_method') $currentStep = 2;
+            if($step === 'sent') $currentStep = 3;
+            ?>
+            <div class="step <?php echo $currentStep >= 1 ? ($currentStep > 1 ? 'completed' : 'active') : ''; ?>">1</div>
+            <div class="step-line <?php echo $currentStep > 1 ? 'active' : ''; ?>"></div>
+            <div class="step <?php echo $currentStep >= 2 ? ($currentStep > 2 ? 'completed' : 'active') : ''; ?>">2</div>
+            <div class="step-line <?php echo $currentStep > 2 ? 'active' : ''; ?>"></div>
+            <div class="step <?php echo $currentStep >= 3 ? 'active' : ''; ?>">3</div>
+        </div>
         
         <?php if($result && !$result['success']): ?>
             <div class="alert alert-error" style="background-color: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">

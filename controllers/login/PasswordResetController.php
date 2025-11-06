@@ -135,7 +135,7 @@ class PasswordResetController {
                 expires_at = VALUES(expires_at), 
                 created_at = NOW()
             ");
-            $stmt->execute([$cedula, $token, $method, $expires]);
+            $stmt->execute([$user['cedula'], $token, $method, $expires]);
             
             // Crear enlace de reseteo
             $resetLink = "http://localhost/valora.vip/views/login/reset_password.php?token=" . $token;

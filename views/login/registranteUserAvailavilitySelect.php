@@ -144,14 +144,14 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             min-height: 100vh;
             height: auto; /* Permitir que el body crezca según el contenido */
             margin: 0;
-            padding: 120px 0 60px 0; /* Padding masivo superior y inferior */
+            padding: 60px 0 60px 0; /* Padding reducido pero suficiente para no ocultarse */
             font-family: 'Poppins', sans-serif;
         }
         
         .wizard-container {
             max-width: 900px;
             margin: 0 auto; /* Sin margen superior adicional ya que el body tiene padding */
-            padding: 40px 20px 60px 20px; /* Padding equilibrado */
+            padding: 20px 20px 60px 20px; /* Padding superior reducido para acercar el título */
             position: relative;
             z-index: 1;
         }
@@ -742,11 +742,11 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             }
             
             body {
-                padding-top: 100px; /* Aún más padding en móviles */
+                padding-top: 50px; /* Padding reducido en móviles */
             }
             
             .wizard-container {
-                padding: 30px 15px 40px 15px;
+                padding: 15px 15px 40px 15px; /* Padding superior reducido en móviles */
             }
         }
 

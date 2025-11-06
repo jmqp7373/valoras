@@ -197,7 +197,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-submit">� Enviar Link</button>
+                <button type="submit" class="btn-submit">Enviar Link</button>
             </form>
 
             <script>

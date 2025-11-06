@@ -621,6 +621,85 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Estilos para análisis detallado de nombres */
+        .characteristic-tag {
+            display: inline-block;
+            background: #882A57;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin: 2px;
+        }
+
+        .trait-connection {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .trait-connection:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .matched-trait {
+            background: #007bff;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .connection-text {
+            color: #495057;
+            font-size: 14px;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        /* Animaciones para el análisis */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .name-analysis-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        /* Responsive para análisis detallado */
+        @media (max-width: 768px) {
+            .trait-connection {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .matched-trait {
+                margin-bottom: 5px;
+            }
+            
+            .characteristic-tag {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -850,7 +929,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             const adjectiveInfo = adjectives[adjective.toLowerCase()] || 
                 { spanish: adjective, meaning: 'característica especial' };
 
-            // Relacionar con características del usuario
+            // Obtener explicación detallada de la relación personal
             const relationExplanation = explainNameRelation(feminineName, adjective, userCharacteristics);
 
             return {
@@ -887,32 +966,103 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             return { feminine: feminineName, adjective: adjective };
         }
 
-        // Función para explicar la relación con las características del usuario
-        function explainNameRelation(feminineName, adjective, characteristics) {
-            const relations = {
-                'fire': ['atrevida', 'energetica', 'pasional', 'radiante'],
-                'star': ['brillante', 'radiante', 'glamourosa', 'elegante'],
-                'moon': ['misteriosa', 'seductora', 'nocturna', 'magnetica'],
-                'wild': ['aventurera', 'libre', 'natural', 'decidida'],
-                'sweet': ['dulce', 'tierna', 'delicada', 'coqueta'],
-                'bold': ['decidida', 'atrevida', 'valiente', 'dramatica'],
-                'pure': ['natural', 'inocente', 'delicada', 'libre'],
-                'storm': ['intensa', 'dramatica', 'poderosa', 'energetica'],
-                'rose': ['romantica', 'elegante', 'delicada', 'sensual'],
-                'sage': ['intelectual', 'reflexiva', 'sofisticada', 'mistica']
+        // Función para explicar la relación detallada con las características del usuario
+        function explainNameRelation(feminineName, adjective, userCharacteristics) {
+            // Mapeo detallado de adjetivos con características y explicaciones
+            const adjectiveConnections = {
+                'fire': {
+                    traits: ['atrevida', 'energetica', 'pasional', 'radiante', 'dramatica', 'intensa'],
+                    explanation: 'Fire (Ardiente) representa pasión, energía y determinación',
+                    connections: {
+                        'atrevida': 'tu espíritu atrevido se refleja en el fuego interior',
+                        'energetica': 'tu energía vibrante coincide con la intensidad del fuego',
+                        'pasional': 'tu naturaleza pasional resuena con la llama ardiente',
+                        'radiante': 'tu brillo natural se amplifica con la fuerza del fuego',
+                        'dramatica': 'tu personalidad dramática encuentra su expresión en lo ardiente',
+                        'intensa': 'tu intensidad emocional se materializa en el concepto de fuego'
+                    }
+                },
+                'star': {
+                    traits: ['brillante', 'radiante', 'glamourosa', 'elegante', 'unica', 'magnetica'],
+                    explanation: 'Star (Estrella) simboliza brillo, unicidad y capacidad de destacar',
+                    connections: {
+                        'brillante': 'tu inteligencia brillante se refleja como una estrella en el cielo',
+                        'radiante': 'tu energía radiante natural coincide con el brillo estelar',
+                        'glamourosa': 'tu glamour natural te hace brillar como una estrella',
+                        'elegante': 'tu elegancia innata te distingue como una estrella única',
+                        'unica': 'tu individualidad especial te hace brillar entre las demás',
+                        'magnetica': 'tu carisma magnético atrae como una estrella brillante'
+                    }
+                },
+                'bold': {
+                    traits: ['decidida', 'atrevida', 'valiente', 'aventurera', 'decidida', 'energetica'],
+                    explanation: 'Bold (Audaz) representa coraje, determinación y valentía',
+                    connections: {
+                        'decidida': 'tu carácter decidido se expresa perfectamente en la audacia',
+                        'atrevida': 'tu espíritu atrevido encuentra su voz en lo audaz',
+                        'valiente': 'tu valentía natural se amplifica con la audacia',
+                        'aventurera': 'tu alma aventurera resuena con el espíritu audaz',
+                        'energetica': 'tu energía desbordante se canaliza en acciones audaces'
+                    }
+                },
+                'sweet': {
+                    traits: ['dulce', 'tierna', 'delicada', 'coqueta', 'amorosa', 'inocente'],
+                    explanation: 'Sweet (Dulce) evoca ternura, delicadeza y encanto natural',
+                    connections: {
+                        'dulce': 'tu naturaleza dulce se refleja perfectamente en este adjetivo',
+                        'tierna': 'tu ternura natural encuentra expresión en la dulzura',
+                        'delicada': 'tu delicadeza se complementa con la suavidad de lo dulce',
+                        'coqueta': 'tu coquetería encantadora se expresa en la dulzura',
+                        'amorosa': 'tu capacidad de amar se materializa en la dulzura',
+                        'inocente': 'tu inocencia natural se refleja en la pureza de lo dulce'
+                    }
+                },
+                'moon': {
+                    traits: ['misteriosa', 'seductora', 'nocturna', 'magnetica', 'mistica', 'elegante'],
+                    explanation: 'Moon (Lunar) simboliza misterio, seducción y magnetismo nocturno',
+                    connections: {
+                        'misteriosa': 'tu aura misteriosa se amplifica con la magia lunar',
+                        'seductora': 'tu poder de seducción resuena con el encanto de la luna',
+                        'nocturna': 'tu espíritu nocturno encuentra su hogar en lo lunar',
+                        'magnetica': 'tu magnetismo natural se potencia con la atracción lunar',
+                        'mistica': 'tu esencia mística se conecta con los ciclos lunares',
+                        'elegante': 'tu elegancia se sublima con la gracia lunar'
+                    }
+                }
             };
 
-            const relatedTraits = relations[adjective.toLowerCase()] || [];
-            const matchingTraits = characteristics.filter(trait => 
-                relatedTraits.some(related => trait.includes(related))
+            // Obtener información del adjetivo
+            const adjectiveInfo = adjectiveConnections[adjective.toLowerCase()] || {
+                traits: [],
+                explanation: `${adjective} representa una cualidad especial`,
+                connections: {}
+            };
+
+            // Encontrar características que coinciden
+            const matchingTraits = userCharacteristics.filter(userTrait => 
+                adjectiveInfo.traits.some(adjectiveTrait => 
+                    userTrait.toLowerCase().includes(adjectiveTrait) || 
+                    adjectiveTrait.includes(userTrait.toLowerCase())
+                )
             );
 
-            if (matchingTraits.length > 0) {
-                const femInfo = feminineNames[feminineName.toLowerCase()] || { meaning: 'belleza' };
-                return `Este nombre refleja perfectamente tu personalidad ${matchingTraits.join(', ')}, creando una identidad única que combina ${feminineName} (${femInfo.meaning}) con la esencia ${adjective.toLowerCase()} que seleccionaste.`;
-            } else {
-                return `Este nombre único combina ${feminineName} con ${adjective}, creando una identidad especial que refleja las características que seleccionaste en el paso anterior.`;
-            }
+            return {
+                selectedTraits: userCharacteristics,
+                matchingTraits: matchingTraits,
+                adjectiveExplanation: adjectiveInfo.explanation,
+                connections: matchingTraits.map(trait => {
+                    const connectionKey = adjectiveInfo.traits.find(adjTrait => 
+                        trait.toLowerCase().includes(adjTrait) || adjTrait.includes(trait.toLowerCase())
+                    );
+                    return {
+                        trait: trait,
+                        connection: adjectiveInfo.connections[connectionKey] || `tu naturaleza ${trait} se complementa perfectamente con ${adjective.toLowerCase()}`
+                    };
+                }),
+                fullExplanation: matchingTraits.length > 0 ? 
+                    `Basándonos en tus características seleccionadas, ${adjective.toLowerCase()} es perfecto para ti` :
+                    `Este adjetivo complementa tu personalidad única de manera especial`
+            };
         }
 
         // Asegurar que el DOM esté completamente cargado
@@ -1037,46 +1187,107 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         // Validación de edad en tiempo real
         } // Fin de setupFormHandlers
 
-        // Función para mostrar el análisis personalizado del nombre
+        // Función para mostrar el análisis detallado del nombre
         function showNameAnalysis(username) {
             const explanation = generateNameExplanation(username, selectedCharacteristics);
             const container = document.getElementById('nameAnalysisContainer');
             const content = document.getElementById('nameAnalysisContent');
             
+            // Obtener las características del usuario
+            const userCharacteristics = selectedCharacteristics || [];
+            
             content.innerHTML = `
-                <div style="text-align: center; margin-bottom: 15px;">
-                    <h4 style="color: #882A57; margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span>✨</span> Análisis de tu nombre: <strong>${explanation.fullName}</strong>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h4 style="color: #882A57; margin: 0 0 15px 0; font-size: 20px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>✨</span> ¿Por qué <strong>${explanation.fullName}</strong> es perfecto para ti?
                     </h4>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div style="background: #f0f8ff; padding: 12px; border-radius: 8px; border-left: 4px solid #4A90E2;">
-                        <strong style="color: #4A90E2;">🌸 Nombre Femenino:</strong><br>
-                        <span style="font-size: 16px; font-weight: 600;">${explanation.feminine.spanish}</span><br>
-                        <small style="color: #666;">Significa: "${explanation.feminine.meaning}" (${explanation.feminine.origin})</small>
-                    </div>
-                    
-                    <div style="background: #fff0f5; padding: 12px; border-radius: 8px; border-left: 4px solid #ee6f92;">
-                        <strong style="color: #ee6f92;">💫 Adjetivo:</strong><br>
-                        <span style="font-size: 16px; font-weight: 600;">${explanation.adjective.spanish}</span><br>
-                        <small style="color: #666;">${explanation.adjective.meaning}</small>
+                <!-- Características seleccionadas por el usuario -->
+                <div style="background: linear-gradient(135deg, #fff5f8, #f0f8ff); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #d4c5d9;">
+                    <h5 style="color: #882A57; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
+                        <span>👤</span> Tus Características Seleccionadas
+                    </h5>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${userCharacteristics.map(trait => `
+                            <span style="background: #882A57; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;">
+                                ${trait}
+                            </span>
+                        `).join('')}
                     </div>
                 </div>
                 
-                <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px; border-radius: 10px; border: 1px solid #dee2e6;">
-                    <strong style="color: #495057; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
-                        <span>🎯</span> ¿Por qué este nombre es perfecto para ti?
-                    </strong>
-                    <p style="margin: 0; color: #6c757d; font-size: 14px; line-height: 1.5;">
-                        ${explanation.relation}
-                    </p>
+                <!-- Análisis del nombre -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; border-left: 4px solid #4A90E2;">
+                        <strong style="color: #4A90E2; display: block; margin-bottom: 8px;">🌸 Nombre Base</strong>
+                        <span style="font-size: 18px; font-weight: 700; color: #2c3e50; display: block;">${explanation.feminine.spanish}</span>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            <strong>Significado:</strong> "${explanation.feminine.meaning}"<br>
+                            <strong>Origen:</strong> ${explanation.feminine.origin}
+                        </small>
+                    </div>
+                    
+                    <div style="background: #fff0f5; padding: 15px; border-radius: 10px; border-left: 4px solid #ee6f92;">
+                        <strong style="color: #ee6f92; display: block; margin-bottom: 8px;">💫 Adjetivo Personalizado</strong>
+                        <span style="font-size: 18px; font-weight: 700; color: #2c3e50; display: block;">${explanation.adjective.spanish}</span>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            <strong>Representa:</strong> ${explanation.adjective.meaning}
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Conexión personalizada detallada -->
+                <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; border: 1px solid #dee2e6;">
+                    <h5 style="color: #495057; display: flex; align-items: center; gap: 8px; margin: 0 0 15px 0; font-size: 16px;">
+                        <span>🔗</span> Conexión Personalizada
+                    </h5>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #28a745;">
+                        <strong style="color: #28a745; display: block; margin-bottom: 8px;">
+                            📊 ${explanation.relation.adjectiveExplanation}
+                        </strong>
+                    </div>
+                    
+                    ${explanation.relation.matchingTraits.length > 0 ? `
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h6 style="color: #28a745; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
+                                <span>✅</span> Características que Coinciden Perfectamente:
+                            </h6>
+                            ${explanation.relation.connections.map(connection => `
+                                <div style="display: flex; align-items: center; gap: 10px; margin: 8px 0; padding: 10px; background: #f8f9fa; border-radius: 6px;">
+                                    <span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 15px; font-size: 12px; font-weight: 600;">
+                                        ${connection.trait}
+                                    </span>
+                                    <span style="color: #6c757d;">→</span>
+                                    <span style="color: #495057; font-size: 14px; flex: 1;">
+                                        ${connection.connection}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <p style="margin: 0; color: #6c757d; font-style: italic;">
+                                ⭐ ${explanation.relation.fullExplanation}
+                            </p>
+                        </div>
+                    `}
+                    
+                    <!-- Resumen final -->
+                    <div style="background: linear-gradient(135deg, #882A57, #a64b73); color: white; padding: 15px; border-radius: 10px; text-align: center;">
+                        <strong style="display: block; margin-bottom: 8px; font-size: 16px;">💖 Resumen Personal</strong>
+                        <p style="margin: 0; font-size: 14px; line-height: 1.6;">
+                            <strong>${explanation.fullName}</strong> combina la esencia de "${explanation.feminine.meaning}" con la fuerza de ser "${explanation.adjective.spanish}", 
+                            creando una identidad digital que refleja auténticamente quien eres y las cualidades que más te representan.
+                        </p>
+                    </div>
                 </div>
             `;
             
             // Actualizar el texto explicativo principal
             document.getElementById('usernameExplanation').innerHTML = `
-                🎉 <strong>¡Perfecto!</strong> Has seleccionado <strong>${username}</strong>. Aquí está el significado personalizado:
+                🎉 <strong>¡Perfecto!</strong> Has seleccionado <strong>${username}</strong>. Descubre por qué es ideal para ti:
             `;
             
             // Mostrar el contenedor con animación

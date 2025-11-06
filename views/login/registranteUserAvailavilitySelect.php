@@ -603,40 +603,7 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             }
         }
         
-        .help-button {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ee6f92, #882A57);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 24px;
-            box-shadow: 0 4px 20px rgba(238, 111, 146, 0.3);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-        
-        .help-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 25px rgba(238, 111, 146, 0.4);
-        }
-        
-        .help-menu {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            display: none;
-            z-index: 999;
-            min-width: 250px;
-        }
+
         
         .help-menu.show {
             display: block;
@@ -647,28 +614,7 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .help-option {
-            display: block;
-            padding: 12px 15px;
-            margin: 5px 0;
-            text-decoration: none;
-            color: #333;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-        
-        .help-option:hover {
-            background: #f8f9fa;
-            border-color: #ee6f92;
-            color: #882A57;
-        }
-        
-        .help-option .icon {
-            margin-right: 10px;
-            font-size: 16px;
-        }
+
     </style>
 </head>
 <body>
@@ -1195,36 +1141,20 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             // Verificar Valora.vip (real)
             await checkValoraAvailability(username);
             
-            // Simular verificación en Chaturbate (más realista)
+            // Simular verificación en Chaturbate (siempre disponible para demo)
             setTimeout(() => {
-                const isAvailable = Math.random() > 0.3; // 70% probabilidad de estar disponible
                 const chaturbateCheck = document.getElementById('chaturbateCheck');
-                
-                if (isAvailable) {
-                    chaturbateCheck.className = 'platform-check available';
-                    chaturbateCheck.querySelector('.platform-status').textContent = '✅ Disponible';
-                    availableCount++;
-                } else {
-                    chaturbateCheck.className = 'platform-check unavailable';
-                    chaturbateCheck.querySelector('.platform-status').textContent = '❌ No disponible';
-                }
+                chaturbateCheck.className = 'platform-check available';
+                chaturbateCheck.querySelector('.platform-status').textContent = '✅ Disponible';
                 
                 checkIfCanContinue();
             }, 1000);
             
-            // Simular verificación en Stripchat (más realista)  
+            // Simular verificación en Stripchat (siempre disponible para demo)  
             setTimeout(() => {
-                const isAvailable = Math.random() > 0.4; // 60% probabilidad de estar disponible
                 const stripchatCheck = document.getElementById('stripchatCheck');
-                
-                if (isAvailable) {
-                    stripchatCheck.className = 'platform-check available';
-                    stripchatCheck.querySelector('.platform-status').textContent = '✅ Disponible';
-                    availableCount++;
-                } else {
-                    stripchatCheck.className = 'platform-check unavailable';
-                    stripchatCheck.querySelector('.platform-status').textContent = '❌ No disponible';
-                }
+                stripchatCheck.className = 'platform-check available';
+                stripchatCheck.querySelector('.platform-status').textContent = '✅ Disponible';
                 
                 checkIfCanContinue();
             }, 1500);
@@ -1319,62 +1249,9 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             document.getElementById('continueBtn').style.display = 'none';
         });
 
-        // Manejar menú de ayuda flotante
-        document.getElementById('helpBtn').addEventListener('click', function() {
-            const menu = document.getElementById('helpMenu');
-            menu.classList.toggle('show');
-        });
 
-        // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', function(e) {
-            const helpBtn = document.getElementById('helpBtn');
-            const helpMenu = document.getElementById('helpMenu');
-            
-            if (!helpBtn.contains(e.target) && !helpMenu.contains(e.target)) {
-                helpMenu.classList.remove('show');
-            }
-        });
     </script>
 
-    <!-- Botón flotante de ayuda y menú -->
-    <button class="help-button" id="helpBtn" title="Opciones y ayuda">
-        ❓
-    </button>
-    
-    <div class="help-menu" id="helpMenu">
-        <h4 style="margin: 0 0 15px; color: #882A57; font-size: 16px;">🚀 Opciones Rápidas</h4>
-        
-        <a href="register.php" class="help-option">
-            <span class="icon">📝</span>
-            Registro Manual
-        </a>
-        
-        <a href="login.php" class="help-option">
-            <span class="icon">🔑</span>
-            Iniciar Sesión
-        </a>
-        
-        <a href="password_reset.php" class="help-option">
-            <span class="icon">🔒</span>
-            Recuperar Contraseña
-        </a>
-        
-        <a href="../../index.php" class="help-option">
-            <span class="icon">🏠</span>
-            Página de Inicio
-        </a>
-        
-        <hr style="margin: 15px 0; border: none; height: 1px; background: #eee;">
-        
-        <a href="mailto:soporte@valora.vip" class="help-option">
-            <span class="icon">📧</span>
-            Contactar Soporte
-        </a>
-        
-        <a href="#" onclick="location.reload()" class="help-option">
-            <span class="icon">🔄</span>
-            Reiniciar Proceso
-        </a>
-    </div>
+
 </body>
 </html>

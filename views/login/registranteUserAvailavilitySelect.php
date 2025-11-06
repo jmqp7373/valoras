@@ -1774,6 +1774,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                     }
                 });
             }
+        } // Fin de setupFormHandlers
 
         // Función para refrescar características con animación elegante
         function refreshCharacteristics() {
@@ -1816,9 +1817,6 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 window.location.href = window.location.pathname + '?refresh=1';
             }, 800);
         }
-
-        // Validación de edad en tiempo real
-        } // Fin de setupFormHandlers
 
         // Función para mostrar confirmación simple del nombre seleccionado
         function showNameAnalysis(username) {

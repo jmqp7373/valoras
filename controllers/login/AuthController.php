@@ -20,19 +20,21 @@ class AuthController {
     // Método para manejar el login
     public function login() {
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $numero_cedula = trim($_POST['Numero_de_cedula']);
+            // Soportar tanto el campo antiguo como el nuevo
+            $identificador = isset($_POST['identificador']) ? trim($_POST['identificador']) : trim($_POST['Numero_de_cedula'] ?? '');
             $password = trim($_POST['contraseña']);
+            $login_type = isset($_POST['login_type']) ? $_POST['login_type'] : 'cedula';
 
             // Validar que los campos no estén vacíos
-            if(empty($numero_cedula) || empty($password)) {
+            if(empty($identificador) || empty($password)) {
                 return [
                     'success' => false,
                     'message' => 'Por favor complete todos los campos'
                 ];
             }
 
-            // Intentar autenticar
-            $user_data = $this->usuario->login($numero_cedula, $password);
+            // Intentar autenticar según el tipo de identificación
+            $user_data = $this->usuario->loginByIdentifier($identificador, $password, $login_type);
 
             if($user_data) {
                 // Login exitoso
@@ -51,7 +53,7 @@ class AuthController {
             } else {
                 return [
                     'success' => false,
-                    'message' => 'Número de cédula o contraseña incorrectos'
+                    'message' => 'Credenciales incorrectas'
                 ];
             }
         }
@@ -121,15 +123,15 @@ class AuthController {
                 $smsResult = $this->sendVerificationCodeSMS($celular, $codigo_verificacion, $cedula);
                 
                 if($smsResult['success']) {
-                    // Guardar la cédula en la sesión para pre-llenar el login
-                    $_SESSION['last_registered_cedula'] = $cedula;
-                    $_SESSION['sms_sent_at'] = time(); // Timestamp para el contador regresivo
+                    // Guardar la cédula en la sesión para el proceso de primera contraseña
+                    $_SESSION['first_password_cedula'] = $cedula;
+                    $_SESSION['first_password_sent_at'] = time(); // Timestamp para el contador regresivo
                     $_SESSION['awaiting_first_password'] = true; // Indicar que espera primer password
                     
                     return [
                         'success' => true,
-                        'message' => 'Usuario registrado exitosamente. Se ha enviado un código de verificación de 6 dígitos a tu número de celular. Usa este código para verificar tu cuenta.',
-                        'redirect' => 'login.php'
+                        'message' => 'Usuario registrado exitosamente. Se ha enviado un código de verificación de 6 dígitos a tu número de celular.',
+                        'redirect' => 'first_password.php'
                     ];
                 } else {
                     // Si falla el SMS, mostrar el código en pantalla como respaldo
@@ -355,6 +357,85 @@ class AuthController {
             'message' => 'Método no permitido'
         ];
     }
+    
+    // Método para reenviar código de primera contraseña
+    public function resendFirstPasswordCode() {
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $cedula = trim($_POST['cedula']);
+            
+            if(empty($cedula)) {
+                return [
+                    'success' => false,
+                    'message' => 'Número de cédula requerido'
+                ];
+            }
+            
+            // Verificar que no haya pasado menos de 60 segundos del último envío
+            if(isset($_SESSION['first_password_sent_at'])) {
+                $time_diff = time() - $_SESSION['first_password_sent_at'];
+                if($time_diff < 60) {
+                    $remaining = 60 - $time_diff;
+                    return [
+                        'success' => false,
+                        'message' => "Debe esperar {$remaining} segundos antes de reenviar el código",
+                        'remaining_time' => $remaining
+                    ];
+                }
+            }
+            
+            try {
+                // Buscar el usuario por cédula
+                $stmt = $this->db->prepare("SELECT cedula, celular FROM usuarios WHERE cedula = :cedula LIMIT 1");
+                $stmt->bindParam(':cedula', $cedula);
+                $stmt->execute();
+                
+                if($stmt->rowCount() == 0) {
+                    return [
+                        'success' => false,
+                        'message' => 'Usuario no encontrado'
+                    ];
+                }
+                
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Generar nuevo código de 6 dígitos
+                $nuevo_codigo = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+                
+                // Actualizar el token en password_first_token
+                $this->saveFirstVerificationToken($cedula, $nuevo_codigo, $user['celular']);
+                
+                // Enviar nuevo código por SMS
+                $smsResult = $this->sendVerificationCodeSMS($user['celular'], $nuevo_codigo, $cedula, false);
+                
+                if($smsResult['success']) {
+                    // Actualizar timestamp del último envío en la sesión de first_password
+                    $_SESSION['first_password_sent_at'] = time();
+                    
+                    return [
+                        'success' => true,
+                        'message' => 'Nuevo código de verificación enviado a tu celular'
+                    ];
+                } else {
+                    return [
+                        'success' => false,
+                        'message' => 'Error al enviar el código: ' . $smsResult['error']
+                    ];
+                }
+                
+            } catch(Exception $e) {
+                error_log("Error en reenvío de código de primera contraseña: " . $e->getMessage());
+                return [
+                    'success' => false,
+                    'message' => 'Error al procesar la solicitud'
+                ];
+            }
+        }
+        
+        return [
+            'success' => false,
+            'message' => 'Método no permitido'
+        ];
+    }
 
     // Método para cerrar sesión
     public function logout() {
@@ -375,6 +456,11 @@ if(isset($_POST['action'])) {
             exit();
         case 'resend_code':
             $result = $auth->resendVerificationCode();
+            header('Content-Type: application/json');
+            echo json_encode($result);
+            exit();
+        case 'resend_first_password_code':
+            $result = $auth->resendFirstPasswordCode();
             header('Content-Type: application/json');
             echo json_encode($result);
             exit();

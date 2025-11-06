@@ -58,7 +58,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?php echo htmlspecialchars($registerResult['message']); ?>
                     <script>
                         setTimeout(function() {
-                            window.location.href = 'login.php';
+                            window.location.href = 'first_password.php';
                         }, 5000);
                     </script>
                 </div>

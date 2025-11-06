@@ -43,6 +43,38 @@ class Usuario {
         
         return false;
     }
+    
+    // Método para autenticar usuario por cualquier identificador (cédula, usuario o celular)
+    public function loginByIdentifier($identificador, $password, $tipo = 'cedula') {
+        // Construir query según el tipo de identificador
+        switch($tipo) {
+            case 'username':
+                $query = "SELECT * FROM " . $this->table_name . " WHERE usuario = :identificador LIMIT 1";
+                break;
+            case 'celular':
+                $query = "SELECT * FROM " . $this->table_name . " WHERE celular = :identificador LIMIT 1";
+                break;
+            case 'cedula':
+            default:
+                $query = "SELECT * FROM " . $this->table_name . " WHERE cedula = :identificador LIMIT 1";
+                break;
+        }
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':identificador', $identificador);
+        $stmt->execute();
+
+        if($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Verificar la contraseña
+            if($row['password'] !== null && password_verify($password, $row['password'])) {
+                return $row;
+            }
+        }
+        
+        return false;
+    }
 
     // Método para verificar si un usuario existe por cédula
     public function existsByCedula($cedula) {

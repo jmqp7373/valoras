@@ -907,7 +907,44 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 'ray': { spanish: 'Rayo', meaning: 'rayo de luz', origin: 'inglés' },
                 'joy': { spanish: 'Alegría', meaning: 'gozo', origin: 'inglés' },
                 'lux': { spanish: 'Luz', meaning: 'luz', origin: 'latino' },
-                'gem': { spanish: 'Gema', meaning: 'piedra preciosa', origin: 'latino' }
+                'gem': { spanish: 'Gema', meaning: 'piedra preciosa', origin: 'latino' },
+                'kay': { spanish: 'Kay', meaning: 'pura', origin: 'inglés' },
+                'mae': { spanish: 'Mae', meaning: 'perla', origin: 'inglés' },
+                'sue': { spanish: 'Sue', meaning: 'lirio', origin: 'inglés' },
+                'ann': { spanish: 'Ana', meaning: 'gracia', origin: 'hebreo' },
+                'amy': { spanish: 'Amy', meaning: 'amada', origin: 'francés' },
+                'kim': { spanish: 'Kim', meaning: 'oro', origin: 'inglés' },
+                'jen': { spanish: 'Jen', meaning: 'justa', origin: 'inglés' },
+                'sam': { spanish: 'Sam', meaning: 'escuchada', origin: 'hebreo' },
+                'max': { spanish: 'Max', meaning: 'la más grande', origin: 'latino' },
+                'rio': { spanish: 'Río', meaning: 'río', origin: 'español' },
+                'ava': { spanish: 'Ava', meaning: 'vida', origin: 'latino' },
+                'ada': { spanish: 'Ada', meaning: 'noble', origin: 'germánico' },
+                'ara': { spanish: 'Ara', meaning: 'altar', origin: 'latino' },
+                'ari': { spanish: 'Ari', meaning: 'león', origin: 'hebreo' },
+                'ash': { spanish: 'Ash', meaning: 'fresno', origin: 'inglés' },
+                'bea': { spanish: 'Bea', meaning: 'felicidad', origin: 'latino' },
+                'cam': { spanish: 'Cam', meaning: 'torcida', origin: 'escocés' },
+                'dex': { spanish: 'Dex', meaning: 'diestra', origin: 'latino' },
+                'eli': { spanish: 'Eli', meaning: 'ascensión', origin: 'hebreo' },
+                'fox': { spanish: 'Fox', meaning: 'zorro', origin: 'inglés' },
+                'gia': { spanish: 'Gia', meaning: 'gracia de Dios', origin: 'italiano' },
+                'iris': { spanish: 'Iris', meaning: 'arcoíris', origin: 'griego' },
+                'jade': { spanish: 'Jade', meaning: 'piedra de jade', origin: 'español' },
+                'kira': { spanish: 'Kira', meaning: 'asesina', origin: 'japonés' },
+                'luna': { spanish: 'Luna', meaning: 'luna', origin: 'latino' },
+                'nova': { spanish: 'Nova', meaning: 'nueva', origin: 'latino' },
+                'rain': { spanish: 'Rain', meaning: 'lluvia', origin: 'inglés' },
+                'sage': { spanish: 'Sage', meaning: 'sabia', origin: 'latino' },
+                'vera': { spanish: 'Vera', meaning: 'verdad', origin: 'latino' },
+                'wren': { spanish: 'Wren', meaning: 'reyezuelo', origin: 'inglés' },
+                'zara': { spanish: 'Zara', meaning: 'flor', origin: 'árabe' },
+                'blue': { spanish: 'Blue', meaning: 'azul', origin: 'inglés' },
+                'dawn': { spanish: 'Dawn', meaning: 'amanecer', origin: 'inglés' },
+                'faye': { spanish: 'Faye', meaning: 'hada', origin: 'inglés' },
+                'hope': { spanish: 'Hope', meaning: 'esperanza', origin: 'inglés' },
+                'june': { spanish: 'June', meaning: 'junio', origin: 'latino' },
+                'lake': { spanish: 'Lake', meaning: 'lago', origin: 'inglés' }
             };
 
             // Traducciones de adjetivos comunes
@@ -936,7 +973,54 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 'amber': { spanish: 'ámbar', meaning: 'cálida y misteriosa' },
                 'jade': { spanish: 'jade', meaning: 'serena y equilibrada' },
                 'coral': { spanish: 'coral', meaning: 'vibrante y marina' },
-                'violet': { spanish: 'violeta', meaning: 'mística y elegante' }
+                'violet': { spanish: 'violeta', meaning: 'mística y elegante' },
+                'hotness': { spanish: 'calentura', meaning: 'atractivo y sensual' },
+                'beauty': { spanish: 'belleza', meaning: 'hermosura y elegancia' },
+                'magic': { spanish: 'mágica', meaning: 'encantadora y misteriosa' },
+                'angel': { spanish: 'ángel', meaning: 'pura y celestial' },
+                'goddess': { spanish: 'diosa', meaning: 'divina y poderosa' },
+                'queen': { spanish: 'reina', meaning: 'majestuosa y dominante' },
+                'princess': { spanish: 'princesa', meaning: 'elegante y real' },
+                'fantasy': { spanish: 'fantasía', meaning: 'imaginativa y soñadora' },
+                'dream': { spanish: 'sueño', meaning: 'aspiracional y deseada' },
+                'love': { spanish: 'amor', meaning: 'amorosa y cariñosa' },
+                'passion': { spanish: 'pasión', meaning: 'intensa y apasionada' },
+                'desire': { spanish: 'deseo', meaning: 'deseada y atractiva' },
+                'charm': { spanish: 'encanto', meaning: 'encantadora y cautivadora' },
+                'grace': { spanish: 'gracia', meaning: 'elegante y refinada' },
+                'elegance': { spanish: 'elegancia', meaning: 'sofisticada y distinguida' },
+                'mystery': { spanish: 'misterio', meaning: 'enigmática y fascinante' },
+                'seduction': { spanish: 'seducción', meaning: 'seductora y cautivante' },
+                'temptation': { spanish: 'tentación', meaning: 'irresistible y provocativa' },
+                'allure': { spanish: 'atractivo', meaning: 'magnética y fascinante' },
+                'enchant': { spanish: 'encanto', meaning: 'hechizante y mágica' },
+                'divine': { spanish: 'divina', meaning: 'celestial y perfecta' },
+                'celestial': { spanish: 'celestial', meaning: 'angelical y etérea' },
+                'radiant': { spanish: 'radiante', meaning: 'brillante y luminosa' },
+                'luminous': { spanish: 'luminosa', meaning: 'brillante y resplandeciente' },
+                'brilliant': { spanish: 'brillante', meaning: 'inteligente y deslumbrante' },
+                'dazzling': { spanish: 'deslumbrante', meaning: 'impactante y brillante' },
+                'stunning': { spanish: 'impresionante', meaning: 'espectacular y hermosa' },
+                'gorgeous': { spanish: 'preciosa', meaning: 'hermosa y atractiva' },
+                'beautiful': { spanish: 'hermosa', meaning: 'bella y atractiva' },
+                'lovely': { spanish: 'encantadora', meaning: 'adorable y querida' },
+                'fierce': { spanish: 'feroz', meaning: 'intensa y determinada' },
+                'powerful': { spanish: 'poderosa', meaning: 'fuerte y dominante' },
+                'strong': { spanish: 'fuerte', meaning: 'resistente y valiente' },
+                'brave': { spanish: 'valiente', meaning: 'audaz y corajuda' },
+                'fearless': { spanish: 'intrépida', meaning: 'sin miedo y audaz' },
+                'confident': { spanish: 'confiada', meaning: 'segura de sí misma' },
+                'daring': { spanish: 'atrevida', meaning: 'audaz y arriesgada' },
+                'adventurous': { spanish: 'aventurera', meaning: 'exploradora y libre' },
+                'rebel': { spanish: 'rebelde', meaning: 'independiente y libre' },
+                'gentle': { spanish: 'gentil', meaning: 'dulce y cariñosa' },
+                'tender': { spanish: 'tierna', meaning: 'delicada y amorosa' },
+                'soft': { spanish: 'suave', meaning: 'delicada y gentil' },
+                'delicate': { spanish: 'delicada', meaning: 'fina y elegante' },
+                'precious': { spanish: 'preciosa', meaning: 'valiosa y querida' },
+                'innocent': { spanish: 'inocente', meaning: 'pura y sincera' },
+                'fresh': { spanish: 'fresca', meaning: 'natural y juvenil' },
+                'natural': { spanish: 'natural', meaning: 'auténtica y genuina' }
             };
 
             const feminineInfo = feminineNames[feminineName.toLowerCase()] || 
@@ -955,27 +1039,93 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             };
         }
 
-        // Función para dividir el nombre en partes
+        // Función inteligente para dividir el nombre en partes
         function analyzeName(username) {
-            // Lógica simple para dividir - puede mejorarse
-            const commonFeminineNames = ['zoe', 'eve', 'mia', 'sky', 'lea', 'ivy', 'ray', 'joy', 'lux', 'gem'];
+            // Array de nombres cortos en inglés (nombres propios)
+            const englishFeminineNames = [
+                'zoe', 'eve', 'mia', 'sky', 'lea', 'ivy', 'ray', 'joy', 'lux', 'gem',
+                'kay', 'mae', 'sue', 'ann', 'amy', 'kim', 'jen', 'sam', 'max', 'rio',
+                'ava', 'ada', 'ara', 'ari', 'ash', 'bea', 'cam', 'dex', 'eli', 'fox',
+                'gia', 'halo', 'iris', 'jade', 'kira', 'luna', 'nova', 'paige', 'rain', 'sage',
+                'tara', 'vera', 'wren', 'zara', 'blue', 'dawn', 'faye', 'hope', 'june', 'lake'
+            ];
+            
+            // Array de adjetivos/palabras descriptivas en inglés
+            const englishAdjectives = [
+                'fire', 'star', 'moon', 'wild', 'sweet', 'bold', 'pure', 'storm', 'rose', 'sage',
+                'sultry', 'velvet', 'diamond', 'silk', 'pearl', 'golden', 'crystal', 'crimson', 'azure', 'emerald',
+                'hotness', 'beauty', 'magic', 'angel', 'goddess', 'queen', 'princess', 'fantasy', 'dream', 'love',
+                'passion', 'desire', 'charm', 'grace', 'elegance', 'mystery', 'seduction', 'temptation', 'allure', 'enchant',
+                'divine', 'celestial', 'radiant', 'luminous', 'brilliant', 'dazzling', 'stunning', 'gorgeous', 'beautiful', 'lovely',
+                'fierce', 'powerful', 'strong', 'brave', 'fearless', 'confident', 'bold', 'daring', 'adventurous', 'rebel',
+                'gentle', 'tender', 'soft', 'delicate', 'precious', 'sweet', 'innocent', 'pure', 'fresh', 'natural'
+            ];
             
             let feminineName = '';
             let adjective = '';
             
-            for (const name of commonFeminineNames) {
-                if (username.toLowerCase().startsWith(name)) {
-                    feminineName = name;
-                    adjective = username.slice(name.length);
-                    break;
+            const lowerUsername = username.toLowerCase();
+            
+            // Buscar coincidencia inteligente: nombre + adjetivo
+            for (const name of englishFeminineNames) {
+                if (lowerUsername.startsWith(name)) {
+                    const remainingPart = lowerUsername.slice(name.length);
+                    
+                    // Verificar si la parte restante es un adjetivo conocido
+                    for (const adj of englishAdjectives) {
+                        if (remainingPart === adj) {
+                            feminineName = name;
+                            adjective = adj;
+                            break;
+                        }
+                    }
+                    
+                    // Si encontramos una coincidencia exacta, salir del bucle
+                    if (feminineName && adjective) {
+                        break;
+                    }
+                    
+                    // Si la parte restante no es un adjetivo conocido pero el nombre sí coincide
+                    // usar la parte restante como adjetivo
+                    if (remainingPart.length > 2) {
+                        feminineName = name;
+                        adjective = remainingPart;
+                        break;
+                    }
                 }
             }
             
-            // Fallback si no encuentra coincidencia
-            if (!feminineName) {
-                const midPoint = Math.ceil(username.length / 2);
-                feminineName = username.slice(0, midPoint);
-                adjective = username.slice(midPoint);
+            // Fallback: buscar por adjetivos conocidos al final
+            if (!feminineName || !adjective) {
+                for (const adj of englishAdjectives) {
+                    if (lowerUsername.endsWith(adj)) {
+                        adjective = adj;
+                        feminineName = lowerUsername.slice(0, lowerUsername.length - adj.length);
+                        
+                        // Verificar si la parte del nombre está en nuestra lista
+                        if (englishFeminineNames.includes(feminineName)) {
+                            break;
+                        } else if (feminineName.length >= 2 && feminineName.length <= 6) {
+                            // Aceptar nombres cortos aunque no estén en la lista
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Último fallback: división inteligente por posición
+            if (!feminineName || !adjective) {
+                // Buscar una división natural (mayúsculas en el medio pueden indicar división)
+                const capitalMatch = username.match(/([a-z]+)([A-Z][a-z]+)/);
+                if (capitalMatch) {
+                    feminineName = capitalMatch[1].toLowerCase();
+                    adjective = capitalMatch[2].toLowerCase();
+                } else {
+                    // División por mitad como último recurso
+                    const midPoint = Math.ceil(username.length / 2);
+                    feminineName = username.slice(0, midPoint).toLowerCase();
+                    adjective = username.slice(midPoint).toLowerCase();
+                }
             }
             
             return { feminine: feminineName, adjective: adjective };
@@ -1078,6 +1228,43 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                         'unica': 'tu unicidad es tan rara y preciosa como un diamante',
                         'radiante': 'tu energía radiante brilla como las facetas de un diamante',
                         'preciosa': 'tu naturaleza preciosa se materializa en el diamante'
+                    }
+                },
+                'hotness': {
+                    traits: ['sensual', 'seductora', 'atractiva', 'magnetica', 'pasional', 'intensa', 'ardiente'],
+                    explanation: 'Hotness (Calentura) representa atractivo sensual, magnetismo y poder de seducción',
+                    connections: {
+                        'sensual': 'tu sensualidad natural se intensifica con la calentura',
+                        'seductora': 'tu poder seductor se amplifica con lo ardiente',
+                        'atractiva': 'tu atractivo natural se potencia con la calentura',
+                        'magnetica': 'tu magnetismo personal se intensifica con lo ardiente',
+                        'pasional': 'tu naturaleza pasional encuentra expresión en la calentura',
+                        'intensa': 'tu intensidad emocional se manifiesta como calentura',
+                        'ardiente': 'tu espíritu ardiente se refleja en la calentura'
+                    }
+                },
+                'beauty': {
+                    traits: ['hermosa', 'elegante', 'radiante', 'encantadora', 'preciosa', 'angelical'],
+                    explanation: 'Beauty (Belleza) simboliza hermosura, elegancia y encanto natural',
+                    connections: {
+                        'hermosa': 'tu hermosura natural se refleja en la belleza pura',
+                        'elegante': 'tu elegancia innata se materializa en la belleza',
+                        'radiante': 'tu energía radiante forma parte de tu belleza',
+                        'encantadora': 'tu encanto natural se expresa a través de la belleza',
+                        'preciosa': 'tu naturaleza preciosa se manifiesta como belleza',
+                        'angelical': 'tu esencia angelical se refleja en la belleza celestial'
+                    }
+                },
+                'goddess': {
+                    traits: ['poderosa', 'divina', 'majestuosa', 'dominante', 'regia', 'suprema'],
+                    explanation: 'Goddess (Diosa) representa poder divino, majestuosidad y supremacía',
+                    connections: {
+                        'poderosa': 'tu poder natural se eleva al nivel de una diosa',
+                        'divina': 'tu esencia divina se manifiesta como una diosa',
+                        'majestuosa': 'tu majestuosidad natural te convierte en una diosa',
+                        'dominante': 'tu presencia dominante refleja el poder de una diosa',
+                        'regia': 'tu porte regio te posiciona como una diosa',
+                        'suprema': 'tu naturaleza suprema se expresa como divinidad'
                     }
                 }
             };

@@ -20,6 +20,8 @@ desktop.ini
 
 # Configuraciones sensibles
 config/twilioSmsConfig.php
+config/email-config.php
+config/database.php
 
 # Logs y archivos de depuración
 *.log

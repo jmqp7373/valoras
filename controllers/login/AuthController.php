@@ -75,8 +75,8 @@ class AuthController {
             // NO generar email automático - dejarlo vacío por ahora
             $email = '';
             
-            // Generar código temporal de 6 dígitos para inicio de sesión
-            $codigo_temporal = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+            // Generar código temporal de 6 dígitos para verificación inicial
+            $codigo_verificacion = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
 
             // Validar que los campos requeridos no estén vacíos
             if(empty($cedula) || empty($nombres) || empty($apellidos) || empty($username) || empty($celular)) {
@@ -94,12 +94,12 @@ class AuthController {
                 ];
             }
 
-            // Crear nuevo usuario
+            // Crear nuevo usuario SIN PASSWORD (quedará NULL hasta que el usuario lo establezca)
             $this->usuario->cedula = $cedula;
             $this->usuario->nombres = $nombres;
             $this->usuario->apellidos = $apellidos;
-            $this->usuario->usuario = $username; // ¡CORREGIDO! Asignar el nombre de usuario
-            $this->usuario->password = $codigo_temporal; // Usar código de 6 dígitos como contraseña temporal
+            $this->usuario->usuario = $username;
+            $this->usuario->password = null; // Password NULL hasta que el usuario lo cree
             $this->usuario->codigo_pais = $codigo_pais;
             $this->usuario->celular = $celular;
             $this->usuario->email = $email; // Campo vacío por ahora
@@ -107,17 +107,28 @@ class AuthController {
             $result = $this->usuario->create();
             
             if($result['success']) {
+                // Guardar el código de verificación en la tabla password_first_token
+                $tokenSaved = $this->saveFirstVerificationToken($cedula, $codigo_verificacion, $celular);
+                
+                if(!$tokenSaved) {
+                    return [
+                        'success' => false,
+                        'message' => 'Error al guardar el token de verificación'
+                    ];
+                }
+                
                 // Enviar código de verificación por SMS
-                $smsResult = $this->sendVerificationCodeSMS($celular, $codigo_temporal, $cedula);
+                $smsResult = $this->sendVerificationCodeSMS($celular, $codigo_verificacion, $cedula);
                 
                 if($smsResult['success']) {
                     // Guardar la cédula en la sesión para pre-llenar el login
                     $_SESSION['last_registered_cedula'] = $cedula;
                     $_SESSION['sms_sent_at'] = time(); // Timestamp para el contador regresivo
+                    $_SESSION['awaiting_first_password'] = true; // Indicar que espera primer password
                     
                     return [
                         'success' => true,
-                        'message' => 'Usuario registrado exitosamente. Se ha enviado un código de verificación de 6 dígitos a tu número de celular. Usa este código para iniciar sesión.',
+                        'message' => 'Usuario registrado exitosamente. Se ha enviado un código de verificación de 6 dígitos a tu número de celular. Usa este código para verificar tu cuenta.',
                         'redirect' => 'login.php'
                     ];
                 } else {
@@ -176,7 +187,7 @@ class AuthController {
     }
 
     // Método para enviar código de verificación por SMS
-    private function sendVerificationCodeSMS($celular, $codigo, $cedula) {
+    private function sendVerificationCodeSMS($celular, $codigo, $cedula, $saveToResetTable = false) {
         try {
             // Formatear el número de celular
             $phone = $this->twilioController->formatColombianNumber($celular);
@@ -193,8 +204,10 @@ class AuthController {
             $smsResult = $this->twilioController->sendVerificationCode($validPhone, $codigo);
             
             if($smsResult['success']) {
-                // Guardar el código en la tabla de tokens para verificación posterior
-                $this->saveVerificationToken($cedula, $codigo);
+                // Solo guardar en password_reset_tokens si se solicita (para reenvíos)
+                if($saveToResetTable) {
+                    $this->saveVerificationToken($cedula, $codigo);
+                }
                 
                 return [
                     'success' => true,
@@ -216,7 +229,32 @@ class AuthController {
         }
     }
     
-    // Método para guardar el token de verificación en la base de datos
+    // Método para guardar el primer token de verificación (registro inicial)
+    private function saveFirstVerificationToken($cedula, $codigo, $celular) {
+        try {
+            // Guardar en la tabla password_first_token
+            $stmt = $this->db->prepare("
+                INSERT INTO password_first_token (cedula, token, celular, expires_at, created_at, verified) 
+                VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE), NOW(), 0)
+                ON DUPLICATE KEY UPDATE 
+                token = VALUES(token), 
+                celular = VALUES(celular),
+                expires_at = VALUES(expires_at), 
+                created_at = VALUES(created_at),
+                verified = 0,
+                verified_at = NULL
+            ");
+            
+            $stmt->execute([$cedula, $codigo, $celular]);
+            
+            return true;
+        } catch(Exception $e) {
+            error_log("Error guardando primer token de verificación: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    // Método para guardar el token de verificación en la base de datos (reenvíos)
     private function saveVerificationToken($cedula, $codigo) {
         try {
             // Usar la misma tabla que usa el sistema de reset de contraseña
@@ -282,15 +320,11 @@ class AuthController {
                 // Generar nuevo código de 6 dígitos
                 $nuevo_codigo = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
                 
-                // Actualizar la contraseña del usuario
-                $update_stmt = $this->db->prepare("UPDATE usuarios SET password = :password WHERE cedula = :cedula");
-                $hashed_password = password_hash($nuevo_codigo, PASSWORD_DEFAULT);
-                $update_stmt->bindParam(':password', $hashed_password);
-                $update_stmt->bindParam(':cedula', $cedula);
-                $update_stmt->execute();
+                // Actualizar el token en password_first_token (para usuarios recién registrados)
+                $this->saveFirstVerificationToken($cedula, $nuevo_codigo, $user['celular']);
                 
                 // Enviar nuevo código por SMS
-                $smsResult = $this->sendVerificationCodeSMS($user['celular'], $nuevo_codigo, $cedula);
+                $smsResult = $this->sendVerificationCodeSMS($user['celular'], $nuevo_codigo, $cedula, false);
                 
                 if($smsResult['success']) {
                     // Actualizar timestamp del último envío

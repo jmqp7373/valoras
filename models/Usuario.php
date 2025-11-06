@@ -104,7 +104,10 @@ class Usuario {
         $this->nombres = htmlspecialchars(strip_tags($this->nombres));
         $this->apellidos = htmlspecialchars(strip_tags($this->apellidos));
         $this->usuario = htmlspecialchars(strip_tags($this->usuario));
-        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
+        
+        // Solo hashear password si no es NULL (permitir usuarios sin password inicial)
+        $password_to_save = $this->password !== null ? password_hash($this->password, PASSWORD_DEFAULT) : null;
+        
         $this->codigo_pais = htmlspecialchars(strip_tags($this->codigo_pais));
         $this->celular = htmlspecialchars(strip_tags($this->celular));
         $this->email = htmlspecialchars(strip_tags($this->email));
@@ -121,7 +124,7 @@ class Usuario {
         $stmt->bindParam(':nombres', $this->nombres);
         $stmt->bindParam(':apellidos', $this->apellidos);
         $stmt->bindParam(':usuario', $this->usuario);
-        $stmt->bindParam(':password', $this->password);
+        $stmt->bindParam(':password', $password_to_save);
         $stmt->bindParam(':codigo_pais', $this->codigo_pais);
         $stmt->bindParam(':celular', $this->celular);
         $stmt->bindParam(':email', $this->email);

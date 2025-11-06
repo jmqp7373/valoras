@@ -434,9 +434,9 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         .selected-username-display {
             text-align: center;
             padding: 20px 15px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: transparent; /* Sin fondo adicional ya que el contenedor padre es verde */
             border-radius: 16px;
-            border: 2px solid #28a745;
+            border: none; /* Sin borde adicional */
             margin: 15px 0;
         }
 
@@ -907,6 +907,8 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             .selected-username-display {
                 padding: 16px 12px;
                 margin: 12px 0;
+                background: transparent; /* Sin fondo adicional en móvil */
+                border: none; /* Sin borde adicional en móvil */
             }
 
             .selected-badge {
@@ -1056,6 +1058,8 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 padding: 12px 8px;
                 margin: 10px 0;
                 border-radius: 12px;
+                background: transparent; /* Sin fondo adicional en móviles pequeños */
+                border: none; /* Sin borde adicional en móviles pequeños */
             }
 
             .selected-badge {
@@ -1821,6 +1825,13 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             const container = document.getElementById('nameAnalysisContainer');
             const content = document.getElementById('nameAnalysisContent');
             
+            // Cambiar completamente el estilo del contenedor a verde
+            container.style.background = 'linear-gradient(135deg, #e8f5e8, #f1f8f1)';
+            container.style.border = '2px solid #28a745';
+            container.style.borderRadius = '15px';
+            container.style.padding = '20px';
+            container.style.marginBottom = '20px';
+            
             content.innerHTML = `
                 <div class="selected-username-display">
                     <div class="selected-badge">
@@ -1966,10 +1977,16 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             // Prevenir múltiples clicks
             if (refreshBtn.disabled) return;
             
-            // Ocultar análisis de nombre anterior
+            // Ocultar análisis de nombre anterior y restaurar estilo original
             const analysisContainer = document.getElementById('nameAnalysisContainer');
             if (analysisContainer) {
                 analysisContainer.style.display = 'none';
+                // Restaurar estilo original (rojo/rosa)
+                analysisContainer.style.background = 'linear-gradient(135deg, #fff9fc, #fef5f8)';
+                analysisContainer.style.border = '2px solid #ee6f92';
+                analysisContainer.style.borderRadius = '15px';
+                analysisContainer.style.padding = '20px';
+                analysisContainer.style.marginBottom = '20px';
             }
             
             // Restaurar texto explicativo original

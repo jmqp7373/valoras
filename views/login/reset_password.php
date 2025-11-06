@@ -2,10 +2,36 @@
 header('Content-Type: text/html; charset=UTF-8');
 require_once '../../controllers/login/PasswordResetController.php';
 
+// Verificar si ya está logueado
+startSessionSafely();
+if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    header('Location: ../../index.php');
+    exit();
+}
+
 $passwordController = new PasswordResetController();
 $result = null;
 $step = 1; // 1 = Ingresar código, 2 = Nueva contraseña
 $cedula = '';
+$userInfo = null;
+
+// Verificar si viene de password_reset.php
+if(isset($_SESSION['reset_code_sent']) && $_SESSION['reset_code_sent'] === true) {
+    // Usar información de la sesión
+    $cedula = $_SESSION['reset_user_identifier'] ?? '';
+    $contactMethod = $_SESSION['reset_contact_method'] ?? 'email';
+    
+    // Obtener información del usuario para mostrar
+    if($cedula) {
+        $userResult = $passwordController->findUser($cedula, $_SESSION['reset_identification_method'] ?? 'cedula');
+        if($userResult['success']) {
+            $userInfo = $userResult['user_data'];
+            $userInfo['contact_method'] = $contactMethod;
+            $userInfo['masked_email'] = $userResult['masked_email'] ?? null;
+            $userInfo['masked_phone'] = $userResult['masked_phone'] ?? null;
+        }
+    }
+}
 
 // Determinar paso actual
 if(isset($_POST['cedula']) && isset($_POST['code'])) {
@@ -119,15 +145,35 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
         <?php endif; ?>
         
         <?php if($step == 1): ?>
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                Ingresa el código de 6 dígitos que recibiste y tu número de cédula
-            </p>
+            <?php if($userInfo): ?>
+                <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                    <strong>📋 Información del Usuario:</strong><br>
+                    <span style="color: #666; font-size: 14px;">
+                        <?php echo htmlspecialchars(($userInfo['nombres'] ?? '') . ' ' . ($userInfo['apellidos'] ?? '')); ?> <br>
+                        Cédula: <?php echo htmlspecialchars($userInfo['cedula'] ?? ''); ?><br>
+                        Código enviado a: 
+                        <?php if($contactMethod === 'sms'): ?>
+                            📱 <?php echo htmlspecialchars($userInfo['celular'] ?? ''); ?>
+                        <?php else: ?>
+                            📧 <?php echo htmlspecialchars($userInfo['email'] ?? ''); ?>
+                        <?php endif; ?>
+                    </span>
+                </div>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Ingresa el código de 6 dígitos que recibiste
+                </p>
+            <?php else: ?>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Ingresa el código de 6 dígitos que recibiste y tu número de cédula
+                </p>
+            <?php endif; ?>
             
             <form method="POST" action="">
                 <div class="form-group">
                     <label for="cedula">Número de Cédula:</label>
                     <input type="text" id="cedula" name="cedula" placeholder="Tu número de cédula" required 
-                           value="<?php echo htmlspecialchars($_POST['cedula'] ?? ''); ?>">
+                           value="<?php echo htmlspecialchars($userInfo['cedula'] ?? $_POST['cedula'] ?? ''); ?>"
+                           <?php echo $userInfo ? 'readonly style="background-color: #f8f9fa;"' : ''; ?>>
                 </div>
                 
                 <div class="form-group">

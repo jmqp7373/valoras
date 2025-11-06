@@ -44,7 +44,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $method = $_SESSION['reset_method'] ?? 'cedula';
                 $result = $passwordController->sendResetCode($identifier, $_POST['method'], $method);
                 if($result['success']) {
-                    $step = 'sent';
+                    // Guardar datos necesarios en sesión para reset_password.php
+                    $_SESSION['reset_code_sent'] = true;
+                    $_SESSION['reset_user_identifier'] = $identifier;
+                    $_SESSION['reset_identification_method'] = $method;
+                    $_SESSION['reset_contact_method'] = $_POST['method'];
+                    
+                    // Redirigir inmediatamente a la página de ingreso de código
+                    header('Location: reset_password.php');
+                    exit();
                 }
                 break;
         }

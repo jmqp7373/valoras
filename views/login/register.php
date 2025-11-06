@@ -70,9 +70,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             <div class="form-group">
                 <label for="username">Nombre de Usuario:</label>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="username-container" style="display: flex; gap: 8px; align-items: center;">
                     <input type="text" id="username" placeholder="Elige tu nombre de usuario único" name="username" style="flex: 1; background-color: #f5f5f5;" readonly required>
                     <a href="registranteUserAvailavilitySelect.php" 
+                       class="ai-button"
                        style="padding: 12px 16px; background: linear-gradient(135deg, #ee6f92, #882A57); color: white; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;"
                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(238, 111, 146, 0.3)'"
                        onmouseout="this.style.transform='none'; this.style.boxShadow='none'"
@@ -186,6 +187,147 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .custom-select .option img {
             flex-shrink: 0;
+        }
+        
+        /* Estilos responsivos para móvil */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .form-group label {
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                display: block;
+            }
+            
+            /* Mejorar el campo nombre de usuario en móvil */
+            .username-container {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                align-items: stretch !important;
+            }
+            
+            #username {
+                width: 100% !important;
+                padding: 14px 16px !important;
+                font-size: 16px !important;
+                border-radius: 12px !important;
+                border: 2px solid #ee6f92 !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+            }
+            
+            /* Botón "Cambiar Nombre con IA" mejorado para móvil */
+            .ai-button {
+                padding: 14px 20px !important;
+                font-size: 14px !important;
+                text-align: center !important;
+                border-radius: 12px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                justify-content: center !important;
+                margin: 0 !important;
+            }
+            
+            .ai-button span:last-child {
+                font-size: 14px !important;
+            }
+            
+            /* Selector de país mejorado para móvil */
+            .form-group div[style*="display: flex; gap: 8px;"] {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            
+            .custom-select {
+                width: 100% !important;
+            }
+            
+            .select-display {
+                padding: 14px 16px !important;
+                font-size: 16px !important;
+            }
+            
+            .select-dropdown {
+                width: 100% !important;
+            }
+            
+            #phone_number {
+                padding: 14px 16px !important;
+                font-size: 16px !important;
+            }
+            
+            /* Mejorar todos los inputs del formulario */
+            input[type="text"], input[type="email"], input[type="password"] {
+                padding: 14px 16px !important;
+                font-size: 16px !important;
+                border-radius: 12px !important;
+                border: 2px solid #ee6f92 !important;
+            }
+            
+            /* Botón de registro mejorado */
+            button[type="submit"] {
+                padding: 16px 24px !important;
+                font-size: 16px !important;
+                margin-top: 25px !important;
+            }
+            
+            /* Mejorar el texto de ayuda */
+            .form-group small {
+                font-size: 12px !important;
+                line-height: 1.4 !important;
+                margin-top: 8px !important;
+            }
+        }
+        
+        /* Estilos para móviles muy pequeños */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 10px;
+                margin: 5px;
+            }
+            
+            .logo {
+                width: 120px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            h2 {
+                font-size: 22px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .form-group {
+                margin-bottom: 18px;
+            }
+            
+            input[type="text"], input[type="email"], input[type="password"] {
+                padding: 12px 14px !important;
+                font-size: 15px !important;
+            }
+            
+            .ai-button {
+                padding: 12px 16px !important;
+                font-size: 13px !important;
+            }
+            
+            .select-display {
+                padding: 12px 14px !important;
+                font-size: 15px !important;
+            }
+            
+            #phone_number {
+                padding: 12px 14px !important;
+                font-size: 15px !important;
+            }
         }
     </style>
 

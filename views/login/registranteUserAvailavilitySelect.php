@@ -387,7 +387,7 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         }
         
         .refresh-btn {
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #FFB347, #4A90E2);
             color: white;
             border: none;
             padding: 12px 25px;
@@ -402,12 +402,13 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
             margin: 15px auto;
             min-width: 180px;
             justify-content: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         
         .refresh-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-            background: linear-gradient(135deg, #20c997, #28a745);
+            box-shadow: 0 8px 25px rgba(255, 179, 71, 0.4);
+            background: linear-gradient(135deg, #4A90E2, #FFB347);
         }
         
         .refresh-btn:hover .icon {
@@ -435,8 +436,8 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         }
         
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3); }
-            50% { box-shadow: 0 8px 30px rgba(40, 167, 69, 0.6); }
+            0%, 100% { box-shadow: 0 6px 20px rgba(255, 179, 71, 0.3); }
+            50% { box-shadow: 0 8px 30px rgba(74, 144, 226, 0.5); }
         }
         
         .characteristics-header {

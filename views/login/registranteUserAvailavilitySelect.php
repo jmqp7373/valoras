@@ -646,6 +646,40 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
         <div class="wizard-header">
             <h1>🌟 Crear Tu Perfil Perfecto</h1>
             <p>Descubre el nombre de usuario ideal para ti en 3 simples pasos</p>
+            
+            <!-- Información explicativa sobre nombres únicos -->
+            <div class="info-box" style="background: linear-gradient(135deg, #fff9fc, #fef5f8); border: 2px solid #ee6f92; border-radius: 15px; padding: 20px; margin: 20px 0; text-align: left;">
+                <h3 style="color: #882A57; margin: 0 0 12px 0; font-size: 18px; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">🎯</span>
+                    ¿Por qué necesitas un nombre único?
+                </h3>
+                <div style="color: #666; font-size: 14px; line-height: 1.6;">
+                    <p style="margin: 0 0 10px 0;">
+                        <strong>🔐 Para registrarte en Valora.vip</strong> necesitas un nombre de usuario que sea <strong>completamente único</strong> y no esté siendo usado por otra persona.
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <div>
+                            <strong style="color: #882A57;">✨ Nuestro sistema IA te ayuda:</strong>
+                            <ul style="margin: 5px 0 0 20px; padding: 0;">
+                                <li>Genera nombres únicos y creativos</li>
+                                <li>Verifica disponibilidad en tiempo real</li>
+                                <li>Combina tu personalidad con nombres atractivos</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong style="color: #882A57;">🎪 Verificamos en múltiples plataformas:</strong>
+                            <ul style="margin: 5px 0 0 20px; padding: 0;">
+                                <li><strong>Valora.vip</strong> - Tu nueva cuenta</li>
+                                <li><strong>Chaturbate</strong> - Disponibilidad externa</li>
+                                <li><strong>Stripchat</strong> - Consistencia de marca</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="background: #f0f8ff; border-left: 4px solid #17a2b8; padding: 12px 15px; margin-top: 15px; border-radius: 0 8px 8px 0;">
+                        <strong style="color: #17a2b8;">💡 Tip:</strong> Si un nombre no está disponible, puedes refrescar las opciones en cualquier paso para obtener nuevas sugerencias personalizadas.
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="wizard-steps">

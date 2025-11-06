@@ -57,6 +57,11 @@ class Usuario {
 
     // Método para verificar si un usuario existe por email
     public function existsByEmail($email) {
+        // Si el email está vacío, no verificar duplicados
+        if (empty($email)) {
+            return false;
+        }
+        
         $query = "SELECT id_usuario FROM " . $this->table_name . " WHERE email = :email LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
@@ -86,9 +91,11 @@ class Usuario {
         }
 
         $query = "INSERT INTO " . $this->table_name . " 
-                 (cedula, nombres, apellidos, usuario, password, codigo_pais, celular, email, disponibilidad) 
+                 (cedula, nombres, apellidos, usuario, password, codigo_pais, celular, email, 
+                  id_estudio, id_referente, estado, inmune_asistencia, nivel) 
                  VALUES 
-                 (:cedula, :nombres, :apellidos, :usuario, :password, :codigo_pais, :celular, :email, :disponibilidad)";
+                 (:cedula, :nombres, :apellidos, :usuario, :password, :codigo_pais, :celular, :email,
+                  :id_estudio, :id_referente, :estado, :inmune_asistencia, :nivel)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -101,7 +108,13 @@ class Usuario {
         $this->codigo_pais = htmlspecialchars(strip_tags($this->codigo_pais));
         $this->celular = htmlspecialchars(strip_tags($this->celular));
         $this->email = htmlspecialchars(strip_tags($this->email));
-        $this->disponibilidad = 0; // Por defecto no disponible
+        
+        // Valores por defecto para campos obligatorios
+        $id_estudio = 1; // Valor por defecto para estudios
+        $id_referente = 0; // Sin referente por defecto  
+        $estado = 1; // Usuario activo
+        $inmune_asistencia = 0; // Sin inmunidad por defecto
+        $nivel = 1; // Nivel básico por defecto
 
         // Bind valores
         $stmt->bindParam(':cedula', $this->cedula);
@@ -112,7 +125,11 @@ class Usuario {
         $stmt->bindParam(':codigo_pais', $this->codigo_pais);
         $stmt->bindParam(':celular', $this->celular);
         $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':disponibilidad', $this->disponibilidad);
+        $stmt->bindParam(':id_estudio', $id_estudio);
+        $stmt->bindParam(':id_referente', $id_referente);
+        $stmt->bindParam(':estado', $estado);
+        $stmt->bindParam(':inmune_asistencia', $inmune_asistencia);
+        $stmt->bindParam(':nivel', $nivel);
 
         try {
             if($stmt->execute()) {

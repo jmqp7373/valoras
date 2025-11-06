@@ -5,6 +5,14 @@ require_once '../../controllers/login/AuthController.php';
 $authController = new AuthController();
 $registerResult = null;
 
+// Variables para mantener los valores del formulario en caso de error
+$cedula = '';
+$nombres = '';
+$apellidos = '';
+$username = '';
+$country_code = '+57';
+$phone_number = '';
+
 // Verificar si ya está logueado
 startSessionSafely();
 if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
@@ -14,9 +22,19 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 
 // Procesar el formulario de registro
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Capturar los valores para mantenerlos en caso de error
+    $cedula = $_POST['Numero_de_cedula'] ?? '';
+    $nombres = $_POST['first_name'] ?? '';
+    $apellidos = $_POST['last_name'] ?? '';
+    $username = $_POST['username'] ?? '';
+    $country_code = $_POST['country_code'] ?? '+57';
+    $phone_number = $_POST['phone_number'] ?? '';
+    
     $registerResult = $authController->register();
     if($registerResult['success']) {
-        // Mostrar mensaje de éxito y luego redirigir
+        // Limpiar variables en caso de éxito para evitar mostrar datos
+        $cedula = $nombres = $apellidos = $username = $phone_number = '';
+        $country_code = '+57';
     }
 }
 ?>
@@ -55,23 +73,23 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="form-group">
                 <!-- Campo de identificación con label y placeholder más descriptivos -->
                 <label for="Numero_de_cedula">Número de identificación (Cédula):</label>
-                <input type="text" id="Numero_de_cedula" placeholder="Número de identificación" name="Numero_de_cedula" required>
+                <input type="text" id="Numero_de_cedula" placeholder="Número de identificación" name="Numero_de_cedula" value="<?php echo htmlspecialchars($cedula); ?>" required>
             </div>
             
             <div class="form-group">
                 <label for="first_name">Nombre:</label>
-                <input type="text" id="first_name" placeholder="Nombre" name="first_name" required>
+                <input type="text" id="first_name" placeholder="Nombre" name="first_name" value="<?php echo htmlspecialchars($nombres); ?>" required>
             </div>
             
             <div class="form-group">
                 <label for="last_name">Apellidos:</label>
-                <input type="text" id="last_name" placeholder="Apellidos" name="last_name" required>
+                <input type="text" id="last_name" placeholder="Apellidos" name="last_name" value="<?php echo htmlspecialchars($apellidos); ?>" required>
             </div>
             
             <div class="form-group">
                 <label for="username">Nombre de Usuario:</label>
                 <div class="username-container" style="display: flex; gap: 8px; align-items: center;">
-                    <input type="text" id="username" placeholder="Elige tu nombre de usuario único" name="username" style="flex: 1; background-color: #f5f5f5;" readonly required>
+                    <input type="text" id="username" placeholder="Elige tu nombre de usuario único" name="username" value="<?php echo htmlspecialchars($username); ?>" style="flex: 1; background-color: #f5f5f5;" readonly required>
                     <a href="registranteUserAvailavilitySelect.php" 
                        class="ai-button"
                        style="padding: 12px 16px; background: linear-gradient(135deg, #ee6f92, #882A57); color: white; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;"
@@ -91,14 +109,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="phone_number">Número de Celular:</label>
                 <div style="display: flex; gap: 8px;">
                     <!-- Select oculto para envío del formulario -->
-                    <input type="hidden" id="country_code" name="country_code" value="+57" required>
+                    <input type="hidden" id="country_code" name="country_code" value="<?php echo htmlspecialchars($country_code); ?>" required>
                     
                     <!-- Selector personalizado -->
                     <div class="custom-select" style="position: relative; width: 110px;">
                         <div class="select-display" style="padding: 14px 12px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
                             <div class="selected-option" style="display: flex; align-items: center;">
                                 <img src="../../assets/images/flags/co.png" style="width: 20px; height: auto; margin-right: 8px;" alt="Colombia">
-                                <span>+57</span>
+                                <span><?php echo htmlspecialchars($country_code); ?></span>
                             </div>
                             <span class="dropdown-arrow" style="transform: rotate(0deg); transition: transform 0.3s;">▼</span>
                         </div>
@@ -141,7 +159,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                         </div>
                     </div>
-                    <input type="tel" id="phone_number" placeholder="Número de celular" name="phone_number" inputmode="numeric" pattern="\d{10}" maxlength="10" style="flex: 1; padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; transition: all 0.3s ease;" required>
+                    <input type="tel" id="phone_number" placeholder="Número de celular" name="phone_number" value="<?php echo htmlspecialchars($phone_number); ?>" inputmode="numeric" pattern="\d{10}" maxlength="10" style="flex: 1; padding: 14px 16px; border: 1px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; transition: all 0.3s ease;" required>
                 </div>
             </div>
             
@@ -340,6 +358,75 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             const selectedOption = selectDisplay.querySelector('.selected-option');
             const options = dropdown.querySelectorAll('.option');
             
+            // Inicializar selector con el valor previo del formulario (si existe)
+            const currentCountryCode = hiddenInput.value || '+57';
+            
+            // Phone number validation and length management  
+            const phoneInput = document.getElementById('phone_number');
+            
+            // Mapeo de longitud de teléfonos por país
+            const phoneLengthMap = {
+                '+57': 10,  // Colombia
+                '+52': 10,  // México
+                '+1': 10,   // Estados Unidos
+                '+56': 9,   // Chile
+                '+51': 9,   // Perú
+                '+58': 11,  // Venezuela
+                '+54': 10,  // Argentina
+                '+593': 9   // Ecuador
+            };
+            
+            // Mapeo de nombres de países para placeholders amigables
+            const countryNamesMap = {
+                '+57': 'Colombia',
+                '+52': 'México', 
+                '+1': 'Estados Unidos',
+                '+56': 'Chile',
+                '+51': 'Perú',
+                '+58': 'Venezuela',
+                '+54': 'Argentina',
+                '+593': 'Ecuador'
+            };
+            
+            // Función para actualizar maxlength y placeholder según el país seleccionado
+            function updatePhoneMaxLength(countryCode) {
+                const maxLength = phoneLengthMap[countryCode] || 10;
+                const countryName = countryNamesMap[countryCode] || 'País';
+                
+                // Actualizar atributos del campo de teléfono
+                phoneInput.setAttribute('maxlength', maxLength);
+                phoneInput.setAttribute('pattern', `\\d{${maxLength}}`);
+                
+                // Actualizar placeholder dinámicamente con información del país
+                phoneInput.setAttribute('placeholder', `${maxLength} dígitos (${countryName})`);
+                
+                // Truncar valor actual si excede la nueva longitud máxima
+                if (phoneInput.value.length > maxLength) {
+                    phoneInput.value = phoneInput.value.substring(0, maxLength);
+                }
+            }
+            
+            initializeCountrySelector(currentCountryCode);
+            
+            function initializeCountrySelector(countryCode) {
+                const option = dropdown.querySelector(`[data-value="${countryCode}"]`);
+                if (option) {
+                    const img = option.querySelector('img').cloneNode(true);
+                    const text = countryCode;
+                    
+                    // Actualizar display
+                    selectedOption.innerHTML = '';
+                    selectedOption.appendChild(img);
+                    selectedOption.appendChild(document.createTextNode(text));
+                    
+                    // Actualizar input hidden
+                    hiddenInput.value = countryCode;
+                    
+                    // Actualizar configuración del campo de teléfono
+                    updatePhoneMaxLength(countryCode);
+                }
+            }
+            
             // Toggle dropdown
             selectDisplay.addEventListener('click', function() {
                 const isOpen = dropdown.style.display === 'block';
@@ -395,54 +482,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (initialOption) {
                 initialOption.classList.add('selected');
             }
-            
-            // Phone number validation and length management
-            const phoneInput = document.getElementById('phone_number');
-            
-            // Mapeo de longitud de teléfonos por país
-            const phoneLengthMap = {
-                '+57': 10,  // Colombia
-                '+52': 10,  // México
-                '+1': 10,   // Estados Unidos
-                '+56': 9,   // Chile
-                '+51': 9,   // Perú
-                '+58': 11,  // Venezuela
-                '+54': 10,  // Argentina
-                '+593': 9   // Ecuador
-            };
-            
-            // Mapeo de nombres de países para placeholders amigables
-            const countryNamesMap = {
-                '+57': 'Colombia',
-                '+52': 'México', 
-                '+1': 'Estados Unidos',
-                '+56': 'Chile',
-                '+51': 'Perú',
-                '+58': 'Venezuela',
-                '+54': 'Argentina',
-                '+593': 'Ecuador'
-            };
-            
-            // Función para actualizar maxlength y placeholder según el país seleccionado
-            function updatePhoneMaxLength(countryCode) {
-                const maxLength = phoneLengthMap[countryCode] || 10;
-                const countryName = countryNamesMap[countryCode] || 'País';
-                
-                // Actualizar atributos del campo de teléfono
-                phoneInput.setAttribute('maxlength', maxLength);
-                phoneInput.setAttribute('pattern', `\\d{${maxLength}}`);
-                
-                // Actualizar placeholder dinámicamente con información del país
-                phoneInput.setAttribute('placeholder', `${maxLength} dígitos (${countryName})`);
-                
-                // Truncar valor actual si excede la nueva longitud máxima
-                if (phoneInput.value.length > maxLength) {
-                    phoneInput.value = phoneInput.value.substring(0, maxLength);
-                }
-            }
-            
-            // Establecer configuración inicial para Colombia (país por defecto)
-            updatePhoneMaxLength('+57');
             
             // Actualizar maxlength y placeholder cuando cambia la selección de país
             options.forEach(option => {

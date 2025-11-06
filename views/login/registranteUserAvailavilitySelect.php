@@ -1675,106 +1675,17 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         // Validación de edad en tiempo real
         } // Fin de setupFormHandlers
 
-        // Función para mostrar confirmación del nombre con análisis del adjetivo
+        // Función para mostrar confirmación simple del nombre seleccionado
         function showNameAnalysis(username) {
             const container = document.getElementById('nameAnalysisContainer');
             const content = document.getElementById('nameAnalysisContent');
             
-            // Analizar el nombre para extraer el adjetivo
-            const nameParts = analyzeName(username);
-            const adjective = nameParts.adjective;
-            
-            // Diccionario de adjetivos con traducciones y significados
-            const adjectiveTranslations = {
-                'fire': { spanish: 'Ardiente', meaning: 'Representa pasión, energía intensa y una personalidad magnética que atrae por su fuerza interior.' },
-                'star': { spanish: 'Estrella', meaning: 'Simboliza brillantez, capacidad de destacar y una personalidad que brilla con luz propia.' },
-                'moon': { spanish: 'Lunar', meaning: 'Evoca misterio, seducción nocturna y una elegancia magnética que fascina.' },
-                'wild': { spanish: 'Salvaje', meaning: 'Representa libertad, espíritu aventurero y una personalidad auténtica sin límites.' },
-                'sweet': { spanish: 'Dulce', meaning: 'Simboliza ternura, encanto natural y una personalidad que conquista con su delicadeza.' },
-                'bold': { spanish: 'Audaz', meaning: 'Representa valentía, determinación y una personalidad que no teme tomar riesgos.' },
-                'pure': { spanish: 'Pura', meaning: 'Evoca autenticidad, naturalidad y una belleza genuina que surge desde el interior.' },
-                'storm': { spanish: 'Tormenta', meaning: 'Simboliza intensidad, poder emocional y una personalidad que causa impacto profundo.' },
-                'rose': { spanish: 'Rosa', meaning: 'Representa delicadeza, belleza clásica y una elegancia natural que enamora.' },
-                'sage': { spanish: 'Sabia', meaning: 'Evoca inteligencia, reflexión profunda y una personalidad que atrae por su sabiduría.' },
-                'sultry': { spanish: 'Seductora', meaning: 'Representa sensualidad, magnetismo irresistible y un carisma que hipnotiza.' },
-                'velvet': { spanish: 'Aterciopelada', meaning: 'Simboliza suavidad, elegancia refinada y una sofisticación que encanta.' },
-                'diamond': { spanish: 'Diamante', meaning: 'Evoca valor excepcional, brillantez única y una personalidad irrompible como una gema.' },
-                'silk': { spanish: 'Sedosa', meaning: 'Representa refinamiento, delicadeza exquisita y una elegancia que fluye naturalmente.' },
-                'pearl': { spanish: 'Perla', meaning: 'Simboliza rareza preciosa, elegancia clásica y una belleza que se forma con el tiempo.' },
-                'golden': { spanish: 'Dorada', meaning: 'Evoca valor supremo, calidez radiante y una personalidad que ilumina todo a su alrededor.' },
-                'crystal': { spanish: 'Cristalina', meaning: 'Representa transparencia, claridad mental y una pureza que se ve a través del alma.' },
-                'crimson': { spanish: 'Carmesí', meaning: 'Simboliza pasión intensa, fuerza emocional y una personalidad que arde con intensidad.' },
-                'azure': { spanish: 'Azul Celeste', meaning: 'Evoca serenidad, paz interior y una tranquilidad que calma y fascina.' },
-                'emerald': { spanish: 'Esmeralda', meaning: 'Representa naturaleza preciosa, crecimiento constante y una belleza que perdura.' },
-                'scarlet': { spanish: 'Escarlata', meaning: 'Simboliza audacia vibrante, energía vital y una personalidad que no pasa desapercibida.' },
-                'amber': { spanish: 'Ámbar', meaning: 'Evoca calidez misteriosa, sabiduría ancestral y una belleza que guarda secretos.' },
-                'jade': { spanish: 'Jade', meaning: 'Representa equilibrio perfecto, serenidad natural y una armonía que tranquiliza.' },
-                'coral': { spanish: 'Coral', meaning: 'Simboliza vida marina, frescura natural y una personalidad que fluye como las olas.' },
-                'violet': { spanish: 'Violeta', meaning: 'Evoca misterio elegante, espiritualidad y una personalidad que fascina con su profundidad.' },
-                'hotness': { spanish: 'Ardor', meaning: 'Representa atractivo irresistible, magnetismo sensual y una energía que enciende pasiones.' },
-                'beauty': { spanish: 'Belleza', meaning: 'Simboliza hermosura absoluta, gracia natural y una presencia que cautiva por su perfección.' },
-                'magic': { spanish: 'Mágica', meaning: 'Evoca encanto sobrenatural, capacidad de fascinar y una personalidad que hechiza.' },
-                'angel': { spanish: 'Ángel', meaning: 'Representa pureza celestial, bondad natural y una dulzura que inspira protección.' },
-                'goddess': { spanish: 'Diosa', meaning: 'Simboliza poder divino, belleza suprema y una presencia majestuosa que inspira adoración.' },
-                'queen': { spanish: 'Reina', meaning: 'Evoca liderazgo natural, elegancia real y una personalidad que domina con clase.' },
-                'princess': { spanish: 'Princesa', meaning: 'Representa elegancia noble, delicadeza real y una gracia que enamora.' },
-                'fantasy': { spanish: 'Fantasía', meaning: 'Simboliza imaginación infinita, creatividad y una personalidad que vive en sueños.' },
-                'dream': { spanish: 'Sueño', meaning: 'Evoca aspiraciones altas, belleza idealizada y una presencia que parece irreal.' },
-                'love': { spanish: 'Amor', meaning: 'Representa capacidad de amar, ternura infinita y un corazón que da sin límites.' },
-                'passion': { spanish: 'Pasión', meaning: 'Simboliza fuego interior, intensidad emocional y una energía que consume y fascina.' },
-                'desire': { spanish: 'Deseo', meaning: 'Evoca atractivo magnético, capacidad de despertar anhelos y una presencia irresistible.' },
-                'charm': { spanish: 'Encanto', meaning: 'Representa carisma natural, capacidad de cautivar y una personalidad que seduce sin esfuerzo.' },
-                'grace': { spanish: 'Gracia', meaning: 'Simboliza elegancia natural, movimientos fluidos y una belleza que surge del interior.' },
-                'mystery': { spanish: 'Misterio', meaning: 'Evoca enigma fascinante, profundidad oculta y una personalidad que intriga constantemente.' },
-                'divine': { spanish: 'Divina', meaning: 'Representa perfección celestial, belleza sobrenatural y una presencia que inspira veneración.' },
-                'radiant': { spanish: 'Radiante', meaning: 'Simboliza luz propia, energía luminosa y una personalidad que ilumina todo entorno.' },
-                'brilliant': { spanish: 'Brillante', meaning: 'Evoca inteligencia superior, talento excepcional y una mente que deslumbra.' },
-                'stunning': { spanish: 'Impresionante', meaning: 'Representa impacto visual, belleza que sorprende y una presencia que deja sin aliento.' },
-                'gorgeous': { spanish: 'Hermosa', meaning: 'Simboliza belleza excepcional, atractivo supremo y una presencia que enamora.' },
-                'fierce': { spanish: 'Feroz', meaning: 'Evoca fuerza indomable, determinación férrea y una personalidad que no se rinde.' },
-                'powerful': { spanish: 'Poderosa', meaning: 'Representa fuerza interior, capacidad de liderazgo y una presencia dominante.' },
-                'fearless': { spanish: 'Intrépida', meaning: 'Simboliza valentía absoluta, ausencia de miedo y un espíritu aventurero.' },
-                'confident': { spanish: 'Confiada', meaning: 'Evoca seguridad personal, autoestima sólida y una presencia que inspira respeto.' },
-                'gentle': { spanish: 'Gentil', meaning: 'Representa dulzura natural, trato delicado y una personalidad que consuela.' },
-                'tender': { spanish: 'Tierna', meaning: 'Simboliza cuidado amoroso, sensibilidad emocional y un corazón que abraza.' },
-                'delicate': { spanish: 'Delicada', meaning: 'Evoca refinamiento exquisito, belleza frágil y una gracia que inspira protección.' },
-                'precious': { spanish: 'Preciosa', meaning: 'Representa valor incalculable, rareza especial y una belleza que se atesora.' },
-                'innocent': { spanish: 'Inocente', meaning: 'Simboliza pureza de alma, candor natural y una dulzura que enternece.' },
-                'fresh': { spanish: 'Fresca', meaning: 'Evoca juventud eterna, vitalidad natural y una energía renovadora.' },
-                'natural': { spanish: 'Natural', meaning: 'Representa autenticidad pura, belleza sin artificios y una personalidad genuina.' }
-            };
-            
-            const adjectiveInfo = adjectiveTranslations[adjective.toLowerCase()] || 
-                { spanish: adjective, meaning: 'Representa una cualidad especial que complementa tu personalidad única.' };
-            
             content.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <h4 style="color: #882A57; margin: 0 0 15px 0; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <div style="text-align: center; padding: 15px;">
+                    <h4 style="color: #882A57; margin: 0; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>✅</span> Has seleccionado: <strong>${username}</strong>
                     </h4>
-                    
-                    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 12px; padding: 18px; margin: 15px 0; border-left: 4px solid #ee6f92;">
-                        <h5 style="color: #882A57; margin: 0 0 12px 0; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                            <span>💫</span> Significado del Adjetivo
-                        </h5>
-                        
-                        <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
-                            <div style="text-align: center; margin-bottom: 12px;">
-                                <span style="font-size: 20px; font-weight: bold; color: #ee6f92; display: block; margin-bottom: 5px;">
-                                    ${adjectiveInfo.spanish}
-                                </span>
-                                <span style="font-size: 14px; color: #666; font-style: italic;">
-                                    (${adjective})
-                                </span>
-                            </div>
-                            
-                            <p style="color: #495057; margin: 0; font-size: 14px; line-height: 1.6; text-align: center;">
-                                ${adjectiveInfo.meaning}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <p style="color: #666; margin: 15px 0 0 0; font-size: 13px; font-style: italic;">
+                    <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">
                         Nombre único generado por IA basado en tus características personales
                     </p>
                 </div>

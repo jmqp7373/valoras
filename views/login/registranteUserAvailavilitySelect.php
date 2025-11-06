@@ -921,7 +921,22 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 'pure': { spanish: 'pura', meaning: 'natural y genuina' },
                 'storm': { spanish: 'tormenta', meaning: 'intensa y poderosa' },
                 'rose': { spanish: 'rosa', meaning: 'delicada y hermosa' },
-                'sage': { spanish: 'sabia', meaning: 'inteligente y reflexiva' }
+                'sage': { spanish: 'sabia', meaning: 'inteligente y reflexiva' },
+                'sultry': { spanish: 'seductora', meaning: 'sensual y provocativa' },
+                'velvet': { spanish: 'aterciopelada', meaning: 'suave y elegante' },
+                'diamond': { spanish: 'diamante', meaning: 'brillante y valiosa' },
+                'silk': { spanish: 'sedosa', meaning: 'suave y refinada' },
+                'pearl': { spanish: 'perla', meaning: 'preciosa y elegante' },
+                'golden': { spanish: 'dorada', meaning: 'radiante y valiosa' },
+                'crystal': { spanish: 'cristalina', meaning: 'clara y transparente' },
+                'crimson': { spanish: 'carmesí', meaning: 'intensa y apasionada' },
+                'azure': { spanish: 'azul celeste', meaning: 'serena y celestial' },
+                'emerald': { spanish: 'esmeralda', meaning: 'preciosa y natural' },
+                'scarlet': { spanish: 'escarlata', meaning: 'vibrante y llamativa' },
+                'amber': { spanish: 'ámbar', meaning: 'cálida y misteriosa' },
+                'jade': { spanish: 'jade', meaning: 'serena y equilibrada' },
+                'coral': { spanish: 'coral', meaning: 'vibrante y marina' },
+                'violet': { spanish: 'violeta', meaning: 'mística y elegante' }
             };
 
             const feminineInfo = feminineNames[feminineName.toLowerCase()] || 
@@ -1027,6 +1042,42 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                         'magnetica': 'tu magnetismo natural se potencia con la atracción lunar',
                         'mistica': 'tu esencia mística se conecta con los ciclos lunares',
                         'elegante': 'tu elegancia se sublima con la gracia lunar'
+                    }
+                },
+                'sultry': {
+                    traits: ['seductora', 'sensual', 'magnetica', 'misteriosa', 'pasional', 'intensa'],
+                    explanation: 'Sultry (Seductora) representa sensualidad, magnetismo y poder de atracción',
+                    connections: {
+                        'seductora': 'tu poder de seducción natural se intensifica con lo seductor',
+                        'sensual': 'tu sensualidad innata encuentra expresión en lo seductor',
+                        'magnetica': 'tu magnetismo personal se amplifica con la seducción',
+                        'misteriosa': 'tu misterio natural se potencia con el encanto seductor',
+                        'pasional': 'tu naturaleza pasional se manifiesta en la seducción',
+                        'intensa': 'tu intensidad emocional se canaliza a través de lo seductor'
+                    }
+                },
+                'velvet': {
+                    traits: ['elegante', 'sofisticada', 'delicada', 'refinada', 'sensual', 'lujosa'],
+                    explanation: 'Velvet (Aterciopelada) evoca elegancia, suavidad y refinamiento',
+                    connections: {
+                        'elegante': 'tu elegancia natural se refleja en la suavidad del terciopelo',
+                        'sofisticada': 'tu sofisticación encuentra expresión en lo aterciopelado',
+                        'delicada': 'tu delicadeza se complementa con la textura suave',
+                        'refinada': 'tu refinamiento se materializa en la calidad aterciopelada',
+                        'sensual': 'tu sensualidad se expresa a través de la suavidad',
+                        'lujosa': 'tu gusto por lo lujoso resuena con el terciopelo'
+                    }
+                },
+                'diamond': {
+                    traits: ['brillante', 'valiosa', 'fuerte', 'unica', 'radiante', 'preciosa'],
+                    explanation: 'Diamond (Diamante) simboliza valor, brillantez y fortaleza',
+                    connections: {
+                        'brillante': 'tu inteligencia brillante resplandece como un diamante',
+                        'valiosa': 'tu valor como persona se refleja en lo precioso del diamante',
+                        'fuerte': 'tu fortaleza interior es tan sólida como un diamante',
+                        'unica': 'tu unicidad es tan rara y preciosa como un diamante',
+                        'radiante': 'tu energía radiante brilla como las facetas de un diamante',
+                        'preciosa': 'tu naturaleza preciosa se materializa en el diamante'
                     }
                 }
             };

@@ -180,13 +180,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php 
             $currentStep = 1;
             if($step === 'select_method') $currentStep = 2;
-            if($step === 'sent') $currentStep = 3;
             ?>
             <div class="step <?php echo $currentStep >= 1 ? ($currentStep > 1 ? 'completed' : 'active') : ''; ?>">1</div>
             <div class="step-line <?php echo $currentStep > 1 ? 'active' : ''; ?>"></div>
-            <div class="step <?php echo $currentStep >= 2 ? ($currentStep > 2 ? 'completed' : 'active') : ''; ?>">2</div>
-            <div class="step-line <?php echo $currentStep > 2 ? 'active' : ''; ?>"></div>
-            <div class="step <?php echo $currentStep >= 3 ? 'active' : ''; ?>">3</div>
+            <div class="step <?php echo $currentStep >= 2 ? 'active' : ''; ?>">2</div>
         </div>
         
         <?php if($result && !$result['success']): ?>

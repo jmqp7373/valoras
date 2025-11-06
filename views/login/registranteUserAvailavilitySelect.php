@@ -688,7 +688,7 @@ $caracteristicasActuales = $_SESSION['caracteristicas_usuario'];
                         <strong>🔐 Para registrarte en Valora.vip</strong> necesitas un nombre <strong>completamente único</strong> y no usado por otra persona.
                     </p>
                     <p style="margin: 0 0 8px 0;">
-                        <strong style="color: #882A57;">✨ Nuestro sistema IA</strong> genera nombres únicos, verifica disponibilidad en tiempo real y combina tu personalidad con nombres atractivos.
+                        <strong style="color: #882A57;">✨ Nuestro sistema IA</strong> genera nombres únicos, verifica disponibilidad en tiempo real en <strong>Chaturbate.com</strong> y <strong>Stripchat.com</strong>, y combina tu personalidad con nombres atractivos.
                     </p>
                     <div style="background: #f0f8ff; border-left: 4px solid #17a2b8; padding: 8px 12px; margin-top: 10px; border-radius: 0 8px 8px 0;">
                         <strong style="color: #17a2b8;">💡 Tip:</strong> Si un nombre no está disponible, puedes refrescar las opciones para obtener nuevas sugerencias.

@@ -66,8 +66,25 @@ class Usuario {
         return $stmt->rowCount() > 0;
     }
 
+    // Método para verificar si un usuario existe por celular
+    public function existsByCelular($celular) {
+        $query = "SELECT id_usuario FROM " . $this->table_name . " WHERE celular = :celular LIMIT 1";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':celular', $celular);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    }
+
     // Método para crear un nuevo usuario
     public function create() {
+        // Verificar duplicados antes de insertar
+        $duplicateCheck = $this->checkForDuplicates();
+        if (!$duplicateCheck['success']) {
+            return $duplicateCheck;
+        }
+
         $query = "INSERT INTO " . $this->table_name . " 
                  (cedula, nombres, apellidos, password, codigo_pais, celular, email, disponibilidad) 
                  VALUES 
@@ -95,11 +112,46 @@ class Usuario {
         $stmt->bindParam(':email', $this->email);
         $stmt->bindParam(':disponibilidad', $this->disponibilidad);
 
-        if($stmt->execute()) {
-            return true;
+        try {
+            if($stmt->execute()) {
+                return ['success' => true, 'message' => 'Usuario creado exitosamente'];
+            }
+            return ['success' => false, 'message' => 'Error al crear el usuario'];
+        } catch(PDOException $e) {
+            // Manejar errores específicos de base de datos
+            if($e->getCode() == 23000) { // Violation de integridad/duplicado
+                if(strpos($e->getMessage(), 'cedula') !== false) {
+                    return ['success' => false, 'message' => 'Ya existe una cuenta con esta cédula'];
+                } elseif(strpos($e->getMessage(), 'celular') !== false) {
+                    return ['success' => false, 'message' => 'Ya existe una cuenta con este número de celular'];
+                } elseif(strpos($e->getMessage(), 'email') !== false) {
+                    return ['success' => false, 'message' => 'Ya existe una cuenta con este email'];
+                } else {
+                    return ['success' => false, 'message' => 'Ya existe una cuenta con estos datos'];
+                }
+            }
+            return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
+        }
+    }
+
+    // Método para verificar duplicados antes de insertar
+    public function checkForDuplicates() {
+        // Verificar cédula duplicada
+        if ($this->existsByCedula($this->cedula)) {
+            return ['success' => false, 'message' => 'Ya existe una cuenta registrada con esta cédula'];
         }
 
-        return false;
+        // Verificar celular duplicado
+        if ($this->existsByCelular($this->celular)) {
+            return ['success' => false, 'message' => 'Ya existe una cuenta registrada con este número de celular'];
+        }
+
+        // Verificar email duplicado
+        if ($this->existsByEmail($this->email)) {
+            return ['success' => false, 'message' => 'Ya existe una cuenta registrada con este email'];
+        }
+
+        return ['success' => true];
     }
 
     // Método para obtener información del usuario por ID

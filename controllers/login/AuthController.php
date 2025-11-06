@@ -100,7 +100,9 @@ class AuthController {
             $this->usuario->celular = $celular;
             $this->usuario->email = $email;
 
-            if($this->usuario->create()) {
+            $result = $this->usuario->create();
+            
+            if($result['success']) {
                 return [
                     'success' => true,
                     'message' => 'Usuario registrado exitosamente. Su contraseña temporal es: ' . $password_temp,
@@ -109,7 +111,7 @@ class AuthController {
             } else {
                 return [
                     'success' => false,
-                    'message' => 'Error al registrar usuario. Intente nuevamente.'
+                    'message' => $result['message']
                 ];
             }
         }

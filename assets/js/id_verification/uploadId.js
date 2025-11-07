@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('id_photo_front', fileFront);
             formData.append('id_photo_back', fileBack);
             
-            // Enviar solicitud al backend
-            const response = await fetch('/controllers/id_verification/idVerificationController.php', {
+            // Enviar solicitud al backend (ruta relativa desde views/login/)
+            const response = await fetch('../../controllers/id_verification/idVerificationController.php', {
                 method: 'POST',
                 body: formData
             });
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.valid && data.userMatch) {
             html += `
                 <div class="mt-4 text-center">
-                    <a href="/views/login/password_reset.php" class="btn btn-primary analyze-button">
+                    <a href="password_reset.php" class="btn btn-primary analyze-button">
                         Continuar con recuperación
                     </a>
                 </div>

@@ -5,7 +5,7 @@
  * UBICACIÓN: https://valora.vip/check_vision_config.php
  * 
  * Este script verifica que todo esté configurado correctamente
- * para usar Google Cloud Vision API en verify_document.php
+ * para usar Google Cloud Vision API en verify1_document.php (flujo multi-página)
  * 
  * ⚠️ ELIMINAR DESPUÉS DE VALIDAR LA CONFIGURACIÓN
  */
@@ -175,17 +175,17 @@ header('Content-Type: text/html; charset=UTF-8');
             $allChecksPass = false;
         }
         
-        // CHECK 5: Verificar vista verify_document.php
+        // CHECK 5: Verificar vista verify1_document.php (Paso 1 - Nuevo flujo multi-página)
         echo '<h3>5️⃣ Verificar vista</h3>';
-        $viewPath = __DIR__ . '/views/login/verify_document.php';
+        $viewPath = __DIR__ . '/views/login/verify1_document.php';
         
         if (file_exists($viewPath)) {
             echo '<div class="check success">';
-            echo '<strong>✅ CORRECTO:</strong> La vista verify_document.php existe';
+            echo '<strong>✅ CORRECTO:</strong> La vista verify1_document.php existe (Paso 1)';
             echo '</div>';
         } else {
             echo '<div class="check error">';
-            echo '<strong>❌ ERROR:</strong> No se encontró verify_document.php';
+            echo '<strong>❌ ERROR:</strong> No se encontró verify1_document.php';
             echo '<br><strong>Ubicación esperada:</strong> ' . $viewPath;
             echo '</div>';
             $allChecksPass = false;
@@ -216,7 +216,7 @@ header('Content-Type: text/html; charset=UTF-8');
             echo '<div class="check success">';
             echo '<strong>✅ TODO CORRECTO:</strong> El sistema está configurado correctamente para usar Google Vision API';
             echo '<br><br><strong>Siguiente paso:</strong> Prueba la verificación de documentos en:';
-            echo '<br><a href="/views/login/verify_document.php" class="btn">Ir a Verificación de Documentos</a>';
+            echo '<br><a href="/views/login/verify1_document.php" class="btn">Ir a Verificación de Documentos (Paso 1)</a>';
             echo '</div>';
         } else {
             echo '<div class="check error">';

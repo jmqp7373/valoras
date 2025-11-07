@@ -80,14 +80,19 @@ Sube el script de diagnóstico a tu servidor y accede a:
 ### Test Local (XAMPP):
 ```
 http://localhost/valora.vip/check_vision_config.php
-http://localhost/valora.vip/views/login/verify_document.php
+http://localhost/valora.vip/views/login/verify1_document.php (Paso 1 - Nuevo flujo)
 ```
 
 ### Test Producción (Hostinger):
 ```
 https://valora.vip/check_vision_config.php
-https://valora.vip/views/login/verify_document.php
+https://valora.vip/views/login/verify1_document.php (Paso 1 - Nuevo flujo)
 ```
+
+**Nota:** El flujo ahora usa 3 páginas separadas:
+- `verify1_document.php` - Paso 1: Subir documentos
+- `verify2_OCR.php` - Paso 2: Ver resultados OCR
+- `verify3_Update.php` - Paso 3: Actualizar datos de contacto
 
 ## 🆘 Si el Error Persiste
 

@@ -396,52 +396,55 @@ startSessionSafely();
            ESTILOS PARA STEP VIEW (VISTA POR PASOS)
            ================================== */
         .steps-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            gap: 8px;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-bottom: 20px !important;
+            gap: 8px !important;
+            background: white !important;
+            padding: 15px 20px !important;
+            border-radius: 15px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
         }
         
         .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            color: #757575;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 18px;
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50% !important;
+            background: #e0e0e0 !important;
+            color: #757575 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-weight: 600 !important;
+            font-size: 18px !important;
             transition: all 0.3s ease;
+            line-height: 1 !important;
+            text-align: center !important;
         }
         
         .step-line {
-            width: 60px;
-            height: 3px;
-            background: #e0e0e0;
+            width: 60px !important;
+            height: 3px !important;
+            background: #e0e0e0 !important;
             transition: all 0.3s ease;
+            flex-shrink: 0 !important;
         }
         
         .step.active {
-            background: linear-gradient(135deg, #e91e63, #ff4081);
-            color: white;
-            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
-            transform: scale(1.1);
+            background: linear-gradient(135deg, #e91e63, #ff4081) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4) !important;
+            transform: scale(1.1) !important;
         }
         
         .step.completed {
-            background: linear-gradient(135deg, #4caf50, #66bb6a);
-            color: white;
+            background: linear-gradient(135deg, #4caf50, #66bb6a) !important;
+            color: white !important;
         }
         
         .step-line.active {
-            background: linear-gradient(90deg, #e91e63, #ff4081);
+            background: linear-gradient(90deg, #e91e63, #ff4081) !important;
         }
         
         /* ==================================
@@ -537,7 +540,7 @@ startSessionSafely();
 <body>
     <div class="verification-container">
         <!-- STEP VIEW: Indicador de progreso (FUERA del card principal) -->
-        <div class="steps-container" style="margin-bottom: 20px;">
+        <div class="steps-container">
             <div class="step step-1 active">1</div>
             <div class="step-line step-line-1"></div>
             <div class="step step-2">2</div>

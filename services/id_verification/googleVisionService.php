@@ -301,16 +301,116 @@ class GoogleVisionService {
     /**
      * Extrae el número de cédula con algoritmo inteligente
      * 
-     * Estrategia:
-     * 1. Buscar número después de palabra clave "NUMERO" o "NÚMERO"
-     * 2. Validar que no empiece con ceros (descarta seriales como 00731551)
-     * 3. Validar longitud de cédula colombiana (7-10 dígitos)
-     * 4. Si hay múltiples candidatos, elegir el más probable
+     * Estrategia mejorada para detectar dos tipos de cédula colombiana:
+     * 
+     * TIPO 1 - Cédula Amarilla (antigua):
+     *   - Palabra clave: "NUMERO" o "NÚMERO"
+     *   - Número: 9-11 dígitos con puntos (1.125.998.052)
+     *   - Código de barras: A-1500150-00731551-M-1125998052-20150808
+     *     (el número real está en el 4to grupo)
+     * 
+     * TIPO 2 - Cédula Digital (nueva, con mariposas):
+     *   - Palabra clave: "NUIP"
+     *   - Número: 9-11 dígitos con puntos (1.000.291.222)
+     *   - Código MRZ: COL1000291222
      * 
      * @param string $text Texto extraído del documento
      * @return string Número de cédula o cadena vacía
      */
     private function extractCedulaNumber($text) {
+        $numeroDocumento = '';
+        
+        // =============================================
+        // DETECTAR TIPO DE CÉDULA
+        // =============================================
+        $isDigital = (stripos($text, 'NUIP') !== false) || 
+                     (stripos($text, 'ALEXANDER VEGA') !== false) ||
+                     (stripos($text, 'REGISTRADURIA NACIONAL') !== false && 
+                      stripos($text, 'COL') !== false);
+        
+        $isAmarilla = (stripos($text, 'NUMERO') !== false || 
+                       stripos($text, 'NÚMERO') !== false) || 
+                      (stripos($text, 'CARLOS ARIEL') !== false);
+        
+        // =============================================
+        // EXTRACCIÓN PARA CÉDULA AMARILLA
+        // =============================================
+        if ($isAmarilla && empty($numeroDocumento)) {
+            // Prioridad 1: Buscar después de "NUMERO" o "NÚMERO"
+            if (preg_match('/N[UÚ]MERO\s*([\d\.]+)/i', $text, $matches)) {
+                $numeroDocumento = preg_replace('/\D/', '', $matches[1]);
+            }
+            
+            // Prioridad 2: Buscar en código de barras formato A-XXXXXXX-XXXXXXXX-M-XXXXXXXXXX-XXXXXXXX
+            // El número real está en el 4to grupo (después del segundo guión M-)
+            if (empty($numeroDocumento) || strlen($numeroDocumento) < 8) {
+                if (preg_match('/A-\d+-\d+-M-(\d{9,11})-/i', $text, $matches)) {
+                    $numeroDocumento = $matches[1];
+                }
+            }
+        }
+        
+        // =============================================
+        // EXTRACCIÓN PARA CÉDULA DIGITAL
+        // =============================================
+        if ($isDigital && empty($numeroDocumento)) {
+            // Prioridad 1: Buscar después de "NUIP"
+            if (preg_match('/NUIP\s*([\d\.]+)/i', $text, $matches)) {
+                $numeroDocumento = preg_replace('/\D/', '', $matches[1]);
+            }
+            
+            // Prioridad 2: Buscar en código MRZ formato COL + número
+            if (empty($numeroDocumento) || strlen($numeroDocumento) < 8) {
+                if (preg_match('/COL(\d{9,11})/i', $text, $matches)) {
+                    $numeroDocumento = $matches[1];
+                }
+            }
+        }
+        
+        // =============================================
+        // FALLBACK: Búsqueda genérica si no se detectó el tipo
+        // =============================================
+        if (empty($numeroDocumento)) {
+            // Buscar cualquier número de 9-11 dígitos que NO empiece con cero
+            if (preg_match('/\b(?!0)\d{9,11}\b/', $text, $matches)) {
+                $numeroDocumento = $matches[0];
+            }
+        }
+        
+        // =============================================
+        // VALIDACIÓN Y NORMALIZACIÓN FINAL
+        // =============================================
+        if (!empty($numeroDocumento)) {
+            // Normalizar: eliminar ceros a la izquierda
+            $numeroDocumento = ltrim($numeroDocumento, '0');
+            
+            // Validar longitud (cédulas colombianas: 8-11 dígitos)
+            $length = strlen($numeroDocumento);
+            if ($length < 8 || $length > 11) {
+                // Si no cumple longitud, intentar búsqueda alternativa
+                return $this->extractCedulaNumberLegacy($text);
+            }
+            
+            // Validar que no sea una fecha (YYYYMMDD)
+            if (preg_match('/^(19|20)\d{6}$/', $numeroDocumento)) {
+                return $this->extractCedulaNumberLegacy($text);
+            }
+            
+            return $numeroDocumento;
+        }
+        
+        // Si todo falló, usar método legacy
+        return $this->extractCedulaNumberLegacy($text);
+    }
+    
+    /**
+     * Método legacy para extracción de cédula (fallback)
+     * Se usa cuando el método principal no encuentra un número válido
+     * 
+     * @param string $text Texto extraído del documento
+     * @return string Número de cédula o cadena vacía
+     */
+    private function extractCedulaNumberLegacy($text) {
         $candidates = [];
         
         // PRIORIDAD 1: Número después de "NUMERO" o "NÚMERO" (con o sin acento)

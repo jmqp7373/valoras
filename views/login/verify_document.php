@@ -399,8 +399,12 @@ startSessionSafely();
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             gap: 8px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         
         .step {
@@ -532,17 +536,17 @@ startSessionSafely();
 </head>
 <body>
     <div class="verification-container">
+        <!-- STEP VIEW: Indicador de progreso (FUERA del card principal) -->
+        <div class="steps-container" style="margin-bottom: 20px;">
+            <div class="step step-1 active">1</div>
+            <div class="step-line step-line-1"></div>
+            <div class="step step-2">2</div>
+            <div class="step-line step-line-2"></div>
+            <div class="step step-3">3</div>
+        </div>
+        
         <div class="card">
             <img src="../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo" style="max-width: 150px; margin: 0 auto 20px; display: block;">
-            
-            <!-- STEP VIEW: Indicador de progreso -->
-            <div class="steps-container">
-                <div class="step step-1 active">1</div>
-                <div class="step-line step-line-1"></div>
-                <div class="step step-2">2</div>
-                <div class="step-line step-line-2"></div>
-                <div class="step step-3">3</div>
-            </div>
             
             <h3>📸 Verificación de Identidad</h3>
             <p>

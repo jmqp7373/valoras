@@ -331,8 +331,12 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {number} stepNumber - Número del paso a activar (1, 2 o 3)
      */
     function setActiveStep(stepNumber) {
+        console.log(`[setActiveStep] Activando paso ${stepNumber}`);
+        
         const steps = document.querySelectorAll('.steps-container .step');
         const stepLines = document.querySelectorAll('.steps-container .step-line');
+        
+        console.log(`[setActiveStep] Pasos encontrados: ${steps.length}, Líneas: ${stepLines.length}`);
         
         steps.forEach((step, index) => {
             const currentStepNum = index + 1;
@@ -343,11 +347,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Activar el paso actual
             if (currentStepNum === stepNumber) {
                 step.classList.add('active');
+                console.log(`[setActiveStep] Paso ${currentStepNum} marcado como ACTIVO`);
             }
             
             // Marcar como completados los pasos anteriores
             if (currentStepNum < stepNumber) {
                 step.classList.add('completed');
+                console.log(`[setActiveStep] Paso ${currentStepNum} marcado como COMPLETADO`);
             }
         });
         
@@ -389,7 +395,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Inicialización del Step View
+    // =========================================
+    // INICIALIZACIÓN DEL STEP VIEW AL CARGAR LA PÁGINA
+    // =========================================
+    
+    // Asegurar que solo el Paso 1 esté activo al inicio
+    setActiveStep(1);
     console.log('Step View inicializado correctamente - Paso 1 activo por defecto');
 });
 

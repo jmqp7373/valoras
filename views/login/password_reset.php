@@ -128,8 +128,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <?php include '../../components/marcaPasos.php'; ?>
     
-    <!-- MARCA PASOS - FUERA DEL CONTENEDOR -->
-    <div style="max-width: 600px; margin: 20px auto 0; padding: 0 15px;">
+    <!-- MARCA PASOS - ALINEADO CON EL FORMULARIO -->
+    <div style="max-width: 380px; margin: 20px auto 0; padding: 0 20px;">
         <?php 
         $currentStep = 1;
         if($step === 'select_method') $currentStep = 2;

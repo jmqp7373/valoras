@@ -102,12 +102,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
 <body>
     <?php include '../../components/marcaPasos.php'; ?>
     
+    <!-- MARCA PASOS - ALINEADO CON EL FORMULARIO -->
+    <div style="max-width: 380px; margin: 20px auto 0; padding: 0 20px;">
+        <?php renderMarcaPasos(3, 3); // Paso 3 de 3: identify → select_method → reset_password ?>
+    </div>
+    
     <div class="login-container">
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo">
         <h2>🔑 Crear Nueva Contraseña</h2>
-        
-        <!-- MARCA PASOS: Paso 3 de 3 pasos totales (1=identify, 2=select_method, 3=reset_password) -->
-        <?php renderMarcaPasos(3, 3); ?>
         
         <?php if($result): ?>
             <?php if($result['success'] && $step == 3): ?>

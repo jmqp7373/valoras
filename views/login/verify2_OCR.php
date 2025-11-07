@@ -37,13 +37,6 @@ $userData = $ocrData['userData'] ?? null;
     <style>
         * { box-sizing: border-box; }
         
-        body {
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px 0;
-            overflow-x: hidden;
-        }
-        
         .verification-container {
             max-width: 600px;
             margin: 0 auto;

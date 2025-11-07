@@ -223,9 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Texto completo combinado (colapsable)
         if (data.data.fullText) {
             html += `
-                <details class="mt-3">
+                <details class="mt-3 ocr-text-toggle">
                     <summary style="cursor: pointer; color: #882A57; font-weight: bold;">Ver texto completo extraído (ambas caras)</summary>
-                    <pre class="mt-2 p-3" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; white-space: pre-wrap;">${escapeHtml(data.data.fullText)}</pre>
+                    <pre class="mt-2 p-3 ocr-text-content">${escapeHtml(data.data.fullText)}</pre>
                 </details>
             `;
         }
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.valid && data.userMatch) {
             html += `
                 <div class="mt-4 text-center">
-                    <a href="/views/login/password_reset.php" class="btn btn-primary" style="white-space: normal; word-wrap: break-word; max-width: 100%;">
+                    <a href="/views/login/password_reset.php" class="btn btn-primary analyze-button">
                         Continuar con recuperación
                     </a>
                 </div>
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             html += `
                 <div class="mt-4 text-center">
-                    <button onclick="location.reload()" class="btn btn-secondary">
+                    <button onclick="location.reload()" class="btn btn-secondary analyze-button">
                         Intentar de nuevo
                     </button>
                 </div>
@@ -267,6 +267,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         resultDiv.innerHTML = html;
+        
+        // Agregar listener para controlar el scroll al expandir el texto OCR
+        const detailsElement = resultDiv.querySelector('details.ocr-text-toggle');
+        if (detailsElement) {
+            detailsElement.addEventListener('toggle', function() {
+                console.log('OCR toggle listener activo - Estado:', this.open ? 'abierto' : 'cerrado');
+                if (this.open) {
+                    // Esperar a que el navegador aplique el cambio de estado
+                    setTimeout(() => {
+                        this.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start'
+                        });
+                    }, 100);
+                }
+            });
+        }
     }
     
     /**

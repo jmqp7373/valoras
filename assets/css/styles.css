@@ -223,3 +223,97 @@ select:focus {
 .btn-primary i {
     margin-right: 8px;
 }
+
+/* ==================================
+   ESTILOS PARA VERIFICACIÓN DE DOCUMENTO
+   ================================== */
+
+/* Control del salto visual al expandir details */
+details[open], 
+.ocr-text-toggle, 
+.results-container,
+#idScanResult {
+    scroll-margin-top: 90px;
+    overflow-anchor: none;
+}
+
+details {
+    transition: all 0.3s ease;
+}
+
+/* Scroll interno del texto OCR extraído */
+.ocr-text-content {
+    max-height: 420px;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Scrollbar personalizada para el texto OCR */
+.ocr-text-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ocr-text-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.ocr-text-content::-webkit-scrollbar-thumb {
+    background: #882A57;
+    border-radius: 10px;
+}
+
+.ocr-text-content::-webkit-scrollbar-thumb:hover {
+    background: #6b1e42;
+}
+
+/* Botón de análisis centrado y responsivo */
+.analyze-button,
+#analyzeIdButton {
+    display: block;
+    margin: 20px auto;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Ajustes responsive para móvil */
+@media (max-width: 768px) {
+    details[open], 
+    .ocr-text-toggle, 
+    #idScanResult {
+        scroll-margin-top: 70px;
+    }
+    
+    .ocr-text-content {
+        max-height: 300px;
+        font-size: 13px;
+    }
+    
+    .analyze-button,
+    #analyzeIdButton {
+        max-width: 100%;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    details[open], 
+    .ocr-text-toggle,
+    #idScanResult {
+        scroll-margin-top: 60px;
+    }
+    
+    .ocr-text-content {
+        max-height: 250px;
+        font-size: 12px;
+        padding: 10px;
+    }
+}

@@ -25,11 +25,12 @@ startSessionSafely();
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            padding-top: 20px;
         }
         
         .verification-container {
             max-width: 600px;
-            margin: 20px auto;
+            margin: 0 auto 20px;
             padding: 15px;
         }
         
@@ -87,8 +88,12 @@ startSessionSafely();
         
         /* Contenedor para dispositivos móviles */
         @media (max-width: 768px) {
+            body {
+                padding-top: 15px;
+            }
+            
             .verification-container {
-                margin: 10px auto;
+                margin: 0 auto 10px;
                 padding: 10px;
             }
             
@@ -123,8 +128,12 @@ startSessionSafely();
         
         /* Estilos para pantallas muy pequeñas */
         @media (max-width: 480px) {
+            body {
+                padding-top: 10px;
+            }
+            
             .verification-container {
-                margin: 5px;
+                margin: 0 5px 5px;
                 padding: 5px;
             }
             

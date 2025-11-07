@@ -571,6 +571,16 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                         Enviando...
                     </span>
                 </button>
+                
+                <!-- Opción de verificación con documento -->
+                <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                    <p style="color: #6c757d; margin-bottom: 10px; font-size: 14px;">¿No puedes recibir el código?</p>
+                    <a href="verify_document.php" 
+                       style="display: inline-block; padding: 10px 20px; background: transparent; border: 2px solid #6c757d; color: #6c757d; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.3s ease;">
+                        📸 Verifica tu identidad con tu documento
+                    </a>
+                </div>
+                
                 <button type="button" onclick="window.location.href='password_reset.php'" class="btn-secondary" style="margin-top: 10px; background-color: #f0f0f0; color: #666;">
                     ← Volver
                 </button>
@@ -687,6 +697,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
+        }
+        
+        /* Estilo para el enlace de verificación documental */
+        a[href="verify_document.php"]:hover {
+            background: #6c757d !important;
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
         }
     </style>
 

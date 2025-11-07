@@ -180,8 +180,10 @@ startSessionSafely();
     <?php include '../../components/marcaPasos.php'; ?>
     
     <div class="verification-container">
-        <!-- MARCA PASOS -->
-        <?php renderMarcaPasos(1, 3); ?>
+        <!-- MARCA PASOS CON PADDING EQUIVALENTE AL CARD -->
+        <div style="padding: 0 25px; margin-bottom: 20px;">
+            <?php renderMarcaPasos(1, 3); ?>
+        </div>
         
         <div class="card">
             <img src="../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo" style="max-width: 150px; margin: 0 auto 20px; display: block;">

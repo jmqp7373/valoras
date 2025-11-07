@@ -49,7 +49,7 @@ define('AI_TEMPERATURE', 0.85);
 // CONFIGURACIÓN DE GOOGLE VISION API
 // =================================
 // Obtén tu API Key en: https://console.cloud.google.com/apis/credentials
-define('GOOGLE_VISION_API_KEY', 'AIzaSyBl2PAMRxKIOZxb26P8_iRFiqwMHTxMp9Q');
+define('GOOGLE_VISION_API_KEY', 'TU-GOOGLE-VISION-API-KEY-AQUI');
 
 // =================================
 // CONFIGURACIONES DE LA APLICACIÓN

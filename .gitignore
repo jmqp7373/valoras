@@ -23,6 +23,7 @@ config/twilioSmsConfig.php
 config/email-config.php
 config/database.php
 config/configGoogleVision.php
+config/configOpenAiChatgpt.php
 
 # Logs y archivos de depuración
 *.log

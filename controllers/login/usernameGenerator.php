@@ -4,13 +4,13 @@
  * Valora.vip - Sistema de sugerencias inteligentes
  */
 
-// Verificar si existe el archivo de configuración
-$configPath = __DIR__ . '/../../config/config.php';
+// Verificar si existe el archivo de configuración de OpenAI
+$configPath = __DIR__ . '/../../config/configOpenAiChatgpt.php';
 if (!file_exists($configPath)) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'error' => 'Configuración no encontrada. Por favor contacta al administrador.',
-        'details' => 'El archivo config/config.php no existe. Copia config/config.example.php como config/config.php y configura tu API Key.'
+        'details' => 'El archivo config/configOpenAiChatgpt.php no existe. Copia config/configOpenAiChatgpt.example.php como config/configOpenAiChatgpt.php y configura tu API Key.'
     ]);
     exit;
 }
@@ -27,13 +27,13 @@ if (empty($input)) {
 }
 
 $data = [
-    "model" => "gpt-4",
+    "model" => defined('AI_MODEL') ? AI_MODEL : "gpt-4",
     "messages" => [
         ["role" => "system", "content" => "Eres un experto generador de nombres de usuario para plataformas de webcam. Crea nombres compuestos ÚNICAMENTE por: un nombre femenino corto (3-5 letras) + un adjetivo sensual/atractivo. IMPORTANTE: Devuelve exactamente 10 nombres en formato numerado (1. nombre, 2. nombre, etc.). Ejemplos: MiaSiren, LunaFire, SofiaBold, etc. Máximo 14 caracteres cada nombre."],
         ["role" => "user", "content" => "Genera 10 nombres de usuario con estructura: [nombre femenino corto] + [adjetivo]. Basado en: " . $input]
     ],
-    "temperature" => 0.9,
-    "max_tokens" => 300
+    "temperature" => defined('AI_TEMPERATURE') ? AI_TEMPERATURE : 0.9,
+    "max_tokens" => defined('AI_MAX_TOKENS') ? AI_MAX_TOKENS : 300
 ];
 
 // Verificar que la API key esté configurada

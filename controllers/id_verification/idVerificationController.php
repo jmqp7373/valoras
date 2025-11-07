@@ -31,13 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Importar configuración y servicios
-$configPath = __DIR__ . '/../../config/config.php';
+$configPath = __DIR__ . '/../../config/configGoogleVision.php';
 if (!file_exists($configPath)) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'error' => 'Archivo de configuración no encontrado. Por favor contacte al administrador.',
-        'debug' => 'config/config.php debe existir en el servidor. Verifique que el archivo fue subido por FTP.'
+        'debug' => 'config/configGoogleVision.php debe existir en el servidor. Verifique que el archivo fue subido por FTP.'
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -49,8 +49,8 @@ if (!defined('GOOGLE_VISION_API_KEY')) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'GOOGLE_VISION_API_KEY no está definida en config.php',
-        'debug' => 'Agregue la línea: define(\'GOOGLE_VISION_API_KEY\', \'su-api-key-aqui\'); en config/config.php'
+        'error' => 'GOOGLE_VISION_API_KEY no está definida en configGoogleVision.php',
+        'debug' => 'Agregue la línea: define(\'GOOGLE_VISION_API_KEY\', \'su-api-key-aqui\'); en config/configGoogleVision.php'
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

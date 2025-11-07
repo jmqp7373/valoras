@@ -99,25 +99,25 @@ header('Content-Type: text/html; charset=UTF-8');
         <?php
         $allChecksPass = true;
         
-        // CHECK 1: Verificar que existe config/config.php
-        echo '<h3>1️⃣ Verificar archivo config/config.php</h3>';
-        $configPath = __DIR__ . '/config/config.php';
+        // CHECK 1: Verificar que existe config/configGoogleVision.php
+        echo '<h3>1️⃣ Verificar archivo config/configGoogleVision.php</h3>';
+        $configPath = __DIR__ . '/config/configGoogleVision.php';
         
         if (file_exists($configPath)) {
             echo '<div class="check success">';
-            echo '<strong>✅ CORRECTO:</strong> El archivo <code>config/config.php</code> existe';
+            echo '<strong>✅ CORRECTO:</strong> El archivo <code>config/configGoogleVision.php</code> existe';
             echo '<br><strong>Ubicación:</strong> ' . $configPath;
             echo '</div>';
         } else {
             echo '<div class="check error">';
-            echo '<strong>❌ ERROR:</strong> No se encontró <code>config/config.php</code>';
+            echo '<strong>❌ ERROR:</strong> No se encontró <code>config/configGoogleVision.php</code>';
             echo '<br><strong>Ubicación esperada:</strong> ' . $configPath;
             echo '<br><strong>Solución:</strong> Sube el archivo por FTP o créalo en FileManager';
             echo '</div>';
             $allChecksPass = false;
         }
         
-        // CHECK 2: Cargar config.php y verificar constante
+        // CHECK 2: Cargar configGoogleVision.php y verificar constante
         echo '<h3>2️⃣ Verificar constante GOOGLE_VISION_API_KEY</h3>';
         
         if (file_exists($configPath)) {
@@ -135,8 +135,8 @@ header('Content-Type: text/html; charset=UTF-8');
                 echo '</div>';
             } else {
                 echo '<div class="check error">';
-                echo '<strong>❌ ERROR:</strong> GOOGLE_VISION_API_KEY no está definida en config.php';
-                echo '<br><strong>Solución:</strong> Agrega esta línea en config/config.php:';
+                echo '<strong>❌ ERROR:</strong> GOOGLE_VISION_API_KEY no está definida en configGoogleVision.php';
+                echo '<br><strong>Solución:</strong> Agrega esta línea en config/configGoogleVision.php:';
                 echo '<pre>define(\'GOOGLE_VISION_API_KEY\', \'tu-api-key-aqui\');</pre>';
                 echo '</div>';
                 $allChecksPass = false;
@@ -221,7 +221,7 @@ header('Content-Type: text/html; charset=UTF-8');
         } else {
             echo '<div class="check error">';
             echo '<strong>❌ CONFIGURACIÓN INCOMPLETA:</strong> Corrige los errores indicados arriba';
-            echo '<br><br><strong>Archivo principal a verificar:</strong> config/config.php';
+            echo '<br><br><strong>Archivo principal a verificar:</strong> config/configGoogleVision.php';
             echo '</div>';
         }
         

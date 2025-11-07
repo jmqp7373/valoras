@@ -2,41 +2,41 @@
 
 ## ⚠️ Problema Actual
 
-El error **"GOOGLE_VISION_API_KEY no está definida en config.php"** aparece porque el archivo `config/config.php` no existe en el servidor de producción o no tiene la constante definida.
+El error **"GOOGLE_VISION_API_KEY no está definida"** aparece porque el archivo `config/configGoogleVision.php` no existe en el servidor de producción o no tiene la constante definida.
 
 ## ✅ Solución Paso a Paso
 
-### 1️⃣ **Verificar que `config/config.php` existe en el servidor**
+### 1️⃣ **Verificar que `config/configGoogleVision.php` existe en el servidor**
 
 Conecta por FTP o FileManager de Hostinger y verifica que existe:
 ```
-/public_html/config/config.php
+/public_html/config/configGoogleVision.php
 ```
 
-### 2️⃣ **Si NO existe, créalo basándote en `config.example.php`**
+### 2️⃣ **Si NO existe, créalo basándote en `configGoogleVision.example.php`**
 
 **Opción A: Por FTP**
-1. Descarga `config/config.example.php` del repositorio
-2. Renómbralo a `config.php`
+1. Descarga `config/configGoogleVision.example.php` del repositorio
+2. Renómbralo a `configGoogleVision.php`
 3. Edita el archivo y agrega tu API Key real
-4. Súbelo a `/public_html/config/config.php`
+4. Súbelo a `/public_html/config/configGoogleVision.php`
 
 **Opción B: Por FileManager de Hostinger**
 1. Ve a `public_html/config/`
-2. Crea un nuevo archivo llamado `config.php`
+2. Crea un nuevo archivo llamado `configGoogleVision.php`
 3. Copia el contenido de abajo y pégalo
 
-### 3️⃣ **Contenido del archivo `config/config.php`**
+### 3️⃣ **Contenido del archivo `config/configGoogleVision.php`**
 
 ```php
 <?php
 /**
- * Archivo de configuración para Valora.vip
+ * Configuración de Google Cloud Vision API para Valora.vip
  * IMPORTANTE: Este archivo NO debe subirse a GitHub
  */
 
 // =================================
-// CONFIGURACIÓN DE OPENAI API
+// CONFIGURACIÓN DE GOOGLE VISION API
 // =================================
 define('OPENAI_API_KEY', 'sk-proj-TU-API-KEY-DE-OPENAI-AQUI');
 
@@ -51,26 +51,25 @@ define('AI_TEMPERATURE', 0.85);
 // Obtén tu API Key en: https://console.cloud.google.com/apis/credentials
 define('GOOGLE_VISION_API_KEY', 'TU-GOOGLE-VISION-API-KEY-AQUI');
 
-// =================================
-// CONFIGURACIONES DE LA APLICACIÓN
-// =================================
-define('APP_NAME', 'Valora.vip');
-define('APP_VERSION', '1.0.0');
-define('APP_DEBUG', false);
+// Configuraciones opcionales
+define('VISION_DETECT_TEXT', true);
+define('VISION_DETECT_FACES', true);
+define('VISION_MAX_RESULTS', 10);
 ?>
 ```
 
 ### 4️⃣ **Verificar que funciona**
 
-Después de crear/actualizar el archivo:
+Sube el script de diagnóstico a tu servidor y accede a:
 
-1. Ve a: `https://valora.vip/testVision.php`
-2. Deberías ver: **"✅ API Key encontrada: AIzaSyBl2P..."**
-3. Si funciona, ya puedes usar `verify_document.php`
+1. Sube `check_vision_config.php` a `/public_html/`
+2. Ve a: `https://valora.vip/check_vision_config.php`
+3. El script verificará automáticamente toda la configuración
+4. Si todo está OK, verás el botón para ir a verificación de documentos
 
 ## 🔐 Seguridad
 
-**IMPORTANTE:** El archivo `config/config.php` contiene credenciales sensibles:
+**IMPORTANTE:** El archivo `config/configGoogleVision.php` contiene credenciales sensibles:
 - ✅ Debe estar en `.gitignore` (ya está)
 - ✅ NO debe subirse a GitHub (nunca)
 - ✅ Solo debe existir en el servidor de producción
@@ -80,13 +79,13 @@ Después de crear/actualizar el archivo:
 
 ### Test Local (XAMPP):
 ```
-http://localhost/valora.vip/testVision.php
+http://localhost/valora.vip/check_vision_config.php
 http://localhost/valora.vip/views/login/verify_document.php
 ```
 
 ### Test Producción (Hostinger):
 ```
-https://valora.vip/testVision.php
+https://valora.vip/check_vision_config.php
 https://valora.vip/views/login/verify_document.php
 ```
 
@@ -95,8 +94,8 @@ https://valora.vip/views/login/verify_document.php
 **Verifica en FileManager de Hostinger:**
 
 1. **Ruta correcta:**
-   - ✅ `/public_html/config/config.php`
-   - ❌ `/public_html/config.php` (mal ubicado)
+   - ✅ `/public_html/config/configGoogleVision.php`
+   - ❌ `/public_html/configGoogleVision.php` (mal ubicado)
 
 2. **Permisos del archivo:**
    - Debe ser: `644` (lectura/escritura para owner, solo lectura para grupo y otros)

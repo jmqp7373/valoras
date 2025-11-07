@@ -18,11 +18,11 @@ class GoogleVisionService {
     
     /**
      * Constructor
-     * Obtiene la API Key desde config.php
+     * Obtiene la API Key desde configGoogleVision.php
      */
     public function __construct() {
         if (!defined('GOOGLE_VISION_API_KEY')) {
-            throw new Exception('GOOGLE_VISION_API_KEY no está definida en config.php');
+            throw new Exception('GOOGLE_VISION_API_KEY no está definida en configGoogleVision.php');
         }
         $this->apiKey = GOOGLE_VISION_API_KEY;
     }

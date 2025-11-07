@@ -389,7 +389,7 @@ class GoogleVisionService {
      * 
      * Estrategia:
      * 1. Buscar línea con palabra "APELLIDOS"
-     * 2. Capturar solo la siguiente línea (no todo lo que sigue)
+     * 2. Intentar capturar la línea anterior o siguiente
      * 3. Limpiar palabras clave que no son apellidos
      * 
      * @param string $text Texto extraído del documento
@@ -400,33 +400,39 @@ class GoogleVisionService {
         $lines = preg_split('/\r\n|\r|\n/', $text);
         
         $apellidos = '';
-        $foundApellidosLabel = false;
         
         foreach ($lines as $index => $line) {
             $line = trim($line);
             
             // Buscar la línea que contiene "APELLIDOS"
             if (preg_match('/^APELLIDOS?\s*:?\s*$/i', $line)) {
-                // Si "APELLIDOS" está solo en una línea, tomar la siguiente
-                if (isset($lines[$index + 1])) {
-                    $apellidos = trim($lines[$index + 1]);
-                    $foundApellidosLabel = true;
-                    break;
+                // Opción 1: Tomar la línea ANTERIOR (puede estar encima)
+                if (isset($lines[$index - 1])) {
+                    $candidatePrev = trim($lines[$index - 1]);
+                    $cleanedPrev = $this->cleanNameField($candidatePrev);
+                    if (!empty($cleanedPrev) && strlen($cleanedPrev) > 2) {
+                        $apellidos = $cleanedPrev;
+                        break;
+                    }
+                }
+                
+                // Opción 2: Si la anterior no sirvió, tomar la SIGUIENTE
+                if (empty($apellidos) && isset($lines[$index + 1])) {
+                    $candidateNext = trim($lines[$index + 1]);
+                    $cleanedNext = $this->cleanNameField($candidateNext);
+                    if (!empty($cleanedNext) && strlen($cleanedNext) > 2) {
+                        $apellidos = $cleanedNext;
+                        break;
+                    }
                 }
             } elseif (preg_match('/^APELLIDOS?\s*:?\s+(.+)$/i', $line, $matches)) {
                 // Si "APELLIDOS" está en la misma línea que el contenido
-                $apellidos = trim($matches[1]);
-                $foundApellidosLabel = true;
-                break;
+                $apellidos = $this->cleanNameField(trim($matches[1]));
+                if (!empty($apellidos) && strlen($apellidos) > 2) {
+                    break;
+                }
             }
         }
-        
-        if (!$foundApellidosLabel) {
-            return '';
-        }
-        
-        // Limpiar el contenido extraído
-        $apellidos = $this->cleanNameField($apellidos);
         
         return $apellidos;
     }
@@ -444,33 +450,39 @@ class GoogleVisionService {
         $lines = preg_split('/\r\n|\r|\n/', $text);
         
         $nombres = '';
-        $foundNombresLabel = false;
         
         foreach ($lines as $index => $line) {
             $line = trim($line);
             
             // Buscar la línea que contiene "NOMBRES"
             if (preg_match('/^NOMBRES?\s*:?\s*$/i', $line)) {
-                // Si "NOMBRES" está solo en una línea, tomar la siguiente
-                if (isset($lines[$index + 1])) {
-                    $nombres = trim($lines[$index + 1]);
-                    $foundNombresLabel = true;
-                    break;
+                // Opción 1: Tomar la línea ANTERIOR (puede estar encima)
+                if (isset($lines[$index - 1])) {
+                    $candidatePrev = trim($lines[$index - 1]);
+                    $cleanedPrev = $this->cleanNameField($candidatePrev);
+                    if (!empty($cleanedPrev) && strlen($cleanedPrev) > 2) {
+                        $nombres = $cleanedPrev;
+                        break;
+                    }
+                }
+                
+                // Opción 2: Si la anterior no sirvió, tomar la SIGUIENTE
+                if (empty($nombres) && isset($lines[$index + 1])) {
+                    $candidateNext = trim($lines[$index + 1]);
+                    $cleanedNext = $this->cleanNameField($candidateNext);
+                    if (!empty($cleanedNext) && strlen($cleanedNext) > 2) {
+                        $nombres = $cleanedNext;
+                        break;
+                    }
                 }
             } elseif (preg_match('/^NOMBRES?\s*:?\s+(.+)$/i', $line, $matches)) {
                 // Si "NOMBRES" está en la misma línea que el contenido
-                $nombres = trim($matches[1]);
-                $foundNombresLabel = true;
-                break;
+                $nombres = $this->cleanNameField(trim($matches[1]));
+                if (!empty($nombres) && strlen($nombres) > 2) {
+                    break;
+                }
             }
         }
-        
-        if (!$foundNombresLabel) {
-            return '';
-        }
-        
-        // Limpiar el contenido extraído
-        $nombres = $this->cleanNameField($nombres);
         
         return $nombres;
     }
@@ -490,17 +502,34 @@ class GoogleVisionService {
             'REPÚBLICA DE',
             'CEDULA DE CIUDADANIA',
             'CÉDULA DE CIUDADANÍA',
+            'CEDULA',
+            'CÉDULA',
+            'IDENTIFICACION PERSONAL',
+            'IDENTIFICACIÓN PERSONAL',
             'FIRMA',
             'COLOR BIA',
             'RESLIBLICA',
             'UBLICA',
             'BIA',
             'COLOMBIA S',
+            'COLOMBIA',
             'NOMBRES',
-            'APELLIDOS'
+            'APELLIDOS',
+            'NUMERO',
+            'NÚMERO',
+            'DE',
+            'S'
         ];
         
-        // Eliminar palabras basura
+        // Primero verificar si la línea completa es basura
+        $fieldUpper = strtoupper(trim($field));
+        foreach ($stopWords as $word) {
+            if ($fieldUpper === strtoupper($word)) {
+                return ''; // La línea completa es una palabra basura
+            }
+        }
+        
+        // Eliminar palabras basura del contenido
         foreach ($stopWords as $word) {
             $field = str_ireplace($word, '', $field);
         }
@@ -509,8 +538,19 @@ class GoogleVisionService {
         $field = preg_replace('/\s+/', ' ', $field);
         $field = trim($field);
         
+        // Validar que contiene al menos una letra
+        if (!preg_match('/[A-ZÁÉÍÓÚÑ]/i', $field)) {
+            return '';
+        }
+        
         // Si el campo resultante solo tiene 1-2 caracteres, probablemente sea basura
         if (strlen($field) <= 2) {
+            return '';
+        }
+        
+        // Si solo contiene una letra repetida (ej: "S S S"), es basura
+        $uniqueChars = count_chars(str_replace(' ', '', strtoupper($field)), 3);
+        if (strlen($uniqueChars) <= 1) {
             return '';
         }
         

@@ -39,8 +39,12 @@ $cedula = trim($_POST['cedula']);
 $telefono = trim($_POST['telefono']);
 $email = trim($_POST['email']);
 
+// Debug
+error_log("UserUpdateController - Recibido: Cédula={$cedula}, Teléfono={$telefono}, Email={$email}");
+
 // Validaciones básicas
 if (empty($cedula) || empty($telefono) || empty($email)) {
+    error_log("UserUpdateController - Campos vacíos detectados");
     header('Location: ../views/login/verify3_Update.php?error=empty_fields');
     exit;
 }

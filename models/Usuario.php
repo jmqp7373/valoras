@@ -226,9 +226,9 @@ class Usuario {
     /**
      * Actualizar datos de contacto del usuario
      * 
-     * @param string $cedula Número de cédula del usuario
-     * @param string $telefono Nuevo número de teléfono
-     * @param string $email Nuevo correo electrónico
+     * @param string $cedula Nï¿½mero de cï¿½dula del usuario
+     * @param string $telefono Nuevo nï¿½mero de telï¿½fono
+     * @param string $email Nuevo correo electrï¿½nico
      * @return bool
      */
     public function updateContactData($cedula, $telefono, $email) {
@@ -239,10 +239,12 @@ class Usuario {
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':cedula', $cedula);
             
-            if ($stmt->execute() && $stmt->rowCount() > 0) {
-                error_log("Usuario actualizado: Cédula {$cedula}");
+            // Si execute() fue exitoso, considerarlo como Ã©xito aunque no cambie filas
+            if ($stmt->execute()) {
+                error_log("Usuario actualizado/verificado: CÃ©dula {$cedula}, Rows affected: " . $stmt->rowCount());
                 return true;
             }
+            error_log("Error al ejecutar UPDATE para cÃ©dula: {$cedula}");
             return false;
         } catch (PDOException $e) {
             error_log("Error al actualizar datos: " . $e->getMessage());

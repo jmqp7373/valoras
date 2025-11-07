@@ -21,6 +21,9 @@ if (!isset($_SESSION['ocr_result']) || !isset($_SESSION['ocr_result']['userData'
 $userData = $_SESSION['ocr_result']['userData'];
 $cedula = $userData['cedula'] ?? '';
 
+// Debug: Log para verificar datos
+error_log("verify3_Update - Cédula: {$cedula}, Teléfono actual: " . ($userData['celular'] ?? 'N/A') . ", Email actual: " . ($userData['email'] ?? 'N/A'));
+
 // Mensajes de error/éxito
 $error = $_GET['error'] ?? '';
 $success = $_GET['success'] ?? '';

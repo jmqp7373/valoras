@@ -80,6 +80,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar Contraseña - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../components/marcaPasos.css">
     <style>
         .code-input {
             font-size: 24px;
@@ -96,45 +97,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
             border-color: #d63384;
             box-shadow: 0 0 0 3px rgba(238, 111, 146, 0.1);
         }
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 10px;
-            font-weight: bold;
-            border: 2px solid #dee2e6;
-            background: #f8f9fa;
-            color: #6c757d;
-        }
-        .step.active {
-            background: #ee6f92;
-            border-color: #ee6f92;
-            color: white;
-        }
-        .step.completed {
-            background: #28a745;
-            border-color: #28a745;
-            color: white;
-        }
     </style>
 </head>
 <body>
+    <?php include '../../components/marcaPasos.php'; ?>
+    
     <div class="login-container">
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo">
         <h2>🔑 Crear Nueva Contraseña</h2>
         
-        <div class="step-indicator">
-            <div class="step <?php echo $step >= 1 ? ($step > 1 ? 'completed' : 'active') : ''; ?>">1</div>
-            <div class="step <?php echo $step >= 2 ? ($step > 2 ? 'completed' : 'active') : ''; ?>">2</div>
-        </div>
+        <!-- MARCA PASOS: Paso 3 de 3 pasos totales (1=identify, 2=select_method, 3=reset_password) -->
+        <?php renderMarcaPasos(3, 3); ?>
         
         <?php if($result): ?>
             <?php if($result['success'] && $step == 3): ?>

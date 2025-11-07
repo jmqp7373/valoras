@@ -264,9 +264,12 @@ class GoogleVisionService {
             $info['tipoDocumento'] = 'Pasaporte';
         }
         
-        // Extraer número de cédula (patrón común: 8-10 dígitos)
-        if (preg_match('/\b(\d{8,10})\b/', $text, $matches)) {
-            $info['cedula'] = $matches[1];
+        // ========================================
+        // EXTRACCIÓN MEJORADA DEL NÚMERO DE CÉDULA
+        // ========================================
+        $cedula = $this->extractCedulaNumber($text);
+        if ($cedula) {
+            $info['cedula'] = $cedula;
         }
         
         // Extraer nombres (patrón: línea después de "NOMBRES" o "APELLIDOS")
@@ -289,6 +292,92 @@ class GoogleVisionService {
         }
         
         return $info;
+    }
+    
+    /**
+     * Extrae el número de cédula con algoritmo inteligente
+     * 
+     * Estrategia:
+     * 1. Buscar número después de palabra clave "NUMERO" o "NÚMERO"
+     * 2. Validar que no empiece con ceros (descarta seriales como 00731551)
+     * 3. Validar longitud de cédula colombiana (7-10 dígitos)
+     * 4. Si hay múltiples candidatos, elegir el más probable
+     * 
+     * @param string $text Texto extraído del documento
+     * @return string Número de cédula o cadena vacía
+     */
+    private function extractCedulaNumber($text) {
+        $candidates = [];
+        
+        // PRIORIDAD 1: Número después de "NUMERO" o "NÚMERO" (con o sin acento)
+        // Captura formatos: "NUMERO 1.125.998.052" o "NUMERO 1125998052"
+        if (preg_match('/N[UÚ]MERO\s+([0-9.]+)/i', $text, $matches)) {
+            $numero = preg_replace('/[^0-9]/', '', $matches[1]); // Eliminar puntos/separadores
+            if (strlen($numero) >= 7 && strlen($numero) <= 11 && $numero[0] !== '0') {
+                $candidates['keyword_match'] = [
+                    'value' => $numero,
+                    'priority' => 100, // Máxima prioridad
+                    'source' => 'Encontrado después de palabra clave NUMERO'
+                ];
+            }
+        }
+        
+        // PRIORIDAD 2: Buscar todos los números de 7-11 dígitos en el texto
+        preg_match_all('/\b(\d{7,11})\b/', $text, $allMatches);
+        
+        if (!empty($allMatches[1])) {
+            foreach ($allMatches[1] as $numero) {
+                // Filtrar números que NO son cédulas válidas
+                
+                // 1. Descartar si empieza con cero (seriales internos)
+                if ($numero[0] === '0') {
+                    continue;
+                }
+                
+                // 2. Descartar si tiene más de 10 dígitos (no es cédula colombiana estándar)
+                if (strlen($numero) > 10) {
+                    continue;
+                }
+                
+                // 3. Descartar fechas (formato YYYYMMDD como 20150808)
+                if (preg_match('/^(19|20)\d{6}$/', $numero)) {
+                    continue;
+                }
+                
+                // 4. Calcular prioridad basada en longitud (8-10 dígitos es lo más común)
+                $length = strlen($numero);
+                $priority = 50;
+                
+                if ($length >= 8 && $length <= 10) {
+                    $priority = 70; // Alta prioridad para longitud típica
+                } elseif ($length == 7) {
+                    $priority = 40; // Menor prioridad para 7 dígitos
+                }
+                
+                // Añadir a candidatos si no existe uno con mayor prioridad
+                $key = 'number_' . $numero;
+                if (!isset($candidates[$key]) || $candidates[$key]['priority'] < $priority) {
+                    $candidates[$key] = [
+                        'value' => $numero,
+                        'priority' => $priority,
+                        'source' => 'Número válido de ' . $length . ' dígitos'
+                    ];
+                }
+            }
+        }
+        
+        // Si no se encontraron candidatos, retornar vacío
+        if (empty($candidates)) {
+            return '';
+        }
+        
+        // Ordenar candidatos por prioridad (mayor a menor)
+        usort($candidates, function($a, $b) {
+            return $b['priority'] - $a['priority'];
+        });
+        
+        // Retornar el candidato con mayor prioridad
+        return $candidates[0]['value'];
     }
     
     /**

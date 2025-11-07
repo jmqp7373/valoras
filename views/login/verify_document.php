@@ -21,17 +21,23 @@ startSessionSafely();
     <title>Verificación de Identidad - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             min-height: 100vh;
             margin: 0;
             padding: 0;
             padding-top: 40px;
+            overflow-x: hidden; /* Prevenir scroll horizontal */
         }
         
         .verification-container {
             max-width: 600px;
             margin: 0 auto 20px;
             padding: 15px;
+            position: relative;
         }
         
         .card {
@@ -95,10 +101,13 @@ startSessionSafely();
             .verification-container {
                 margin: 0 auto 10px;
                 padding: 10px;
+                width: 100%;
             }
             
             .card {
                 padding: 20px 15px;
+                width: 100%;
+                box-sizing: border-box;
             }
             
             #idPreviewFront,
@@ -124,6 +133,16 @@ startSessionSafely();
             .alert-info ul li {
                 margin-bottom: 5px;
             }
+            
+            /* Botones en móvil */
+            .btn {
+                padding: 12px 20px;
+                font-size: 15px;
+                width: 100%;
+                max-width: 100%;
+                word-wrap: break-word;
+                white-space: normal;
+            }
         }
         
         /* Estilos para pantallas muy pequeñas */
@@ -135,11 +154,13 @@ startSessionSafely();
             .verification-container {
                 margin: 0 5px 5px;
                 padding: 5px;
+                width: calc(100% - 10px);
             }
             
             .card {
                 padding: 15px 10px;
                 border-radius: 10px;
+                width: 100%;
             }
             
             #idPreviewFront,
@@ -150,6 +171,10 @@ startSessionSafely();
             .btn {
                 padding: 10px 16px;
                 font-size: 14px;
+                width: 100%;
+                max-width: 100%;
+                word-wrap: break-word;
+                white-space: normal;
             }
         }
         
@@ -163,12 +188,15 @@ startSessionSafely();
             font-size: 16px;
             font-weight: 500;
             text-decoration: none;
-            display: inline-block;
+            display: block;
             transition: all 0.3s ease;
             cursor: pointer;
             border: none;
             width: 100%;
-            margin-top: 15px;
+            max-width: 100%;
+            margin: 15px auto 0;
+            text-align: center;
+            box-sizing: border-box;
         }
         
         .btn-primary {
@@ -338,6 +366,30 @@ startSessionSafely();
             overflow-x: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
+        }
+        
+        /* Estilos para contenedor de resultados */
+        #idScanResult {
+            scroll-margin-top: 80px;
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Prevenir saltos visuales al expandir */
+        .card {
+            scroll-margin-top: 80px;
+        }
+        
+        /* Asegurar que los detalles no causen overflow */
+        details {
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        
+        details[open] {
+            overflow: visible;
         }
     </style>
 </head>

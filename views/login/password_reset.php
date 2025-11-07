@@ -128,16 +128,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <?php include '../../components/marcaPasos.php'; ?>
     
-    <!-- MARCA PASOS - ALINEADO CON EL FORMULARIO -->
-    <div style="width: 100%; max-width: 380px; margin: 0 auto; padding: 20px 20px 0;">
-        <?php 
-        $currentStep = 1;
-        if($step === 'select_method') $currentStep = 2;
-        renderMarcaPasos($currentStep, 3); // 3 pasos: identify, select_method, reset_password
-        ?>
-    </div>
-    
-    <div class="login-container">
+    <!-- CONTENEDOR PRINCIPAL CON ANCHO FIJO -->
+    <div style="width: 100%; max-width: 380px; margin: 0 auto; padding: 20px;">
+        <!-- MARCA PASOS -->
+        <div style="margin-bottom: 20px;">
+            <?php 
+            $currentStep = 1;
+            if($step === 'select_method') $currentStep = 2;
+            renderMarcaPasos($currentStep, 3); // 3 pasos: identify, select_method, reset_password
+            ?>
+        </div>
+        
+        <div class="login-container">
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
         <h2>🔐 Recuperar Contraseña</h2>
         
@@ -754,5 +756,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         });
     </script>
+</div> <!-- /CONTENEDOR PRINCIPAL -->
 </body>
 </html>

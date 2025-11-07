@@ -102,10 +102,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
 <body>
     <?php include '../../components/marcaPasos.php'; ?>
     
-    <!-- MARCA PASOS - ALINEADO CON EL FORMULARIO -->
-    <div style="width: 100%; max-width: 380px; margin: 0 auto; padding: 20px 20px 0;">
-        <?php renderMarcaPasos(3, 3); // Paso 3 de 3: identify → select_method → reset_password ?>
-    </div>
+    <!-- CONTENEDOR PRINCIPAL PARA ALINEACIÓN -->
+    <div style="width: 100%; max-width: 380px; margin: 0 auto; padding: 20px;">
+        <!-- MARCA PASOS - ALINEADO CON EL FORMULARIO -->
+        <div style="margin-bottom: 20px;">
+            <?php renderMarcaPasos(3, 3); // Paso 3 de 3: identify → select_method → reset_password ?>
+        </div>
     
     <div class="login-container">
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo">
@@ -351,5 +353,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
         });
         <?php endif; ?>
     </script>
+</div> <!-- /CONTENEDOR PRINCIPAL -->
 </body>
 </html>

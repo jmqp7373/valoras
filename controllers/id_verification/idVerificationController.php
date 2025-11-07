@@ -32,41 +32,71 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Importar configuración y servicios
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../services/id_verification/googleVisionService.php';
 
 try {
-    // Validar que se recibió una imagen
-    if (!isset($_FILES['idPhoto']) || $_FILES['idPhoto']['error'] !== UPLOAD_ERR_OK) {
-        throw new Exception('No se recibió ninguna imagen o hubo un error en la carga.');
+    // Validar que se recibieron ambas imágenes
+    if (!isset($_FILES['id_photo_front']) || $_FILES['id_photo_front']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('No se recibió la imagen frontal o hubo un error en la carga.');
     }
     
-    $file = $_FILES['idPhoto'];
+    if (!isset($_FILES['id_photo_back']) || $_FILES['id_photo_back']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('No se recibió la imagen posterior o hubo un error en la carga.');
+    }
     
-    // Validar tamaño del archivo (máximo 6MB)
+    $fileFront = $_FILES['id_photo_front'];
+    $fileBack = $_FILES['id_photo_back'];
+    
+    // Validar tamaño de los archivos (máximo 6MB cada uno)
     $maxSize = 6 * 1024 * 1024; // 6MB en bytes
-    if ($file['size'] > $maxSize) {
-        throw new Exception('La imagen es demasiado grande. Tamaño máximo: 6MB.');
+    
+    if ($fileFront['size'] > $maxSize) {
+        throw new Exception('La imagen frontal es demasiado grande. Tamaño máximo: 6MB.');
     }
     
-    // Validar tipo MIME
+    if ($fileBack['size'] > $maxSize) {
+        throw new Exception('La imagen posterior es demasiado grande. Tamaño máximo: 6MB.');
+    }
+    
+    // Validar tipos MIME
     $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    $mimeTypeFront = finfo_file($finfo, $fileFront['tmp_name']);
+    $mimeTypeBack = finfo_file($finfo, $fileBack['tmp_name']);
     finfo_close($finfo);
     
-    if (!in_array($mimeType, $allowedTypes)) {
-        throw new Exception('Formato de imagen no permitido. Use JPEG, PNG o WebP.');
+    if (!in_array($mimeTypeFront, $allowedTypes)) {
+        throw new Exception('Formato de imagen frontal no permitido. Use JPEG, PNG o WebP.');
     }
     
-    // Leer y codificar imagen en base64
-    $imageData = file_get_contents($file['tmp_name']);
-    $base64Image = base64_encode($imageData);
+    if (!in_array($mimeTypeBack, $allowedTypes)) {
+        throw new Exception('Formato de imagen posterior no permitido. Use JPEG, PNG o WebP.');
+    }
+    
+    // Guardar temporalmente las imágenes para procesamiento
+    $tempPathFront = sys_get_temp_dir() . '/' . uniqid('id_front_') . '.jpg';
+    $tempPathBack = sys_get_temp_dir() . '/' . uniqid('id_back_') . '.jpg';
+    
+    if (!move_uploaded_file($fileFront['tmp_name'], $tempPathFront)) {
+        throw new Exception('Error al guardar imagen frontal temporalmente.');
+    }
+    
+    if (!move_uploaded_file($fileBack['tmp_name'], $tempPathBack)) {
+        @unlink($tempPathFront);
+        throw new Exception('Error al guardar imagen posterior temporalmente.');
+    }
     
     // Inicializar servicio de Google Vision
     $visionService = new GoogleVisionService();
     
-    // Analizar documento
-    $analysisResult = $visionService->analyzeDocument($base64Image);
+    // Analizar ambas imágenes
+    $analysisResult = $visionService->analyzeMultipleImages([$tempPathFront, $tempPathBack]);
+    
+    // Limpiar archivos temporales inmediatamente
+    @unlink($tempPathFront);
+    @unlink($tempPathBack);
     
     if (!$analysisResult['success']) {
         throw new Exception($analysisResult['error']);
@@ -75,10 +105,39 @@ try {
     // Validar documento
     $validation = $visionService->validateDocument($analysisResult);
     
+    // Conectar a base de datos para cotejo
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    $userMatch = false;
+    $userData = null;
+    
+    // Si se extrajo un número de cédula, buscar en la base de datos
+    if (!empty($analysisResult['documentInfo']['cedula'])) {
+        $cedula = $analysisResult['documentInfo']['cedula'];
+        
+        // Buscar usuario por cédula
+        $stmt = $db->prepare("SELECT cedula, nombres, apellidos, celular, email FROM usuarios WHERE cedula = :cedula LIMIT 1");
+        $stmt->execute(['cedula' => $cedula]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($usuario) {
+            $userMatch = true;
+            $userData = [
+                'cedula' => $usuario['cedula'],
+                'nombres' => $usuario['nombres'],
+                'apellidos' => $usuario['apellidos'],
+                'celular' => $usuario['celular'] ?? '',
+                'email' => $usuario['email'] ?? ''
+            ];
+        }
+    }
+    
     // Preparar respuesta
     $response = [
         'success' => true,
         'valid' => $validation['valid'],
+        'userMatch' => $userMatch,
         'message' => $validation['message'],
         'data' => [
             'documentType' => $analysisResult['documentInfo']['tipoDocumento'],
@@ -94,12 +153,22 @@ try {
         'warnings' => $validation['warnings']
     ];
     
-    // Limpiar archivo temporal
-    @unlink($file['tmp_name']);
+    // Agregar datos del usuario si se encontró
+    if ($userData) {
+        $response['userData'] = $userData;
+    }
     
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     
 } catch (Exception $e) {
+    // Limpiar archivos temporales en caso de error
+    if (isset($tempPathFront) && file_exists($tempPathFront)) {
+        @unlink($tempPathFront);
+    }
+    if (isset($tempPathBack) && file_exists($tempPathBack)) {
+        @unlink($tempPathBack);
+    }
+    
     http_response_code(400);
     echo json_encode([
         'success' => false,

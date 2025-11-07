@@ -1,16 +1,18 @@
 /**
  * Upload ID Document Script
  * 
- * Script para manejar la carga y análisis de documentos de identidad
+ * Script para manejar la carga y análisis de documentos de identidad (frontal y posterior)
  * usando la Cloud Vision API a través del backend
  * 
  * @author Valora.vip
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    const idPhotoInput = document.getElementById('idPhoto');
-    const idPreview = document.getElementById('idPreview');
+    const idPhotoFrontInput = document.getElementById('idPhotoFront');
+    const idPhotoBackInput = document.getElementById('idPhotoBack');
+    const idPreviewFront = document.getElementById('idPreviewFront');
+    const idPreviewBack = document.getElementById('idPreviewBack');
     const analyzeButton = document.getElementById('analyzeIdButton');
     const resultDiv = document.getElementById('idScanResult');
     
@@ -18,63 +20,97 @@ document.addEventListener('DOMContentLoaded', function() {
     const MAX_FILE_SIZE = 6 * 1024 * 1024; // 6MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     
+    let frontImageReady = false;
+    let backImageReady = false;
+    
     /**
-     * Previsualizar imagen cuando se selecciona
+     * Previsualizar imagen frontal cuando se selecciona
      */
-    idPhotoInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
+    idPhotoFrontInput.addEventListener('change', function(e) {
+        handleImageSelection(e, idPreviewFront, 'frontal', (isValid) => {
+            frontImageReady = isValid;
+            updateAnalyzeButton();
+        });
+    });
+    
+    /**
+     * Previsualizar imagen posterior cuando se selecciona
+     */
+    idPhotoBackInput.addEventListener('change', function(e) {
+        handleImageSelection(e, idPreviewBack, 'posterior', (isValid) => {
+            backImageReady = isValid;
+            updateAnalyzeButton();
+        });
+    });
+    
+    /**
+     * Manejar selección de imagen
+     */
+    function handleImageSelection(event, previewElement, side, callback) {
+        const file = event.target.files[0];
         
         if (!file) {
-            idPreview.classList.add('d-none');
+            previewElement.classList.add('d-none');
+            callback(false);
             return;
         }
         
         // Validar tipo de archivo
         if (!ALLOWED_TYPES.includes(file.type)) {
-            showError('Formato no permitido. Use JPEG, PNG o WebP.');
-            idPhotoInput.value = '';
+            showError(`Formato no permitido en imagen ${side}. Use JPEG, PNG o WebP.`);
+            event.target.value = '';
+            callback(false);
             return;
         }
         
         // Validar tamaño
         if (file.size > MAX_FILE_SIZE) {
-            showError('La imagen es demasiado grande. Tamaño máximo: 6MB.');
-            idPhotoInput.value = '';
+            showError(`La imagen ${side} es demasiado grande. Tamaño máximo: 6MB.`);
+            event.target.value = '';
+            callback(false);
             return;
         }
         
         // Mostrar previsualización
         const reader = new FileReader();
         reader.onload = function(event) {
-            idPreview.src = event.target.result;
-            idPreview.classList.remove('d-none');
+            previewElement.src = event.target.result;
+            previewElement.classList.remove('d-none');
         };
         reader.readAsDataURL(file);
         
-        // Habilitar botón de análisis
-        analyzeButton.disabled = false;
-    });
+        callback(true);
+    }
+    
+    /**
+     * Actualizar estado del botón de análisis
+     */
+    function updateAnalyzeButton() {
+        analyzeButton.disabled = !(frontImageReady && backImageReady);
+    }
     
     /**
      * Analizar documento al hacer clic en el botón
      */
     analyzeButton.addEventListener('click', async function() {
-        const file = idPhotoInput.files[0];
+        const fileFront = idPhotoFrontInput.files[0];
+        const fileBack = idPhotoBackInput.files[0];
         
-        if (!file) {
-            showError('Por favor, selecciona una imagen primero.');
+        if (!fileFront || !fileBack) {
+            showError('Por favor, selecciona ambas imágenes (frontal y posterior).');
             return;
         }
         
         // Deshabilitar botón y mostrar loading
         analyzeButton.disabled = true;
-        analyzeButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analizando...';
-        resultDiv.innerHTML = '<div class="alert alert-info">🔍 Analizando documento con IA...</div>';
+        analyzeButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analizando ambas imágenes...';
+        resultDiv.innerHTML = '<div class="alert alert-info">🔍 Analizando documento con IA (frontal y posterior)...</div>';
         
         try {
-            // Preparar FormData
+            // Preparar FormData con ambas imágenes
             const formData = new FormData();
-            formData.append('idPhoto', file);
+            formData.append('id_photo_front', fileFront);
+            formData.append('id_photo_back', fileBack);
             
             // Enviar solicitud al backend
             const response = await fetch('/controllers/id_verification/idVerificationController.php', {
@@ -96,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             // Restaurar botón
             analyzeButton.disabled = false;
-            analyzeButton.innerHTML = 'Analizar Documento con IA';
+            analyzeButton.innerHTML = 'Analizar ambas imágenes con IA';
         }
     });
     
@@ -117,6 +153,21 @@ document.addEventListener('DOMContentLoaded', function() {
             html += `
                 <div class="alert alert-warning">
                     <h5 class="mb-2">⚠️ ${data.message}</h5>
+                </div>
+            `;
+        }
+        
+        // Coincidencia con usuario en BD
+        if (data.userMatch) {
+            html += `
+                <div class="alert alert-success">
+                    <strong>✅ Usuario Verificado:</strong> Los datos del documento coinciden con un usuario registrado en el sistema.
+                </div>
+            `;
+        } else if (data.userMatch === false) {
+            html += `
+                <div class="alert alert-danger">
+                    <strong>❌ Usuario No Encontrado:</strong> No se encontró ningún usuario registrado con este número de documento.
                 </div>
             `;
         }
@@ -169,11 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         html += `<p><strong>Rostros detectados:</strong> ${data.data.faceCount}</p>`;
         
-        // Texto completo (colapsable)
+        // Texto completo combinado (colapsable)
         if (data.data.fullText) {
             html += `
                 <details class="mt-3">
-                    <summary style="cursor: pointer; color: #882A57; font-weight: bold;">Ver texto completo extraído</summary>
+                    <summary style="cursor: pointer; color: #882A57; font-weight: bold;">Ver texto completo extraído (ambas caras)</summary>
                     <pre class="mt-2 p-3" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; white-space: pre-wrap;">${escapeHtml(data.data.fullText)}</pre>
                 </details>
             `;
@@ -181,8 +232,23 @@ document.addEventListener('DOMContentLoaded', function() {
         
         html += '</div></div>';
         
+        // Información del usuario encontrado (si aplica)
+        if (data.userData) {
+            html += '<div class="card mt-3" style="border: 2px solid #28a745;"><div class="card-body">';
+            html += '<h5 class="card-title mb-3" style="color: #28a745;">👤 Usuario Registrado</h5>';
+            html += `<p><strong>Nombre completo:</strong> ${escapeHtml(data.userData.nombres)} ${escapeHtml(data.userData.apellidos)}</p>`;
+            html += `<p><strong>Cédula:</strong> ${escapeHtml(data.userData.cedula)}</p>`;
+            if (data.userData.celular) {
+                html += `<p><strong>Celular:</strong> ${escapeHtml(data.userData.celular)}</p>`;
+            }
+            if (data.userData.email) {
+                html += `<p><strong>Email:</strong> ${escapeHtml(data.userData.email)}</p>`;
+            }
+            html += '</div></div>';
+        }
+        
         // Botón para continuar
-        if (data.valid) {
+        if (data.valid && data.userMatch) {
             html += `
                 <div class="mt-4 text-center">
                     <a href="/views/login/password_reset.php" class="btn btn-primary">

@@ -274,27 +274,46 @@ startSessionSafely();
             <div class="alert alert-info" style="text-align: left;">
                 <strong>💡 Consejos para una buena foto:</strong>
                 <ul style="margin: 10px 0 0 20px; padding: 0;">
+                    <li>Sube ambas caras del documento (frontal y posterior)</li>
                     <li>Asegúrate de que el documento esté completo y legible</li>
                     <li>Usa buena iluminación, evita sombras</li>
                     <li>Mantén el documento plano, sin reflejos</li>
-                    <li>Formato: JPEG, PNG o WebP (máx. 6MB)</li>
+                    <li>Formato: JPEG, PNG o WebP (máx. 6MB cada una)</li>
                 </ul>
             </div>
             
+            <!-- Cara Frontal -->
+            <label style="font-weight: 600; color: #495057; margin-top: 20px; display: block;">
+                📄 Cara Frontal del Documento:
+            </label>
             <input type="file" 
-                   id="idPhoto" 
+                   id="idPhotoFront" 
                    accept="image/*" 
                    capture="environment" 
                    class="form-control">
             
-            <img id="idPreview" 
+            <img id="idPreviewFront" 
                  class="d-none" 
-                 alt="Vista previa del documento">
+                 alt="Vista previa frontal del documento">
+            
+            <!-- Cara Posterior -->
+            <label style="font-weight: 600; color: #495057; margin-top: 20px; display: block;">
+                📄 Cara Posterior del Documento:
+            </label>
+            <input type="file" 
+                   id="idPhotoBack" 
+                   accept="image/*" 
+                   capture="environment" 
+                   class="form-control">
+            
+            <img id="idPreviewBack" 
+                 class="d-none" 
+                 alt="Vista previa posterior del documento">
             
             <button id="analyzeIdButton" 
                     class="btn btn-primary" 
                     disabled>
-                Analizar Documento con IA
+                Analizar ambas imágenes con IA
             </button>
             
             <div id="idScanResult" class="mt-4"></div>

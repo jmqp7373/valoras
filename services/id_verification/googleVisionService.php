@@ -28,6 +28,116 @@ class GoogleVisionService {
     }
     
     /**
+     * Analizar múltiples imágenes de documento
+     * 
+     * @param array $imagePaths Array de rutas a las imágenes
+     * @return array Resultado del análisis combinado
+     */
+    public function analyzeMultipleImages($imagePaths) {
+        try {
+            // Preparar solicitud para múltiples imágenes
+            $requests = [];
+            
+            foreach ($imagePaths as $imagePath) {
+                $imageData = file_get_contents($imagePath);
+                $base64Image = base64_encode($imageData);
+                
+                $requests[] = [
+                    'image' => [
+                        'content' => $base64Image
+                    ],
+                    'features' => [
+                        [
+                            'type' => 'DOCUMENT_TEXT_DETECTION',
+                            'maxResults' => 1
+                        ],
+                        [
+                            'type' => 'FACE_DETECTION',
+                            'maxResults' => 10
+                        ]
+                    ]
+                ];
+            }
+            
+            $requestData = ['requests' => $requests];
+            $jsonRequest = json_encode($requestData);
+            
+            // Enviar solicitud con cURL
+            $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonRequest);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($jsonRequest)
+            ]);
+            
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+            
+            // Verificar errores de conexión
+            if ($curlError) {
+                return [
+                    'success' => false,
+                    'error' => 'Error de conexión: ' . $curlError
+                ];
+            }
+            
+            // Verificar código HTTP
+            if ($httpCode !== 200) {
+                return [
+                    'success' => false,
+                    'error' => 'Error HTTP ' . $httpCode . ': ' . $response
+                ];
+            }
+            
+            // Decodificar respuesta
+            $responseData = json_decode($response, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return [
+                    'success' => false,
+                    'error' => 'Error al decodificar respuesta: ' . json_last_error_msg()
+                ];
+            }
+            
+            // Combinar textos detectados de todas las imágenes
+            $combinedText = '';
+            $totalFaces = 0;
+            
+            foreach ($responseData['responses'] as $index => $response) {
+                if (isset($response['fullTextAnnotation']['text'])) {
+                    $combinedText .= "\n=== CARA " . ($index + 1) . " ===\n";
+                    $combinedText .= $response['fullTextAnnotation']['text'] . "\n";
+                }
+                
+                if (isset($response['faceAnnotations'])) {
+                    $totalFaces += count($response['faceAnnotations']);
+                }
+            }
+            
+            // Extraer información del texto combinado
+            $documentInfo = $this->extractDocumentInfo($combinedText);
+            
+            return [
+                'success' => true,
+                'text' => trim($combinedText),
+                'faceCount' => $totalFaces,
+                'documentInfo' => $documentInfo,
+                'rawResponse' => $responseData
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
      * Analizar documento de identidad
      * 
      * @param string $base64Image Imagen codificada en base64

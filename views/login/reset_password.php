@@ -129,7 +129,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
 <body>
     <div class="login-container">
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo">
-        <h2>🔑 Recuperar Contraseña</h2>
+        <h2>🔑 Crear Nueva Contraseña</h2>
         
         <div class="step-indicator">
             <div class="step <?php echo $step >= 1 ? ($step > 1 ? 'completed' : 'active') : ''; ?>">1</div>

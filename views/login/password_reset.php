@@ -278,6 +278,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 
                 <button type="submit" class="btn-submit">Enviar Código</button>
+                
+                <!-- Opción de verificación con documento -->
+                <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                    <p style="color: #6c757d; margin-bottom: 10px; font-size: 14px;">¿No puedes recibir el código?</p>
+                    <a href="verify_document.php" 
+                       style="display: inline-block; padding: 10px 20px; background: transparent; border: 2px solid #6c757d; color: #6c757d; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.3s ease;">
+                        📸 Verifica tu identidad con tu documento
+                    </a>
+                </div>
             </form>
 
             <script>

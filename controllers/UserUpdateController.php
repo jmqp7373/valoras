@@ -24,13 +24,13 @@ try {
 
 // Verificar que sea una petición POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../views/login/verify_document.php?error=invalid_method');
+    header('Location: ../views/login/verify3_Update.php?error=invalid_method');
     exit;
 }
 
 // Validar que existan los datos necesarios
 if (!isset($_POST['cedula']) || !isset($_POST['telefono']) || !isset($_POST['email'])) {
-    header('Location: ../views/login/verify_document.php?error=missing_fields');
+    header('Location: ../views/login/verify3_Update.php?error=missing_fields');
     exit;
 }
 
@@ -41,19 +41,19 @@ $email = trim($_POST['email']);
 
 // Validaciones básicas
 if (empty($cedula) || empty($telefono) || empty($email)) {
-    header('Location: ../views/login/verify_document.php?error=empty_fields');
+    header('Location: ../views/login/verify3_Update.php?error=empty_fields');
     exit;
 }
 
 // Validar formato de teléfono (10 dígitos)
 if (!preg_match('/^[0-9]{10}$/', $telefono)) {
-    header('Location: ../views/login/verify_document.php?error=invalid_phone');
+    header('Location: ../views/login/verify3_Update.php?error=invalid_phone');
     exit;
 }
 
 // Validar formato de email
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    header('Location: ../views/login/verify_document.php?error=invalid_email');
+    header('Location: ../views/login/verify3_Update.php?error=invalid_email');
     exit;
 }
 
@@ -77,20 +77,23 @@ try {
         $_SESSION['updated_email'] = $email;
         $_SESSION['verified_cedula'] = $cedula;
         
+        // Limpiar resultado OCR de sesión
+        unset($_SESSION['ocr_result']);
+        
         // Redirigir a la página de recuperación de contraseña con éxito
         header('Location: ../views/login/password_reset.php?updated=1&cedula=' . urlencode($cedula));
         exit;
     } else {
-        header('Location: ../views/login/verify_document.php?error=update_failed');
+        header('Location: ../views/login/verify3_Update.php?error=update_failed');
         exit;
     }
     
 } catch (PDOException $e) {
     error_log('Error en UserUpdateController: ' . $e->getMessage());
-    header('Location: ../views/login/verify_document.php?error=database_error');
+    header('Location: ../views/login/verify3_Update.php?error=database_error');
     exit;
 } catch (Exception $e) {
     error_log('Error general en UserUpdateController: ' . $e->getMessage());
-    header('Location: ../views/login/verify_document.php?error=general_error');
+    header('Location: ../views/login/verify3_Update.php?error=general_error');
     exit;
 }

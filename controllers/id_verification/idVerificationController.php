@@ -6,39 +6,27 @@
  * usando Google Cloud Vision API
  * 
  * @author Valora.vip
- * @version 1.0.0
+ * @version 2.0.0 - Multi-page flow with SESSION
  */
-
-// Habilitar CORS si es necesario
-header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Manejar preflight OPTIONS
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
 
 // Solo permitir POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Método no permitido. Use POST.'
-    ]);
-    exit;
+    http_response_code(405);
+    die('Método no permitido');
 }
+
+// Iniciar sesión
+require_once __DIR__ . '/../../config/database.php';
+startSessionSafely();
 
 // Importar configuración y servicios
 $configPath = __DIR__ . '/../../config/configGoogleVision.php';
 if (!file_exists($configPath)) {
-    http_response_code(500);
-    echo json_encode([
+    $_SESSION['ocr_result'] = [
         'success' => false,
-        'error' => 'Archivo de configuración no encontrado. Por favor contacte al administrador.',
-        'debug' => 'config/configGoogleVision.php debe existir en el servidor. Verifique que el archivo fue subido por FTP.'
-    ], JSON_UNESCAPED_UNICODE);
+        'error' => 'Configuración no encontrada. Contacte al administrador.'
+    ];
+    header('Location: ../../views/login/verify2_OCR.php');
     exit;
 }
 
@@ -46,30 +34,28 @@ require_once $configPath;
 
 // Verificar que la API Key esté definida
 if (!defined('GOOGLE_VISION_API_KEY')) {
-    http_response_code(500);
-    echo json_encode([
+    $_SESSION['ocr_result'] = [
         'success' => false,
-        'error' => 'GOOGLE_VISION_API_KEY no está definida en configGoogleVision.php',
-        'debug' => 'Agregue la línea: define(\'GOOGLE_VISION_API_KEY\', \'su-api-key-aqui\'); en config/configGoogleVision.php'
-    ], JSON_UNESCAPED_UNICODE);
+        'error' => 'GOOGLE_VISION_API_KEY no está definida'
+    ];
+    header('Location: ../../views/login/verify2_OCR.php');
     exit;
 }
 
-require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../services/id_verification/googleVisionService.php';
 
 try {
     // Validar que se recibieron ambas imágenes
-    if (!isset($_FILES['id_photo_front']) || $_FILES['id_photo_front']['error'] !== UPLOAD_ERR_OK) {
+    if (!isset($_FILES['idPhotoFront']) || $_FILES['idPhotoFront']['error'] !== UPLOAD_ERR_OK) {
         throw new Exception('No se recibió la imagen frontal o hubo un error en la carga.');
     }
     
-    if (!isset($_FILES['id_photo_back']) || $_FILES['id_photo_back']['error'] !== UPLOAD_ERR_OK) {
+    if (!isset($_FILES['idPhotoBack']) || $_FILES['idPhotoBack']['error'] !== UPLOAD_ERR_OK) {
         throw new Exception('No se recibió la imagen posterior o hubo un error en la carga.');
     }
     
-    $fileFront = $_FILES['id_photo_front'];
-    $fileBack = $_FILES['id_photo_back'];
+    $fileFront = $_FILES['idPhotoFront'];
+    $fileBack = $_FILES['idPhotoBack'];
     
     // Validar tamaño de los archivos (máximo 6MB cada uno)
     $maxSize = 6 * 1024 * 1024; // 6MB en bytes
@@ -156,7 +142,7 @@ try {
         }
     }
     
-    // Preparar respuesta
+    // Preparar respuesta para SESSION
     $response = [
         'success' => true,
         'valid' => $validation['valid'],
@@ -181,7 +167,12 @@ try {
         $response['userData'] = $userData;
     }
     
-    echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    // Guardar en SESSION
+    $_SESSION['ocr_result'] = $response;
+    
+    // Redirigir a Paso 2
+    header('Location: ../../views/login/verify2_OCR.php');
+    exit;
     
 } catch (Exception $e) {
     // Limpiar archivos temporales en caso de error
@@ -192,10 +183,14 @@ try {
         @unlink($tempPathBack);
     }
     
-    http_response_code(400);
-    echo json_encode([
+    // Guardar error en SESSION
+    $_SESSION['ocr_result'] = [
         'success' => false,
         'error' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    ];
+    
+    // Redirigir a Paso 2 con error
+    header('Location: ../../views/login/verify2_OCR.php');
+    exit;
 }
 ?>

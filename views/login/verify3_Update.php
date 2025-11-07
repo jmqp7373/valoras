@@ -35,6 +35,7 @@ $success = $_GET['success'] ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paso 3: Actualizar Datos - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../components/marcaPasos.css">
     <style>
         * { box-sizing: border-box; }
         
@@ -49,55 +50,6 @@ $success = $_GET['success'] ?? '';
             max-width: 600px;
             margin: 0 auto;
             padding: 15px;
-        }
-        
-        /* STEPS INDICATOR */
-        .steps-container {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin-bottom: 25px !important;
-            gap: 8px !important;
-            background: white !important;
-            padding: 20px !important;
-            border-radius: 15px !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        .step {
-            width: 45px !important;
-            height: 45px !important;
-            border-radius: 50% !important;
-            background: #e0e0e0 !important;
-            color: #757575 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-weight: 700 !important;
-            font-size: 20px !important;
-            line-height: 1 !important;
-        }
-        
-        .step-line {
-            width: 70px !important;
-            height: 4px !important;
-            background: #e0e0e0 !important;
-        }
-        
-        .step.active {
-            background: linear-gradient(135deg, #e91e63, #ff4081) !important;
-            color: white !important;
-            box-shadow: 0 6px 15px rgba(233, 30, 99, 0.5) !important;
-            transform: scale(1.15) !important;
-        }
-        
-        .step.completed {
-            background: linear-gradient(135deg, #4caf50, #66bb6a) !important;
-            color: white !important;
-        }
-        
-        .step-line.active {
-            background: linear-gradient(90deg, #e91e63, #ff4081) !important;
         }
         
         .card {
@@ -220,15 +172,11 @@ $success = $_GET['success'] ?? '';
     </style>
 </head>
 <body>
+    <?php include '../../components/marcaPasos.php'; ?>
+    
     <div class="verification-container">
-        <!-- STEP INDICATOR -->
-        <div class="steps-container">
-            <div class="step completed">1</div>
-            <div class="step-line active"></div>
-            <div class="step completed">2</div>
-            <div class="step-line active"></div>
-            <div class="step active">3</div>
-        </div>
+        <!-- MARCA PASOS -->
+        <?php renderMarcaPasos(3, 3); ?>
         
         <div class="card">
             <img src="../../assets/images/logos/logo_valora.png" style="max-width: 150px; margin: 0 auto 20px; display: block;">

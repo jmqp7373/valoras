@@ -18,7 +18,7 @@ startSessionSafely();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paso 1: Verificación de Identidad - Valora</title>
-    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../components/marcaPasos.css">
     <style>
         * {
             box-sizing: border-box;
@@ -35,48 +35,6 @@ startSessionSafely();
             max-width: 600px;
             margin: 0 auto;
             padding: 15px;
-        }
-        
-        /* STEPS INDICATOR */
-        .steps-container {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin-bottom: 25px !important;
-            gap: 8px !important;
-            background: white !important;
-            padding: 20px !important;
-            border-radius: 15px !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        .step {
-            width: 45px !important;
-            height: 45px !important;
-            border-radius: 50% !important;
-            background: #e0e0e0 !important;
-            color: #757575 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-weight: 700 !important;
-            font-size: 20px !important;
-            line-height: 1 !important;
-            text-align: center !important;
-        }
-        
-        .step-line {
-            width: 70px !important;
-            height: 4px !important;
-            background: #e0e0e0 !important;
-            flex-shrink: 0 !important;
-        }
-        
-        .step.active {
-            background: linear-gradient(135deg, #e91e63, #ff4081) !important;
-            color: white !important;
-            box-shadow: 0 6px 15px rgba(233, 30, 99, 0.5) !important;
-            transform: scale(1.15) !important;
         }
         
         .card {
@@ -216,47 +174,14 @@ startSessionSafely();
         @keyframes spinner-border {
             to { transform: rotate(360deg); }
         }
-        
-        @media (max-width: 768px) {
-            .steps-container {
-                gap: 6px !important;
-                padding: 15px !important;
-            }
-            
-            .step {
-                width: 38px !important;
-                height: 38px !important;
-                font-size: 18px !important;
-            }
-            
-            .step-line {
-                width: 50px !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .step {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 16px !important;
-            }
-            
-            .step-line {
-                width: 35px !important;
-            }
-        }
     </style>
 </head>
 <body>
+    <?php include '../../components/marcaPasos.php'; ?>
+    
     <div class="verification-container">
-        <!-- STEP INDICATOR -->
-        <div class="steps-container">
-            <div class="step active">1</div>
-            <div class="step-line"></div>
-            <div class="step">2</div>
-            <div class="step-line"></div>
-            <div class="step">3</div>
-        </div>
+        <!-- MARCA PASOS -->
+        <?php renderMarcaPasos(1, 3); ?>
         
         <div class="card">
             <img src="../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo" style="max-width: 150px; margin: 0 auto 20px; display: block;">

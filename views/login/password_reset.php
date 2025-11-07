@@ -128,8 +128,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <?php include '../../components/marcaPasos.php'; ?>
     
-    <!-- CONTENEDOR PRINCIPAL CON ANCHO FIJO -->
-    <div style="width: 100%; max-width: 380px; margin: 0 auto; padding: 20px;">
+    <!-- CONTENEDOR PRINCIPAL SIN PADDING -->
+    <div style="width: 100%; max-width: 380px; margin: 20px auto;">
         <!-- MARCA PASOS -->
         <div style="margin-bottom: 20px;">
             <?php 

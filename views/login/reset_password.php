@@ -102,8 +102,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
 <body>
     <?php include '../../components/marcaPasos.php'; ?>
     
-    <!-- CONTENEDOR PRINCIPAL PARA ALINEACIÓN -->
-    <div style="width: 100%; max-width: 380px; margin: 0 auto; padding: 20px;">
+    <!-- CONTENEDOR PRINCIPAL SIN PADDING -->
+    <div style="width: 100%; max-width: 380px; margin: 20px auto;">
         <!-- MARCA PASOS -->
         <div style="margin-bottom: 20px;">
             <?php renderMarcaPasos(3, 3); // Paso 3 de 3: identify → select_method → reset_password ?>

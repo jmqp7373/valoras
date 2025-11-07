@@ -251,8 +251,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.valid && data.userMatch) {
             html += `
                 <div class="mt-4 text-center">
-                    <a href="/views/login/password_reset.php" class="btn btn-primary">
-                        Continuar con recuperación de contraseña
+                    <a href="/views/login/password_reset.php" class="btn btn-primary" style="white-space: normal; word-wrap: break-word; max-width: 100%;">
+                        Continuar con recuperación
                     </a>
                 </div>
             `;

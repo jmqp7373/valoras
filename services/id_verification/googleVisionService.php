@@ -272,13 +272,17 @@ class GoogleVisionService {
             $info['cedula'] = $cedula;
         }
         
-        // Extraer nombres (patrón: línea después de "NOMBRES" o "APELLIDOS")
-        if (preg_match('/NOMBRES?\s*[:\n]?\s*([A-ZÁÉÍÓÚÑ\s]+)/i', $text, $matches)) {
-            $info['nombres'] = trim($matches[1]);
+        // ========================================
+        // EXTRACCIÓN MEJORADA DE NOMBRES Y APELLIDOS
+        // ========================================
+        $nombres = $this->extractNombres($text);
+        if ($nombres) {
+            $info['nombres'] = $nombres;
         }
         
-        if (preg_match('/APELLIDOS?\s*[:\n]?\s*([A-ZÁÉÍÓÚÑ\s]+)/i', $text, $matches)) {
-            $info['apellidos'] = trim($matches[1]);
+        $apellidos = $this->extractApellidos($text);
+        if ($apellidos) {
+            $info['apellidos'] = $apellidos;
         }
         
         // Extraer fechas (formato DD/MM/YYYY o DD-MM-YYYY)
@@ -378,6 +382,139 @@ class GoogleVisionService {
         
         // Retornar el candidato con mayor prioridad
         return $candidates[0]['value'];
+    }
+    
+    /**
+     * Extrae los apellidos del documento de forma inteligente
+     * 
+     * Estrategia:
+     * 1. Buscar línea con palabra "APELLIDOS"
+     * 2. Capturar solo la siguiente línea (no todo lo que sigue)
+     * 3. Limpiar palabras clave que no son apellidos
+     * 
+     * @param string $text Texto extraído del documento
+     * @return string Apellidos o cadena vacía
+     */
+    private function extractApellidos($text) {
+        // Dividir el texto en líneas
+        $lines = preg_split('/\r\n|\r|\n/', $text);
+        
+        $apellidos = '';
+        $foundApellidosLabel = false;
+        
+        foreach ($lines as $index => $line) {
+            $line = trim($line);
+            
+            // Buscar la línea que contiene "APELLIDOS"
+            if (preg_match('/^APELLIDOS?\s*:?\s*$/i', $line)) {
+                // Si "APELLIDOS" está solo en una línea, tomar la siguiente
+                if (isset($lines[$index + 1])) {
+                    $apellidos = trim($lines[$index + 1]);
+                    $foundApellidosLabel = true;
+                    break;
+                }
+            } elseif (preg_match('/^APELLIDOS?\s*:?\s+(.+)$/i', $line, $matches)) {
+                // Si "APELLIDOS" está en la misma línea que el contenido
+                $apellidos = trim($matches[1]);
+                $foundApellidosLabel = true;
+                break;
+            }
+        }
+        
+        if (!$foundApellidosLabel) {
+            return '';
+        }
+        
+        // Limpiar el contenido extraído
+        $apellidos = $this->cleanNameField($apellidos);
+        
+        return $apellidos;
+    }
+    
+    /**
+     * Extrae los nombres del documento de forma inteligente
+     * 
+     * Estrategia similar a extractApellidos
+     * 
+     * @param string $text Texto extraído del documento
+     * @return string Nombres o cadena vacía
+     */
+    private function extractNombres($text) {
+        // Dividir el texto en líneas
+        $lines = preg_split('/\r\n|\r|\n/', $text);
+        
+        $nombres = '';
+        $foundNombresLabel = false;
+        
+        foreach ($lines as $index => $line) {
+            $line = trim($line);
+            
+            // Buscar la línea que contiene "NOMBRES"
+            if (preg_match('/^NOMBRES?\s*:?\s*$/i', $line)) {
+                // Si "NOMBRES" está solo en una línea, tomar la siguiente
+                if (isset($lines[$index + 1])) {
+                    $nombres = trim($lines[$index + 1]);
+                    $foundNombresLabel = true;
+                    break;
+                }
+            } elseif (preg_match('/^NOMBRES?\s*:?\s+(.+)$/i', $line, $matches)) {
+                // Si "NOMBRES" está en la misma línea que el contenido
+                $nombres = trim($matches[1]);
+                $foundNombresLabel = true;
+                break;
+            }
+        }
+        
+        if (!$foundNombresLabel) {
+            return '';
+        }
+        
+        // Limpiar el contenido extraído
+        $nombres = $this->cleanNameField($nombres);
+        
+        return $nombres;
+    }
+    
+    /**
+     * Limpia campos de nombre/apellido eliminando texto basura
+     * 
+     * @param string $field Campo a limpiar
+     * @return string Campo limpio
+     */
+    private function cleanNameField($field) {
+        // Lista de palabras/frases que NO son parte del nombre
+        $stopWords = [
+            'REPUBLICA DE COLOMBIA',
+            'REPUBLICA DE',
+            'REPÚBLICA DE COLOMBIA',
+            'REPÚBLICA DE',
+            'CEDULA DE CIUDADANIA',
+            'CÉDULA DE CIUDADANÍA',
+            'FIRMA',
+            'COLOR BIA',
+            'RESLIBLICA',
+            'UBLICA',
+            'BIA',
+            'COLOMBIA S',
+            'NOMBRES',
+            'APELLIDOS'
+        ];
+        
+        // Eliminar palabras basura
+        foreach ($stopWords as $word) {
+            $field = str_ireplace($word, '', $field);
+        }
+        
+        // Limpiar espacios múltiples y caracteres especiales
+        $field = preg_replace('/\s+/', ' ', $field);
+        $field = trim($field);
+        
+        // Si el campo resultante solo tiene 1-2 caracteres, probablemente sea basura
+        if (strlen($field) <= 2) {
+            return '';
+        }
+        
+        return $field;
     }
     
     /**

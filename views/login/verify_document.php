@@ -25,7 +25,7 @@ startSessionSafely();
             min-height: 100vh;
             margin: 0;
             padding: 0;
-            padding-top: 20px;
+            padding-top: 40px;
         }
         
         .verification-container {
@@ -89,7 +89,7 @@ startSessionSafely();
         /* Contenedor para dispositivos móviles */
         @media (max-width: 768px) {
             body {
-                padding-top: 15px;
+                padding-top: 30px;
             }
             
             .verification-container {
@@ -129,7 +129,7 @@ startSessionSafely();
         /* Estilos para pantallas muy pequeñas */
         @media (max-width: 480px) {
             body {
-                padding-top: 10px;
+                padding-top: 25px;
             }
             
             .verification-container {

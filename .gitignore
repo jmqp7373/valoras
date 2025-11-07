@@ -34,6 +34,12 @@ yarn-error.log*
 *.backup
 *.swp
 
+# Imágenes de prueba y documentos temporales
+documento.jpg
+documento.png
+documento.webp
+test_document.*
+
 # Configuración sensible (API Keys)
 config.php
 config/config.php

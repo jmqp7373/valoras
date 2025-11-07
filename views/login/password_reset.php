@@ -128,16 +128,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <?php include '../../components/marcaPasos.php'; ?>
     
-    <div class="login-container">
-        <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
-        <h2>🔐 Recuperar Contraseña</h2>
-        
-        <!-- MARCA PASOS -->
+    <!-- MARCA PASOS - FUERA DEL CONTENEDOR -->
+    <div style="max-width: 600px; margin: 20px auto 0; padding: 0 15px;">
         <?php 
         $currentStep = 1;
         if($step === 'select_method') $currentStep = 2;
         renderMarcaPasos($currentStep, 3); // 3 pasos: identify, select_method, reset_password
         ?>
+    </div>
+    
+    <div class="login-container">
+        <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
+        <h2>🔐 Recuperar Contraseña</h2>
         
         <?php if($result && !$result['success']): ?>
             <div class="alert alert-error" style="background-color: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">

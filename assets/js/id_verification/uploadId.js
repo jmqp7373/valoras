@@ -247,16 +247,8 @@ document.addEventListener('DOMContentLoaded', function() {
             html += '</div></div>';
         }
         
-        // Botón para continuar
-        if (data.valid && data.userMatch) {
-            html += `
-                <div class="mt-4 text-center">
-                    <a href="password_reset.php" class="btn btn-primary analyze-button">
-                        Continuar con recuperación
-                    </a>
-                </div>
-            `;
-        } else {
+        // Botón para intentar de nuevo (solo si no se encontró usuario o documento inválido)
+        if (!data.valid || !data.userMatch) {
             html += `
                 <div class="mt-4 text-center">
                     <button onclick="location.reload()" class="btn btn-secondary analyze-button">
@@ -265,6 +257,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         }
+        // NOTA: Si data.valid && data.userMatch, NO se muestra botón aquí
+        // porque el usuario debe pasar por el Paso 3 (formulario de actualización)
         
         resultDiv.innerHTML = html;
         

@@ -182,6 +182,17 @@ $success = $_GET['success'] ?? '';
             box-shadow: 0 6px 15px rgba(136, 42, 87, 0.4);
         }
         
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+        }
+        
         .alert {
             padding: 15px;
             border-radius: 8px;
@@ -286,6 +297,12 @@ $success = $_GET['success'] ?? '';
                     💾 Guardar Cambios y Continuar
                 </button>
             </form>
+            
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="verify2_OCR.php" class="btn btn-secondary">
+                    ← Volver al Paso 2
+                </a>
+            </div>
         </div>
     </div>
 </body>

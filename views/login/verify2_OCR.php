@@ -315,6 +315,9 @@ $userData = $ocrData['userData'] ?? null;
                 <a href="verify3_Update.php" class="btn btn-primary">
                     Continuar al Paso 3: Actualizar Datos →
                 </a>
+                <a href="verify1_document.php" class="btn btn-secondary" style="margin-top: 10px;">
+                    ← Volver al Paso 1
+                </a>
             <?php else: ?>
                 <a href="verify1_document.php" class="btn btn-secondary">
                     ← Volver al Paso 1 e Intentar de Nuevo

@@ -80,12 +80,13 @@ try {
         $_SESSION['updated_phone'] = $telefono;
         $_SESSION['updated_email'] = $email;
         $_SESSION['verified_cedula'] = $cedula;
+        $_SESSION['contact_updated'] = true; // Marcar que los datos fueron actualizados
         
-        // Limpiar resultado OCR de sesión
-        unset($_SESSION['ocr_result']);
+        // NO limpiar resultado OCR todavía, lo necesitamos en verify4
+        // unset($_SESSION['ocr_result']);
         
-        // Redirigir a la página de recuperación de contraseña con éxito
-        header('Location: ../views/login/password_reset.php?updated=1&cedula=' . urlencode($cedula));
+        // Redirigir a la página de aprobación (paso 4)
+        header('Location: ../views/login/verify4_Approval.php');
         exit;
     } else {
         header('Location: ../views/login/verify3_Update.php?error=update_failed');

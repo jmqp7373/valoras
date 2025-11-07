@@ -175,7 +175,7 @@ startSessionSafely();
     
     <div class="verification-container">
         <!-- MARCA PASOS -->
-        <?php renderMarcaPasos(1, 3); ?>
+        <?php renderMarcaPasos(1, 4); ?>
         
         <div class="card">
             <img src="../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo" style="max-width: 150px; margin: 0 auto 20px; display: block;">

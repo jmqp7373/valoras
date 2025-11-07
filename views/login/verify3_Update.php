@@ -169,7 +169,7 @@ $success = $_GET['success'] ?? '';
     
     <div class="verification-container">
         <!-- MARCA PASOS -->
-        <?php renderMarcaPasos(3, 3); ?>
+        <?php renderMarcaPasos(3, 4); ?>
         
         <div class="card">
             <img src="../../assets/images/logos/logo_valora.png" style="max-width: 150px; margin: 0 auto 20px; display: block;">

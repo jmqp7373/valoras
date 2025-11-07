@@ -19,6 +19,12 @@ define('AI_MAX_TOKENS', 200);
 define('AI_TEMPERATURE', 0.85);
 
 // =================================
+// CONFIGURACIÓN DE GOOGLE VISION API
+// =================================
+// Obtén tu API Key en: https://console.cloud.google.com/apis/credentials
+define('GOOGLE_VISION_API_KEY', 'AIzaSy-ejemplo-pon-tu-google-vision-api-key-aqui');
+
+// =================================
 // CONFIGURACIONES DE LA APLICACIÓN
 // =================================
 define('APP_NAME', 'Valora.vip');

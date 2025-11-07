@@ -21,17 +21,23 @@ startSessionSafely();
     <title>Verificación de Identidad - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
         .verification-container {
             max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
+            margin: 20px auto;
+            padding: 15px;
         }
         
         .card {
             background: white;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            padding: 25px 20px;
         }
         
         .card h3 {
@@ -63,13 +69,79 @@ startSessionSafely();
             box-shadow: 0 0 0 3px rgba(238, 111, 146, 0.1);
         }
         
-        #idPreview {
-            max-height: 300px;
-            width: 100%;
+        /* Estilos para las previsualizaciones de imágenes */
+        #idPreviewFront,
+        #idPreviewBack {
+            max-height: 200px;
+            max-width: 100%;
+            width: auto;
+            height: auto;
             object-fit: contain;
             border-radius: 10px;
             border: 2px solid #dee2e6;
-            margin-top: 15px;
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Contenedor para dispositivos móviles */
+        @media (max-width: 768px) {
+            .verification-container {
+                margin: 10px auto;
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 20px 15px;
+            }
+            
+            #idPreviewFront,
+            #idPreviewBack {
+                max-height: 120px;
+            }
+            
+            .card h3 {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+            
+            .card p {
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+            
+            .alert-info ul {
+                font-size: 13px;
+                padding-left: 15px !important;
+            }
+            
+            .alert-info ul li {
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* Estilos para pantallas muy pequeñas */
+        @media (max-width: 480px) {
+            .verification-container {
+                margin: 5px;
+                padding: 5px;
+            }
+            
+            .card {
+                padding: 15px 10px;
+                border-radius: 10px;
+            }
+            
+            #idPreviewFront,
+            #idPreviewBack {
+                max-height: 100px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
         }
         
         .d-none {
@@ -282,33 +354,37 @@ startSessionSafely();
                 </ul>
             </div>
             
-            <!-- Cara Frontal -->
-            <label style="font-weight: 600; color: #495057; margin-top: 20px; display: block;">
-                📄 Cara Frontal del Documento:
-            </label>
-            <input type="file" 
-                   id="idPhotoFront" 
-                   accept="image/*" 
-                   capture="environment" 
-                   class="form-control">
+            <!-- Sección Cara Frontal -->
+            <div style="margin-top: 20px;">
+                <label style="font-weight: 600; color: #495057; margin-bottom: 8px; display: block; font-size: 14px;">
+                    📄 Cara Frontal del Documento:
+                </label>
+                <input type="file" 
+                       id="idPhotoFront" 
+                       accept="image/*" 
+                       capture="environment" 
+                       class="form-control">
+                
+                <img id="idPreviewFront" 
+                     class="d-none" 
+                     alt="Vista previa frontal del documento">
+            </div>
             
-            <img id="idPreviewFront" 
-                 class="d-none" 
-                 alt="Vista previa frontal del documento">
-            
-            <!-- Cara Posterior -->
-            <label style="font-weight: 600; color: #495057; margin-top: 20px; display: block;">
-                📄 Cara Posterior del Documento:
-            </label>
-            <input type="file" 
-                   id="idPhotoBack" 
-                   accept="image/*" 
-                   capture="environment" 
-                   class="form-control">
-            
-            <img id="idPreviewBack" 
-                 class="d-none" 
-                 alt="Vista previa posterior del documento">
+            <!-- Sección Cara Posterior -->
+            <div style="margin-top: 20px;">
+                <label style="font-weight: 600; color: #495057; margin-bottom: 8px; display: block; font-size: 14px;">
+                    📄 Cara Posterior del Documento:
+                </label>
+                <input type="file" 
+                       id="idPhotoBack" 
+                       accept="image/*" 
+                       capture="environment" 
+                       class="form-control">
+                
+                <img id="idPreviewBack" 
+                     class="d-none" 
+                     alt="Vista previa posterior del documento">
+            </div>
             
             <button id="analyzeIdButton" 
                     class="btn btn-primary" 

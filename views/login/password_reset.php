@@ -129,16 +129,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php include '../../components/marcaPasos.php'; ?>
     
     <!-- CONTENEDOR PRINCIPAL CON ANCHO FIJO -->
-    <div style="width: 100%; max-width: 460px; margin: 0 auto; padding: 20px;">
-        <!-- MARCA PASOS CON PADDING EQUIVALENTE -->
+    <div style="width: 100%; max-width: 380px; margin: 0 auto; padding: 20px;">
+        <!-- MARCA PASOS -->
         <div style="margin-bottom: 20px;">
-            <div style="padding: 0 40px;">
-                <?php 
-                $currentStep = 1;
-                if($step === 'select_method') $currentStep = 2;
-                renderMarcaPasos($currentStep, 3); // 3 pasos: identify, select_method, reset_password
-                ?>
-            </div>
+            <?php 
+            $currentStep = 1;
+            if($step === 'select_method') $currentStep = 2;
+            renderMarcaPasos($currentStep, 3); // 3 pasos: identify, select_method, reset_password
+            ?>
         </div>
         
         <div class="login-container">

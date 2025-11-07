@@ -391,12 +391,158 @@ startSessionSafely();
         details[open] {
             overflow: visible;
         }
+        
+        /* ==================================
+           ESTILOS PARA STEP VIEW (VISTA POR PASOS)
+           ================================== */
+        .steps-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 8px;
+        }
+        
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #757575;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        
+        .step-line {
+            width: 60px;
+            height: 3px;
+            background: #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background: linear-gradient(135deg, #e91e63, #ff4081);
+            color: white;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .step.completed {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: white;
+        }
+        
+        .step-line.active {
+            background: linear-gradient(90deg, #e91e63, #ff4081);
+        }
+        
+        /* ==================================
+           ESTILOS PARA FORMULARIO DE ACTUALIZACIÓN (PASO 3)
+           ================================== */
+        .update-form {
+            display: none; /* Oculto por defecto */
+            border: 2px solid #4caf50;
+            background: #f1f8f4;
+            margin-top: 20px;
+        }
+        
+        .update-form.visible {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .update-form h4 {
+            color: #2e7d32;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        /* Responsive para steps en móvil */
+        @media (max-width: 768px) {
+            .step {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            
+            .step-line {
+                width: 40px;
+                height: 2px;
+            }
+            
+            .steps-container {
+                gap: 5px;
+                margin-bottom: 20px;
+            }
+            
+            .update-form h4 {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .step {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            
+            .step-line {
+                width: 30px;
+            }
+            
+            .steps-container {
+                gap: 4px;
+                margin-bottom: 15px;
+            }
+            
+            .update-form h4 {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="verification-container">
         <div class="card">
             <img src="../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo" style="max-width: 150px; margin: 0 auto 20px; display: block;">
+            
+            <!-- STEP VIEW: Indicador de progreso -->
+            <div class="steps-container">
+                <div class="step step-1 active">1</div>
+                <div class="step-line step-line-1"></div>
+                <div class="step step-2">2</div>
+                <div class="step-line step-line-2"></div>
+                <div class="step step-3">3</div>
+            </div>
             
             <h3>📸 Verificación de Identidad</h3>
             <p>
@@ -454,6 +600,46 @@ startSessionSafely();
             </button>
             
             <div id="idScanResult" class="mt-4"></div>
+            
+            <!-- PASO 3: Formulario de Actualización de Datos de Contacto -->
+            <div id="updateUserData" class="update-form card p-3">
+                <h4>✏️ Actualiza tus datos de contacto</h4>
+                <p style="text-align: center; color: #2e7d32; font-size: 14px; margin-bottom: 20px;">
+                    Para continuar con la recuperación de tu contraseña, actualiza tus datos de contacto.
+                </p>
+                
+                <form id="updateContactForm" action="../../controllers/UserUpdateController.php" method="POST">
+                    <input type="hidden" name="cedula" id="hiddenCedula" value="">
+                    
+                    <div class="form-group mb-3">
+                        <label for="telefono">📱 Número de Celular:</label>
+                        <input type="tel" 
+                               id="telefono" 
+                               name="telefono" 
+                               class="form-control" 
+                               placeholder="Ejemplo: 3103951529" 
+                               pattern="[0-9]{10}" 
+                               title="Ingresa un número de 10 dígitos"
+                               required>
+                        <small style="color: #6c757d; font-size: 12px;">Ingresa 10 dígitos sin espacios ni guiones</small>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="email">📧 Correo Electrónico:</label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               class="form-control" 
+                               placeholder="Ejemplo: usuario@email.com" 
+                               required>
+                        <small style="color: #6c757d; font-size: 12px;">Ingresa un correo electrónico válido</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        💾 Guardar Cambios y Continuar
+                    </button>
+                </form>
+            </div>
             
             <div class="text-center mt-4">
                 <a href="password_reset.php" class="back-link">

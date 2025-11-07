@@ -284,6 +284,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        
+        // ACTIVAR PASOS SEGÚN EL RESULTADO DE LA VERIFICACIÓN
+        // Paso 2: Activar cuando el documento es validado correctamente
+        if (data.valid) {
+            setActiveStep(2);
+            console.log('Paso 2 activado: Documento validado');
+        }
+        
+        // Paso 3: Activar y mostrar formulario si hay coincidencia con usuario en BD
+        if (data.valid && data.userMatch) {
+            setTimeout(() => {
+                setActiveStep(3);
+                showUpdateForm(data.data.cedula);
+                console.log('Paso 3 activado: Usuario encontrado, formulario visible');
+            }, 500); // Pequeño delay para mejor UX
+        }
     }
     
     /**
@@ -305,4 +321,75 @@ document.addEventListener('DOMContentLoaded', function() {
         div.textContent = text;
         return div.innerHTML;
     }
+    
+    /**
+     * GESTIÓN DE PASOS (STEP VIEW)
+     */
+    
+    /**
+     * Activar un paso específico en el indicador de progreso
+     * @param {number} stepNumber - Número del paso a activar (1, 2 o 3)
+     */
+    function setActiveStep(stepNumber) {
+        const steps = document.querySelectorAll('.steps-container .step');
+        const stepLines = document.querySelectorAll('.steps-container .step-line');
+        
+        steps.forEach((step, index) => {
+            const currentStepNum = index + 1;
+            
+            // Remover clases activas
+            step.classList.remove('active', 'completed');
+            
+            // Activar el paso actual
+            if (currentStepNum === stepNumber) {
+                step.classList.add('active');
+            }
+            
+            // Marcar como completados los pasos anteriores
+            if (currentStepNum < stepNumber) {
+                step.classList.add('completed');
+            }
+        });
+        
+        // Actualizar líneas de conexión
+        stepLines.forEach((line, index) => {
+            line.classList.remove('active');
+            if (index < stepNumber - 1) {
+                line.classList.add('active');
+            }
+        });
+        
+        console.log(`Step View: Paso ${stepNumber} activado`);
+    }
+    
+    /**
+     * Mostrar el formulario de actualización de datos (Paso 3)
+     * @param {string} cedula - Número de cédula del usuario verificado
+     */
+    function showUpdateForm(cedula) {
+        const updateForm = document.getElementById('updateUserData');
+        const hiddenCedulaInput = document.getElementById('hiddenCedula');
+        
+        if (updateForm && hiddenCedulaInput) {
+            // Establecer la cédula en el campo oculto
+            hiddenCedulaInput.value = cedula;
+            
+            // Mostrar el formulario con animación
+            updateForm.classList.add('visible');
+            
+            // Scroll suave hacia el formulario
+            setTimeout(() => {
+                updateForm.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 200);
+            
+            console.log('Formulario de actualización visible con cédula:', cedula);
+        }
+    }
+    
+    // Inicialización del Step View
+    console.log('Step View inicializado correctamente - Paso 1 activo por defecto');
 });
+

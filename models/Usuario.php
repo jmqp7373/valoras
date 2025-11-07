@@ -222,5 +222,32 @@ class Usuario {
         
         return false;
     }
+    
+    /**
+     * Actualizar datos de contacto del usuario
+     * 
+     * @param string $cedula Número de cédula del usuario
+     * @param string $telefono Nuevo número de teléfono
+     * @param string $email Nuevo correo electrónico
+     * @return bool
+     */
+    public function updateContactData($cedula, $telefono, $email) {
+        try {
+            $query = "UPDATE " . $this->table_name . " SET celular = :telefono, email = :email WHERE cedula = :cedula";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':telefono', $telefono);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':cedula', $cedula);
+            
+            if ($stmt->execute() && $stmt->rowCount() > 0) {
+                error_log("Usuario actualizado: Cédula {$cedula}");
+                return true;
+            }
+            return false;
+        } catch (PDOException $e) {
+            error_log("Error al actualizar datos: " . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

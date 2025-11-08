@@ -1,5 +1,5 @@
 -- ============================================================================
--- SCRIPT DE DEPLOY PARA PRODUCCIÓN - TABLA EARNINGS
+-- SCRIPT DE DEPLOY PARA PRODUCCIÓN - TABLA VENTAS
 -- BASE DE DATOS: u179023609_orvlvi (Hostinger)
 -- PROYECTO: Valora.vip
 -- FECHA: 2025-11-08
@@ -26,10 +26,10 @@ FROM information_schema.tables
 WHERE table_schema = 'u179023609_orvlvi' 
 AND table_name = 'credenciales';
 
--- Crear tabla earnings
-SELECT 'Creando tabla earnings...' as paso;
+-- Crear tabla ventas
+SELECT 'Creando tabla ventas...' as paso;
 
-CREATE TABLE IF NOT EXISTS earnings (
+CREATE TABLE IF NOT EXISTS ventas (
     -- ID principal
     id INT(11) NOT NULL AUTO_INCREMENT,
     
@@ -66,13 +66,13 @@ CREATE TABLE IF NOT EXISTS earnings (
     UNIQUE KEY unique_earning_period (usuario_id, credencial_id, period_start, period_end),
     
     -- Claves foráneas con eliminación en cascada
-    CONSTRAINT fk_earnings_usuario 
+    CONSTRAINT fk_ventas_usuario 
         FOREIGN KEY (usuario_id) 
         REFERENCES usuarios(id_usuario) 
         ON DELETE CASCADE 
         ON UPDATE CASCADE,
     
-    CONSTRAINT fk_earnings_credencial 
+    CONSTRAINT fk_ventas_credencial 
         FOREIGN KEY (credencial_id) 
         REFERENCES credenciales(id_credencial) 
         ON DELETE CASCADE 
@@ -91,15 +91,15 @@ CREATE TABLE IF NOT EXISTS earnings (
   COMMENT='Registro de ingresos totales de modelos por plataforma y periodo';
 
 -- Mensaje de confirmación
-SELECT '✅ Tabla earnings creada exitosamente en producción' AS resultado;
+SELECT '✅ Tabla ventas creada exitosamente en producción' AS resultado;
 
 -- ============================================================================
 -- CONSULTAS DE VERIFICACIÓN (ejecutar después del deploy)
 -- ============================================================================
 
 -- 1. Ver estructura de la tabla
-SELECT 'Estructura de la tabla earnings:' as paso;
-DESCRIBE earnings;
+SELECT 'Estructura de la tabla ventas:' as paso;
+DESCRIBE ventas;
 
 -- 2. Verificar claves foráneas
 SELECT 'Verificando claves foráneas:' as paso;
@@ -111,15 +111,15 @@ SELECT
     REFERENCED_COLUMN_NAME
 FROM information_schema.KEY_COLUMN_USAGE
 WHERE TABLE_SCHEMA = 'u179023609_orvlvi'
-AND TABLE_NAME = 'earnings'
+AND TABLE_NAME = 'ventas'
 AND REFERENCED_TABLE_NAME IS NOT NULL;
 
 -- 3. Ver definición completa de la tabla
 SELECT 'Definición completa de la tabla:' as paso;
-SHOW CREATE TABLE earnings;
+SHOW CREATE TABLE ventas;
 
 -- 4. Verificar que la tabla está vacía (debe devolver 0)
-SELECT 'Conteo de registros en earnings:' as paso;
-SELECT COUNT(*) as total_registros FROM earnings;
+SELECT 'Conteo de registros en ventas:' as paso;
+SELECT COUNT(*) as total_registros FROM ventas;
 
-SELECT '✅ Deploy completado - Tabla earnings lista para usar' AS estado_final;
+SELECT '✅ Deploy completado - Tabla ventas lista para usar' AS estado_final;

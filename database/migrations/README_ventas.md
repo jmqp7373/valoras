@@ -1,8 +1,8 @@
-# 📊 Tabla `earnings` - Documentación
+# 📊 Tabla `ventas` - Documentación
 
 ## 📋 Descripción General
 
-La tabla `earnings` registra los **ingresos totales** de cada modelo (usuario) en cada plataforma (credencial) durante un periodo específico.
+La tabla `ventas` registra los **ingresos totales** de cada modelo (usuario) en cada plataforma (credencial) durante un periodo específico.
 
 **Características principales:**
 - ✅ Relaciona modelos con plataformas mediante IDs
@@ -36,16 +36,16 @@ La tabla `earnings` registra los **ingresos totales** de cada modelo (usuario) e
 FOREIGN KEY (usuario_id) REFERENCES usuarios(id_usuario)
 ON DELETE CASCADE ON UPDATE CASCADE
 ```
-- **Eliminación en cascada:** Si se elimina un usuario, se eliminan todos sus earnings
-- **Actualización en cascada:** Si se actualiza id_usuario, se actualiza en earnings
+- **Eliminación en cascada:** Si se elimina un usuario, se eliminan todas sus ventas
+- **Actualización en cascada:** Si se actualiza id_usuario, se actualiza en ventas
 
 ### 2. Relación con `credenciales`
 ```sql
 FOREIGN KEY (credencial_id) REFERENCES credenciales(id_credencial)
 ON DELETE CASCADE ON UPDATE CASCADE
 ```
-- **Eliminación en cascada:** Si se elimina una credencial, se eliminan sus earnings
-- **Actualización en cascada:** Si se actualiza id_credencial, se actualiza en earnings
+- **Eliminación en cascada:** Si se elimina una credencial, se eliminan sus ventas
+- **Actualización en cascada:** Si se actualiza id_credencial, se actualiza en ventas
 
 ---
 
@@ -84,58 +84,58 @@ CHECK (period_end >= period_start)
 
 ## 💡 Ejemplos de Uso
 
-### Insertar un Registro de Earnings
+### Insertar un Registro de Ventas
 ```sql
-INSERT INTO earnings (usuario_id, credencial_id, period_start, period_end, total_earnings)
+INSERT INTO ventas (usuario_id, credencial_id, period_start, period_end, total_earnings)
 VALUES (1, 5, '2025-11-01 00:00:00', '2025-11-30 23:59:59', 1500.00);
 ```
 
-### Consultar Earnings de un Modelo Específico
+### Consultar Ventas de un Modelo Específico
 ```sql
 SELECT 
-    e.*,
+    v.*,
     u.nombres,
     u.apellidos,
     c.usuario as credencial_usuario
-FROM earnings e
-JOIN usuarios u ON e.usuario_id = u.id_usuario
-JOIN credenciales c ON e.credencial_id = c.id_credencial
-WHERE e.usuario_id = 1
-ORDER BY e.period_start DESC;
+FROM ventas v
+JOIN usuarios u ON v.usuario_id = u.id_usuario
+JOIN credenciales c ON v.credencial_id = c.id_credencial
+WHERE v.usuario_id = 1
+ORDER BY v.period_start DESC;
 ```
 
-### Total de Earnings por Modelo
+### Total de Ventas por Modelo
 ```sql
 SELECT 
     u.id_usuario,
     u.nombres,
     u.apellidos,
-    COUNT(e.id) as total_registros,
-    SUM(e.total_earnings) as total_ganado
+    COUNT(v.id) as total_registros,
+    SUM(v.total_earnings) as total_ganado
 FROM usuarios u
-LEFT JOIN earnings e ON u.id_usuario = e.usuario_id
+LEFT JOIN ventas v ON u.id_usuario = v.usuario_id
 GROUP BY u.id_usuario
 ORDER BY total_ganado DESC;
 ```
 
-### Earnings por Plataforma en un Periodo
+### Ventas por Plataforma en un Periodo
 ```sql
 SELECT 
     c.usuario as plataforma,
-    COUNT(e.id) as total_registros,
-    SUM(e.total_earnings) as total_ingresos,
-    AVG(e.total_earnings) as promedio_por_periodo
-FROM earnings e
-JOIN credenciales c ON e.credencial_id = c.id_credencial
-WHERE e.period_start >= '2025-11-01'
-AND e.period_end <= '2025-11-30'
+    COUNT(v.id) as total_registros,
+    SUM(v.total_earnings) as total_ingresos,
+    AVG(v.total_earnings) as promedio_por_periodo
+FROM ventas v
+JOIN credenciales c ON v.credencial_id = c.id_credencial
+WHERE v.period_start >= '2025-11-01'
+AND v.period_end <= '2025-11-30'
 GROUP BY c.id_credencial
 ORDER BY total_ingresos DESC;
 ```
 
-### Actualizar Total de Earnings
+### Actualizar Total de Ventas
 ```sql
-UPDATE earnings 
+UPDATE ventas 
 SET total_earnings = 2750.00,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = 1;
@@ -146,17 +146,17 @@ WHERE id = 1;
 ## 📂 Archivos de Migración
 
 ### Local (Desarrollo)
-**Archivo:** `database/migrations/create_earnings_table.sql`
+**Archivo:** `database/migrations/create_ventas_table.sql`
 ```bash
 # Ejecutar en local
-mysql -u root valora_db < database/migrations/create_earnings_table.sql
+mysql -u root valora_db < database/migrations/create_ventas_table.sql
 ```
 
 ### Producción (Hostinger)
-**Archivo:** `database/migrations/deploy_earnings_production.sql`
+**Archivo:** `database/migrations/deploy_ventas_production.sql`
 ```bash
 # Conectar a producción y ejecutar
-mysql -u u179023609_orvlvi -p u179023609_orvlvi < database/migrations/deploy_earnings_production.sql
+mysql -u u179023609_orvlvi -p u179023609_orvlvi < database/migrations/deploy_ventas_production.sql
 ```
 
 ---
@@ -165,7 +165,7 @@ mysql -u u179023609_orvlvi -p u179023609_orvlvi < database/migrations/deploy_ear
 
 ### 1. Verificar Estructura
 ```sql
-DESCRIBE earnings;
+DESCRIBE ventas;
 ```
 
 ### 2. Verificar Claves Foráneas
@@ -177,37 +177,37 @@ SELECT
     REFERENCED_COLUMN_NAME
 FROM information_schema.KEY_COLUMN_USAGE
 WHERE TABLE_SCHEMA = DATABASE()
-AND TABLE_NAME = 'earnings'
+AND TABLE_NAME = 'ventas'
 AND REFERENCED_TABLE_NAME IS NOT NULL;
 ```
 
 ### 3. Ver Definición Completa
 ```sql
-SHOW CREATE TABLE earnings;
+SHOW CREATE TABLE ventas;
 ```
 
 ---
 
 ## 🎯 Casos de Uso
 
-### Caso 1: Registro Mensual de Earnings
+### Caso 1: Registro Mensual de Ventas
 Un modelo trabaja en OnlyFans (credencial_id = 5) durante noviembre 2025 y genera $1,500 USD:
 ```sql
-INSERT INTO earnings (usuario_id, credencial_id, period_start, period_end, total_earnings)
+INSERT INTO ventas (usuario_id, credencial_id, period_start, period_end, total_earnings)
 VALUES (1, 5, '2025-11-01 00:00:00', '2025-11-30 23:59:59', 1500.00);
 ```
 
 ### Caso 2: Consultar Histórico de un Modelo
-Ver todos los earnings históricos del modelo ID 1:
+Ver todas las ventas históricas del modelo ID 1:
 ```sql
 SELECT 
     DATE_FORMAT(period_start, '%Y-%m') as mes,
     c.usuario as plataforma,
     total_earnings
-FROM earnings e
-JOIN credenciales c ON e.credencial_id = c.id_credencial
-WHERE e.usuario_id = 1
-ORDER BY e.period_start DESC;
+FROM ventas v
+JOIN credenciales c ON v.credencial_id = c.id_credencial
+WHERE v.usuario_id = 1
+ORDER BY v.period_start DESC;
 ```
 
 ### Caso 3: Reporte de Ganancias por Plataforma
@@ -215,11 +215,11 @@ Total ganado en cada plataforma en el último trimestre:
 ```sql
 SELECT 
     c.usuario as plataforma,
-    SUM(e.total_earnings) as total,
-    COUNT(e.id) as periodos
-FROM earnings e
-JOIN credenciales c ON e.credencial_id = c.id_credencial
-WHERE e.period_start >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+    SUM(v.total_earnings) as total,
+    COUNT(v.id) as periodos
+FROM ventas v
+JOIN credenciales c ON v.credencial_id = c.id_credencial
+WHERE v.period_start >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
 GROUP BY c.id_credencial
 ORDER BY total DESC;
 ```
@@ -231,7 +231,7 @@ ORDER BY total DESC;
 1. **Periodos Consistentes:** Usar siempre el mismo formato de periodos (ej: mensual, quincenal)
 2. **No Duplicar:** La restricción `unique_earning_period` previene duplicados
 3. **Validar Fechas:** Asegurar que `period_end >= period_start` antes de insertar
-4. **Usar Transacciones:** Para operaciones batch que modifiquen múltiples earnings
+4. **Usar Transacciones:** Para operaciones batch que modifiquen múltiples ventas
 5. **Auditoría:** Aprovechar `created_at` y `updated_at` para tracking de cambios
 
 ---
@@ -240,7 +240,7 @@ ORDER BY total DESC;
 
 | Fecha | Versión | Descripción |
 |-------|---------|-------------|
-| 2025-11-08 | 1.0.0 | Creación inicial de la tabla earnings |
+| 2025-11-08 | 1.0.0 | Creación inicial de la tabla ventas (renombrada de earnings) |
 
 ---
 

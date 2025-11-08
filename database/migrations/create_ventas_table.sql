@@ -1,5 +1,5 @@
 -- ============================================================================
--- TABLA: earnings
+-- TABLA: ventas
 -- DESCRIPCIÓN: Registro de ingresos totales de modelos por plataforma y periodo
 -- PROYECTO: Valora.vip
 -- FECHA: 2025-11-08
@@ -21,8 +21,8 @@ WHERE table_schema = DATABASE()
 AND table_name = 'credenciales';
 */
 
--- Crear tabla earnings
-CREATE TABLE IF NOT EXISTS earnings (
+-- Crear tabla ventas
+CREATE TABLE IF NOT EXISTS ventas (
     -- ID principal
     id INT(11) NOT NULL AUTO_INCREMENT,
     
@@ -59,13 +59,13 @@ CREATE TABLE IF NOT EXISTS earnings (
     UNIQUE KEY unique_earning_period (usuario_id, credencial_id, period_start, period_end),
     
     -- Claves foráneas con eliminación en cascada
-    CONSTRAINT fk_earnings_usuario 
+    CONSTRAINT fk_ventas_usuario 
         FOREIGN KEY (usuario_id) 
         REFERENCES usuarios(id_usuario) 
         ON DELETE CASCADE 
         ON UPDATE CASCADE,
     
-    CONSTRAINT fk_earnings_credencial 
+    CONSTRAINT fk_ventas_credencial 
         FOREIGN KEY (credencial_id) 
         REFERENCES credenciales(id_credencial) 
         ON DELETE CASCADE 
@@ -84,17 +84,17 @@ CREATE TABLE IF NOT EXISTS earnings (
   COMMENT='Registro de ingresos totales de modelos por plataforma y periodo';
 
 -- Mensaje de confirmación
-SELECT 'Tabla earnings creada exitosamente' AS mensaje;
+SELECT 'Tabla ventas creada exitosamente' AS mensaje;
 
 -- ============================================================================
 -- CONSULTAS ÚTILES PARA VERIFICACIÓN
 -- ============================================================================
 
 -- Ver estructura de la tabla
--- DESCRIBE earnings;
+-- DESCRIBE ventas;
 
 -- Ver información detallada de la tabla
--- SHOW CREATE TABLE earnings;
+-- SHOW CREATE TABLE ventas;
 
 -- Verificar claves foráneas
 -- SELECT 
@@ -105,38 +105,38 @@ SELECT 'Tabla earnings creada exitosamente' AS mensaje;
 --     REFERENCED_COLUMN_NAME
 -- FROM information_schema.KEY_COLUMN_USAGE
 -- WHERE TABLE_SCHEMA = DATABASE()
--- AND TABLE_NAME = 'earnings'
+-- AND TABLE_NAME = 'ventas'
 -- AND REFERENCED_TABLE_NAME IS NOT NULL;
 
 -- ============================================================================
 -- EJEMPLO DE USO
 -- ============================================================================
 /*
--- Insertar un registro de earnings
-INSERT INTO earnings (usuario_id, credencial_id, period_start, period_end, total_earnings)
+-- Insertar un registro de ventas
+INSERT INTO ventas (usuario_id, credencial_id, period_start, period_end, total_earnings)
 VALUES (1, 5, '2025-11-01 00:00:00', '2025-11-30 23:59:59', 1500.00);
 
--- Consultar earnings de un modelo específico
+-- Consultar ventas de un modelo específico
 SELECT 
-    e.*,
+    v.*,
     u.nombres,
     u.apellidos,
     c.usuario as credencial_usuario
-FROM earnings e
-JOIN usuarios u ON e.usuario_id = u.id_usuario
-JOIN credenciales c ON e.credencial_id = c.id_credencial
-WHERE e.usuario_id = 1
-ORDER BY e.period_start DESC;
+FROM ventas v
+JOIN usuarios u ON v.usuario_id = u.id_usuario
+JOIN credenciales c ON v.credencial_id = c.id_credencial
+WHERE v.usuario_id = 1
+ORDER BY v.period_start DESC;
 
--- Consultar total de earnings por modelo
+-- Consultar total de ventas por modelo
 SELECT 
     u.id_usuario,
     u.nombres,
     u.apellidos,
-    COUNT(e.id) as total_registros,
-    SUM(e.total_earnings) as total_ganado
+    COUNT(v.id) as total_registros,
+    SUM(v.total_earnings) as total_ganado
 FROM usuarios u
-LEFT JOIN earnings e ON u.id_usuario = e.usuario_id
+LEFT JOIN ventas v ON u.id_usuario = v.usuario_id
 GROUP BY u.id_usuario
 ORDER BY total_ganado DESC;
 */

@@ -31,7 +31,7 @@ $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
 $logout_path = 'controllers/login/logout.php';
 
 // Incluir header
-include 'components/header.php';
+include 'components/header/header.php';
 ?>
 ```
 
@@ -43,7 +43,7 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
 $logout_path = '../../controllers/login/logout.php';
 
-include '../../components/header.php';
+include '../../components/header/header.php';
 ?>
 ```
 
@@ -120,7 +120,7 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
         <?php
         $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
         $logout_path = 'controllers/login/logout.php';
-        include 'components/header.php';
+        include 'components/header/header.php';
         ?>
         
         <main class="dashboard-main">
@@ -164,7 +164,7 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
         <?php
         $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
         $logout_path = '../../controllers/login/logout.php';
-        include '../../components/header.php';
+        include '../../components/header/header.php';
         ?>
         
         <main class="dashboard-main">
@@ -248,7 +248,7 @@ Edita `footer.php` y agrega elementos `<li><a>` en las secciones
 Para implementar estos componentes en tus páginas existentes:
 
 1. Definir las variables necesarias
-2. Reemplazar tu header actual con `include 'components/header.php'`
+2. Reemplazar tu header actual con `include 'components/header/header.php'`
 3. Reemplazar tu footer (o agregar si no existe) con `include 'components/footer.php'`
 4. Eliminar CSS duplicado de header/footer en tus archivos
 

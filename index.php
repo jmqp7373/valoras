@@ -38,7 +38,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
         $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
         $logout_path = 'controllers/login/logout.php';
         $profile_path = 'views/usuario/miPerfil.php';
-        include 'components/header.php';
+        include 'components/header/header.php';
         ?>
         
         <main class="dashboard-main">

@@ -116,6 +116,15 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
     </div>
     
     <style>
+        /* Reset de estilos del body para permitir scroll */
+        body {
+            display: block !important;
+            height: auto !important;
+            min-height: 100vh;
+            overflow-y: auto !important;
+            padding: 0 !important;
+        }
+
         .dashboard-container {
             min-height: 100vh;
             background-color: #f8f9fa;

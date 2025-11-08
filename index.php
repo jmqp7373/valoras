@@ -33,13 +33,13 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
 </head>
 <body>
     <div class="dashboard-container">
-        <header class="dashboard-header">
-            <img src="assets/images/logos/logoValoraHorizontal.png" class="logo" alt="Valora Logo">
-            <div class="user-info">
-                <span>Bienvenido, <?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></span>
-                <a href="controllers/login/logout.php" class="logout-btn">Cerrar Sesión</a>
-            </div>
-        </header>
+        <?php
+        // Incluir header con botón de usuario
+        $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
+        $logout_path = 'controllers/login/logout.php';
+        $profile_path = '#'; // TODO: Crear página de perfil
+        include 'components/header.php';
+        ?>
         
         <main class="dashboard-main">
             <div class="welcome-section">
@@ -128,38 +128,6 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
         .dashboard-container {
             min-height: 100vh;
             background-color: #f8f9fa;
-        }
-        
-        .dashboard-header {
-            background-color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .dashboard-header .logo {
-            height: 40px;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .logout-btn {
-            background-color: #ee6f92;
-            color: white;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-        }
-        
-        .logout-btn:hover {
-            background-color: #d63384;
         }
         
         .dashboard-main {
@@ -373,5 +341,10 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
         // Hacer la función global para que pueda ser llamada desde otras páginas
         window.actualizarResumenFinanzas = actualizarResumenFinanzas;
     </script>
+
+    <?php
+    $base_path = '';
+    include 'components/footer.php';
+    ?>
 </body>
 </html>

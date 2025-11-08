@@ -227,7 +227,14 @@ class PerfilController {
             $stmt->bindParam(':id_usuario', $id_usuario);
 
             if ($stmt->execute()) {
-                return ['success' => true, 'message' => 'Contraseña actualizada exitosamente'];
+                // Destruir la sesión actual para forzar nuevo login
+                session_destroy();
+                
+                return [
+                    'success' => true, 
+                    'message' => 'Contraseña actualizada exitosamente. Por seguridad, se cerrarán todas las sesiones.',
+                    'logout' => true // Indicar al frontend que debe redirigir al login
+                ];
             }
 
             return ['success' => false, 'message' => 'Error al actualizar la contraseña'];

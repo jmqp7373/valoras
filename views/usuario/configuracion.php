@@ -666,13 +666,21 @@ unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']);
                 if (resultado.success) {
                     mostrarMensaje(resultado.message, 'success');
                     cerrarModal();
+                    
+                    // Si se cerró la sesión, redirigir al login después de 2 segundos
+                    if (resultado.logout) {
+                        setTimeout(() => {
+                            window.location.href = '../login/login.php';
+                        }, 2000);
+                    }
                 } else {
                     mostrarMensaje(resultado.message, 'error');
+                    btnSubmit.textContent = textoOriginal;
+                    btnSubmit.disabled = false;
                 }
             } catch (error) {
                 console.error('Error:', error);
                 mostrarMensaje('Error al procesar la solicitud', 'error');
-            } finally {
                 btnSubmit.textContent = textoOriginal;
                 btnSubmit.disabled = false;
             }

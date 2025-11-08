@@ -81,7 +81,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                         <div class="finanza-icon">💰</div>
                         <div class="finanza-info">
                             <span class="finanza-label">Ingresos Totales</span>
-                            <span class="finanza-amount">$<?php echo number_format($totalesFinanzas['total_ingresos'], 2, ',', '.'); ?></span>
+                            <span class="finanza-amount" id="totalIngresos">$<?php echo number_format($totalesFinanzas['total_ingresos'], 2, ',', '.'); ?></span>
                         </div>
                     </div>
                     
@@ -89,7 +89,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                         <div class="finanza-icon">💸</div>
                         <div class="finanza-info">
                             <span class="finanza-label">Gastos Totales</span>
-                            <span class="finanza-amount">$<?php echo number_format($totalesFinanzas['total_gastos'], 2, ',', '.'); ?></span>
+                            <span class="finanza-amount" id="totalGastos">$<?php echo number_format($totalesFinanzas['total_gastos'], 2, ',', '.'); ?></span>
                         </div>
                     </div>
                     
@@ -97,7 +97,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                         <div class="finanza-icon">⚖️</div>
                         <div class="finanza-info">
                             <span class="finanza-label">Balance General</span>
-                            <span class="finanza-amount" style="color: <?php echo $totalesFinanzas['balance'] >= 0 ? '#28a745' : '#dc3545'; ?>">
+                            <span class="finanza-amount" id="totalBalance" style="color: <?php echo $totalesFinanzas['balance'] >= 0 ? '#28a745' : '#dc3545'; ?>">
                                 $<?php echo number_format($totalesFinanzas['balance'], 2, ',', '.'); ?>
                             </span>
                         </div>
@@ -107,7 +107,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                 <!-- Gráfico circular -->
                 <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
                     <canvas id="finanzasChart" width="400" height="400"></canvas>
-                    <p style="text-align: center; color: #6c757d; margin-top: 1rem; font-size: 0.9rem;">
+                    <p id="ultimaActualizacion" style="text-align: center; color: #6c757d; margin-top: 1rem; font-size: 0.9rem;">
                         Última actualización: <strong><?php echo htmlspecialchars($totalesFinanzas['ultima_actualizacion']); ?></strong>
                     </p>
                 </div>
@@ -238,6 +238,9 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
     </style>
 
     <script>
+        // Variable global para el gráfico
+        let miGraficoFinanzas = null;
+
         // Gráfico de finanzas
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('finanzasChart');
@@ -247,7 +250,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                 
                 // Solo mostrar gráfico si hay datos
                 if (ingresos > 0 || gastos > 0) {
-                    new Chart(ctx, {
+                    miGraficoFinanzas = new Chart(ctx, {
                         type: 'doughnut',
                         data: {
                             labels: ['Ingresos', 'Gastos'],
@@ -307,7 +310,59 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                     ctx.parentElement.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6c757d;"><p style="font-size: 3rem;">📊</p><p style="font-size: 1.1rem;">No hay datos financieros para mostrar</p><p style="color: #999; margin-top: 0.5rem;">Comienza registrando movimientos en el módulo de finanzas</p></div>';
                 }
             }
+
+            // Iniciar actualización automática
+            actualizarResumenFinanzas();
+            setInterval(actualizarResumenFinanzas, 30000); // Cada 30 segundos
         });
+
+        /**
+         * Actualiza el resumen financiero sin recargar la página
+         */
+        async function actualizarResumenFinanzas() {
+            try {
+                const response = await fetch('controllers/FinanzasController.php?action=totales_json');
+                const data = await response.json();
+
+                // Actualizar tarjetas de totales
+                const totalIngresosEl = document.getElementById('totalIngresos');
+                const totalGastosEl = document.getElementById('totalGastos');
+                const totalBalanceEl = document.getElementById('totalBalance');
+                const ultimaActualizacionEl = document.getElementById('ultimaActualizacion');
+
+                if (totalIngresosEl) {
+                    totalIngresosEl.innerText = '$' + data.ingresos.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+
+                if (totalGastosEl) {
+                    totalGastosEl.innerText = '$' + data.gastos.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+
+                if (totalBalanceEl) {
+                    totalBalanceEl.innerText = '$' + data.balance.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    // Actualizar color del balance
+                    totalBalanceEl.style.color = data.balance >= 0 ? '#28a745' : '#dc3545';
+                }
+
+                if (ultimaActualizacionEl) {
+                    ultimaActualizacionEl.innerHTML = 'Última actualización: <strong>' + data.ultima_actualizacion + '</strong>';
+                }
+
+                // Actualizar gráfico Chart.js
+                if (miGraficoFinanzas && (data.ingresos > 0 || data.gastos > 0)) {
+                    miGraficoFinanzas.data.datasets[0].data = [data.ingresos, data.gastos];
+                    miGraficoFinanzas.update();
+                } else if (!miGraficoFinanzas && (data.ingresos > 0 || data.gastos > 0)) {
+                    // Si no había gráfico pero ahora hay datos, recargar la página
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error actualizando resumen financiero:', error);
+            }
+        }
+
+        // Hacer la función global para que pueda ser llamada desde otras páginas
+        window.actualizarResumenFinanzas = actualizarResumenFinanzas;
     </script>
 </body>
 </html>

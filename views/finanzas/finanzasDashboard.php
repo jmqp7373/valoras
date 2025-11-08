@@ -162,10 +162,10 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
                 <h2 style="color: #1B263B; font-family: 'Poppins', sans-serif; margin-bottom: 1.5rem;">📊 Historial de Movimientos</h2>
                 
                 <?php if (empty($movimientos)): ?>
-                    <div style="text-align: center; padding: 3rem; color: #6c757d;">
-                        <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
-                        <p style="font-size: 1.1rem; font-family: 'Poppins', sans-serif;">No hay movimientos registrados</p>
-                        <p style="color: #999;">Comienza registrando tu primer movimiento financiero</p>
+                    <div class="alert alert-info" style="background: #d1ecf1; color: #0c5460; padding: 1.5rem; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bee5eb; text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">�</div>
+                        <h3 style="margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">¡Aún no hay movimientos registrados!</h3>
+                        <p style="margin: 0; font-size: 1rem;">Comienza agregando el primero usando el formulario de arriba. Los datos de ejemplo se cargarán automáticamente la primera vez.</p>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">

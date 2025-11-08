@@ -19,6 +19,7 @@ if (!isset($logo_path)) $logo_path = 'assets/images/logos/logoValoraHorizontal.p
 if (!isset($logout_path)) $logout_path = 'controllers/login/logout.php';
 if (!isset($profile_path)) $profile_path = '#'; // Ruta por defecto
 if (!isset($home_path)) $home_path = 'index.php'; // Ruta por defecto al home
+if (!isset($settings_path)) $settings_path = 'views/usuario/configuracion.php'; // Ruta a configuración
 
 // Obtener iniciales del usuario para el avatar
 $iniciales = '';
@@ -65,6 +66,15 @@ if (empty($iniciales)) $iniciales = 'U';
                             <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 1.5c-2.67 0-8 1.34-8 4v1.5h16v-1.5c0-2.66-5.33-4-8-4z"/>
                         </svg>
                         <span>Mi Perfil</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo htmlspecialchars($settings_path); ?>" class="dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 10.5l-1.414 1.414L8 10.828l-2.086 2.086L4.5 11.5 6.586 9.414 4.5 7.328l1.414-1.414L8 7.999l2.086-2.085 1.414 1.414-2.086 2.086L11.5 11.5z"/>
+                            <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 01-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 01.872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 012.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 012.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 01.872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 01-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 01-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 100-5.86 2.929 2.929 0 000 5.858z"/>
+                        </svg>
+                        <span>Configuración</span>
                     </a>
                 </li>
                 <li>

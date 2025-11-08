@@ -39,6 +39,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
         $logout_path = 'controllers/login/logout.php';
         $profile_path = 'views/usuario/miPerfil.php';
         $home_path = 'index.php';
+        $settings_path = 'views/usuario/configuracion.php';
         include 'components/header/header.php';
         ?>
         

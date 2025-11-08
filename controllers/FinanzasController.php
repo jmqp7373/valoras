@@ -100,14 +100,18 @@ class FinanzasController {
             // Si no hay movimientos, insertar datos de ejemplo
             if (empty($movimientos)) {
                 $datosEjemplo = [
+                    // GASTOS (Total: $11,730,000)
                     ['fecha' => '2025-11-01', 'tipo' => 'Gasto', 'categoria' => 'Arriendo', 'monto' => 4500000, 'descripcion' => 'Pago Arriendo Estudio Diamante'],
                     ['fecha' => '2025-11-02', 'tipo' => 'Gasto', 'categoria' => 'Servicios', 'monto' => 980000, 'descripcion' => 'Servicio EPM y Agua'],
                     ['fecha' => '2025-11-03', 'tipo' => 'Gasto', 'categoria' => 'Nómina', 'monto' => 5200000, 'descripcion' => 'Pago Modelos Semana 44'],
                     ['fecha' => '2025-11-04', 'tipo' => 'Gasto', 'categoria' => 'Personal', 'monto' => 800000, 'descripcion' => 'Administración Apto Castelmola'],
-                    ['fecha' => '2025-11-05', 'tipo' => 'Ingreso', 'categoria' => 'Otro', 'monto' => 3000000, 'descripcion' => 'Transferencia Geraldin'],
                     ['fecha' => '2025-11-06', 'tipo' => 'Gasto', 'categoria' => 'Servicios', 'monto' => 250000, 'descripcion' => 'Pago Internet Claro y Telefonía'],
-                    ['fecha' => '2025-11-07', 'tipo' => 'Ingreso', 'categoria' => 'Otro', 'monto' => 1200000, 'descripcion' => 'Reembolso Gastos Generales'],
-                    ['fecha' => '2025-11-08', 'tipo' => 'Ingreso', 'categoria' => 'Otro', 'monto' => 900000, 'descripcion' => 'Pago Aliadas Medellín']
+                    
+                    // INGRESOS (Total: $18,500,000) - Balance Positivo: +$6,770,000
+                    ['fecha' => '2025-11-05', 'tipo' => 'Ingreso', 'categoria' => 'Otro', 'monto' => 8000000, 'descripcion' => 'Ingresos Estudio Fotográfico Noviembre'],
+                    ['fecha' => '2025-11-07', 'tipo' => 'Ingreso', 'categoria' => 'Otro', 'monto' => 6500000, 'descripcion' => 'Pago Colaboraciones Empresariales'],
+                    ['fecha' => '2025-11-08', 'tipo' => 'Ingreso', 'categoria' => 'Otro', 'monto' => 3000000, 'descripcion' => 'Transferencia Servicios Creativos'],
+                    ['fecha' => '2025-11-08', 'tipo' => 'Ingreso', 'categoria' => 'Otro', 'monto' => 1000000, 'descripcion' => 'Bonificación Proyecto Especial']
                 ];
                 
                 foreach ($datosEjemplo as $dato) {

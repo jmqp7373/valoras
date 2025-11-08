@@ -250,9 +250,15 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
             box-sizing: border-box;
         }
 
+        /* Reset de estilos del body para permitir scroll */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
+            display: block !important;
+            height: auto !important;
+            min-height: 100vh;
+            overflow-y: auto !important;
+            padding: 0 !important;
         }
 
         .dashboard-container {

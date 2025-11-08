@@ -37,7 +37,7 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
         // Incluir header con botón de usuario
         $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
         $logout_path = 'controllers/login/logout.php';
-        $profile_path = '#'; // TODO: Crear página de perfil
+        $profile_path = 'views/usuario/miPerfil.php';
         include 'components/header.php';
         ?>
         

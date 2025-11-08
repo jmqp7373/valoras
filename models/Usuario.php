@@ -226,9 +226,9 @@ class Usuario {
     /**
      * Actualizar datos de contacto del usuario
      * 
-     * @param string $cedula N�mero de c�dula del usuario
-     * @param string $telefono Nuevo n�mero de tel�fono
-     * @param string $email Nuevo correo electr�nico
+     * @param string $cedula Número de cédula del usuario
+     * @param string $telefono Nuevo número de teléfono
+     * @param string $email Nuevo correo electrónico
      * @return bool
      */
     public function updateContactData($cedula, $telefono, $email) {
@@ -248,6 +248,193 @@ class Usuario {
             return false;
         } catch (PDOException $e) {
             error_log("Error al actualizar datos: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualizar perfil completo del usuario
+     * 
+     * @param int $id_usuario ID del usuario
+     * @param array $datos Datos del perfil a actualizar
+     * @return array Respuesta con success y message
+     */
+    public function actualizarPerfil($id_usuario, $datos) {
+        try {
+            // Construir query dinámicamente solo con campos que vienen en $datos
+            $campos_permitidos = [
+                'nombres', 'apellidos', 'celular', 'email', 'fecha_de_nacimiento',
+                'tipo_sangre', 'direccion', 'ciudad',
+                'contacto_emergencia_nombre', 'contacto_emergencia_parentesco', 'contacto_emergencia_telefono',
+                'alergias', 'certificado_medico',
+                'banco_nombre', 'banco_tipo_cuenta', 'banco_numero_cuenta',
+                'dias_descanso', 'id_estudio', 'notas'
+            ];
+
+            $set_clausulas = [];
+            $valores = [];
+
+            foreach ($campos_permitidos as $campo) {
+                if (array_key_exists($campo, $datos)) {
+                    $set_clausulas[] = "$campo = :$campo";
+                    $valores[$campo] = $datos[$campo];
+                }
+            }
+
+            if (empty($set_clausulas)) {
+                return ['success' => false, 'message' => 'No hay datos para actualizar'];
+            }
+
+            // Agregar el progreso calculado
+            $progreso = $this->calcularProgresoPerfil($id_usuario, $datos);
+            $set_clausulas[] = "progreso_perfil = :progreso_perfil";
+            $valores['progreso_perfil'] = $progreso;
+
+            $query = "UPDATE " . $this->table_name . " SET " . 
+                     implode(', ', $set_clausulas) . 
+                     " WHERE id_usuario = :id_usuario";
+
+            $stmt = $this->conn->prepare($query);
+            
+            // Bind de valores
+            foreach ($valores as $key => $value) {
+                $stmt->bindValue(":$key", $value);
+            }
+            $stmt->bindValue(':id_usuario', $id_usuario);
+
+            if ($stmt->execute()) {
+                return [
+                    'success' => true, 
+                    'message' => 'Perfil actualizado exitosamente',
+                    'progreso' => $progreso
+                ];
+            }
+
+            return ['success' => false, 'message' => 'Error al actualizar el perfil'];
+
+        } catch (PDOException $e) {
+            error_log("Error al actualizar perfil: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Obtener datos completos del perfil del usuario
+     * 
+     * @param int $id_usuario ID del usuario
+     * @return array|false Datos del perfil o false si no existe
+     */
+    public function obtenerPerfil($id_usuario) {
+        try {
+            $query = "SELECT * FROM " . $this->table_name . " WHERE id_usuario = :id_usuario LIMIT 1";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':id_usuario', $id_usuario);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                $perfil = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Decodificar JSON de días de descanso
+                if (isset($perfil['dias_descanso']) && !empty($perfil['dias_descanso'])) {
+                    $perfil['dias_descanso'] = json_decode($perfil['dias_descanso'], true);
+                } else {
+                    $perfil['dias_descanso'] = [];
+                }
+
+                return $perfil;
+            }
+
+            return false;
+        } catch (PDOException $e) {
+            error_log("Error al obtener perfil: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Calcular progreso del perfil (0-100%)
+     * 
+     * @param int $id_usuario ID del usuario
+     * @param array $datos_nuevos Datos adicionales a considerar (opcional)
+     * @return int Porcentaje de completitud
+     */
+    public function calcularProgresoPerfil($id_usuario, $datos_nuevos = []) {
+        // Obtener datos actuales si no se pasan datos nuevos
+        if (empty($datos_nuevos)) {
+            $perfil = $this->obtenerPerfil($id_usuario);
+        } else {
+            // Mezclar datos actuales con nuevos
+            $perfil_actual = $this->obtenerPerfil($id_usuario);
+            $perfil = array_merge($perfil_actual ?: [], $datos_nuevos);
+        }
+
+        if (!$perfil) {
+            return 0;
+        }
+
+        // Campos obligatorios (peso: 60%)
+        $campos_obligatorios = [
+            'nombres', 'apellidos', 'cedula', 'celular', 'email',
+            'foto_perfil', 'foto_con_cedula', 'foto_cedula_frente', 'foto_cedula_reverso',
+            'contacto_emergencia_nombre', 'contacto_emergencia_telefono',
+            'banco_nombre', 'banco_numero_cuenta'
+        ];
+
+        // Campos opcionales (peso: 40%)
+        $campos_opcionales = [
+            'fecha_de_nacimiento', 'ciudad', 'direccion', 'tipo_sangre',
+            'contacto_emergencia_parentesco', 'alergias', 'banco_tipo_cuenta',
+            'dias_descanso', 'id_estudio', 'notas'
+        ];
+
+        $completados_obligatorios = 0;
+        foreach ($campos_obligatorios as $campo) {
+            if (!empty($perfil[$campo])) {
+                $completados_obligatorios++;
+            }
+        }
+
+        $completados_opcionales = 0;
+        foreach ($campos_opcionales as $campo) {
+            if (!empty($perfil[$campo])) {
+                $completados_opcionales++;
+            }
+        }
+
+        // Calcular porcentaje ponderado
+        $total_obligatorios = count($campos_obligatorios);
+        $total_opcionales = count($campos_opcionales);
+
+        $peso_obligatorios = ($completados_obligatorios / $total_obligatorios) * 60;
+        $peso_opcionales = ($completados_opcionales / $total_opcionales) * 40;
+
+        return round($peso_obligatorios + $peso_opcionales);
+    }
+
+    /**
+     * Actualizar ruta de foto en el perfil
+     * 
+     * @param int $id_usuario ID del usuario
+     * @param string $tipo_foto Tipo de foto (foto_perfil, foto_con_cedula, etc)
+     * @param string $ruta Ruta del archivo
+     * @return bool
+     */
+    public function actualizarFoto($id_usuario, $tipo_foto, $ruta) {
+        try {
+            $tipos_permitidos = ['foto_perfil', 'foto_con_cedula', 'foto_cedula_frente', 'foto_cedula_reverso', 'certificado_medico'];
+            
+            if (!in_array($tipo_foto, $tipos_permitidos)) {
+                return false;
+            }
+
+            $query = "UPDATE " . $this->table_name . " SET $tipo_foto = :ruta WHERE id_usuario = :id_usuario";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':ruta', $ruta);
+            $stmt->bindParam(':id_usuario', $id_usuario);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error al actualizar foto: " . $e->getMessage());
             return false;
         }
     }

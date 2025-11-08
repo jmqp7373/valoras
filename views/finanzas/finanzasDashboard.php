@@ -46,7 +46,7 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
         <?php
         $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
         $logout_path = '../../controllers/login/logout.php';
-        $profile_path = '#';
+        $profile_path = '../../views/usuario/miPerfil.php';
         include '../../components/header.php';
         ?>
         

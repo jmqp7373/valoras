@@ -600,26 +600,72 @@ unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']);
             document.querySelector('.form-password').reset();
         }
 
-        function mostrarMensaje(mensaje, tipo) {
+        function mostrarMensaje(mensaje, tipo, redireccionar = false, urlRedireccion = '', tiempoRedireccion = 2000) {
             const mensajeDiv = document.createElement('div');
-            mensajeDiv.className = `mensaje mensaje-${tipo}`;
-            mensajeDiv.textContent = mensaje;
+            
+            // Usar estilos coherentes con alertaVerde.php
+            if (tipo === 'success') {
+                mensajeDiv.style.backgroundColor = '#d4edda';
+                mensajeDiv.style.border = '1px solid #c3e6cb';
+                mensajeDiv.style.color = '#155724';
+                
+                // Crear estructura interna con ícono
+                const icono = tipo === 'success' ? '✅' : '❌';
+                mensajeDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 18px;">${icono}</span>
+                        <strong style="font-weight: 600;">Operación exitosa</strong>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 14px; opacity: 0.9;">
+                        ${mensaje}
+                    </div>
+                `;
+            } else {
+                mensajeDiv.style.backgroundColor = '#f8d7da';
+                mensajeDiv.style.border = '1px solid #f5c6cb';
+                mensajeDiv.style.color = '#721c24';
+                
+                mensajeDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 18px;">⚠️</span>
+                        <strong style="font-weight: 600;">Error</strong>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 14px; opacity: 0.9;">
+                        ${mensaje}
+                    </div>
+                `;
+            }
+            
+            // Estilos comunes (coherentes con alertaVerde.php)
+            mensajeDiv.style.padding = '16px';
+            mensajeDiv.style.borderRadius = '12px';
+            mensajeDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+            mensajeDiv.style.fontFamily = "'Poppins', sans-serif";
             mensajeDiv.style.position = 'fixed';
             mensajeDiv.style.top = '100px';
             mensajeDiv.style.left = '50%';
             mensajeDiv.style.transform = 'translateX(-50%)';
             mensajeDiv.style.zIndex = '3000';
-            mensajeDiv.style.minWidth = '300px';
+            mensajeDiv.style.minWidth = '400px';
+            mensajeDiv.style.maxWidth = '600px';
             mensajeDiv.style.textAlign = 'center';
             
             document.body.appendChild(mensajeDiv);
             
-            // Eliminar después de 5 segundos
+            // Eliminar después de 5 segundos (o menos si hay redirección)
+            const tiempoEspera = redireccionar ? tiempoRedireccion : 5000;
             setTimeout(() => {
                 mensajeDiv.style.opacity = '0';
                 mensajeDiv.style.transition = 'opacity 0.5s';
                 setTimeout(() => mensajeDiv.remove(), 500);
-            }, 5000);
+            }, tiempoEspera);
+            
+            // Redirigir si es necesario
+            if (redireccionar && urlRedireccion) {
+                setTimeout(() => {
+                    window.location.href = urlRedireccion;
+                }, tiempoRedireccion);
+            }
         }
 
         // Cerrar modal al hacer clic fuera
@@ -664,14 +710,13 @@ unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']);
                 const resultado = await response.json();
 
                 if (resultado.success) {
-                    mostrarMensaje(resultado.message, 'success');
                     cerrarModal();
                     
-                    // Si se cerró la sesión, redirigir al login después de 2 segundos
+                    // Si se cerró la sesión, mostrar mensaje y redirigir
                     if (resultado.logout) {
-                        setTimeout(() => {
-                            window.location.href = '../login/login.php';
-                        }, 2000);
+                        mostrarMensaje(resultado.message, 'success', true, '../login/login.php', 2000);
+                    } else {
+                        mostrarMensaje(resultado.message, 'success');
                     }
                 } else {
                     mostrarMensaje(resultado.message, 'error');

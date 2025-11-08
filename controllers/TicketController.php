@@ -14,7 +14,7 @@ class TicketController {
     private $pdo;
     
     public function __construct() {
-        $this->pdo = getConnection();
+        $this->pdo = getDBConnection();
         $this->createTicketsTableIfNotExists();
         startSessionSafely();
         

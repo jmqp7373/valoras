@@ -97,6 +97,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
             border-color: #d63384;
             box-shadow: 0 0 0 3px rgba(238, 111, 146, 0.1);
         }
+        
+        .btn-back:hover {
+            background-color: #882A57 !important;
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(136, 42, 87, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -184,6 +191,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
                 <button type="submit" class="btn-submit">
                     🔍 Verificar Código
                 </button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="password_reset.php" class="btn-back" style="display: inline-block; padding: 12px 24px; color: #882A57; text-decoration: none; border: 2px solid #882A57; border-radius: 12px; font-weight: 500; transition: all 0.3s ease;">
+                        ← Volver al paso anterior
+                    </a>
+                </div>
             </form>
             
         <?php elseif($step == 2): ?>
@@ -224,6 +237,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
                 <button type="submit" id="submitBtn" class="btn-submit" disabled>
                     🔐 Actualizar Contraseña
                 </button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <button type="button" onclick="history.back()" class="btn-back" style="padding: 12px 24px; color: #882A57; background: white; border: 2px solid #882A57; border-radius: 12px; font-weight: 500; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 16px; transition: all 0.3s ease;">
+                        ← Volver al paso anterior
+                    </button>
+                </div>
             </form>
         <?php endif; ?>
         

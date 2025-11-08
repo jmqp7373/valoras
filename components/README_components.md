@@ -29,6 +29,7 @@ $user_nombres = $_SESSION['user_nombres'] ?? '';
 $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
 $logout_path = 'controllers/login/logout.php';
+$home_path = 'index.php'; // Ruta al dashboard principal
 
 // Incluir header
 include 'components/header/header.php';
@@ -42,6 +43,7 @@ $user_nombres = $_SESSION['user_nombres'] ?? '';
 $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
 $logout_path = '../../controllers/login/logout.php';
+$home_path = '../../index.php';
 
 include '../../components/header/header.php';
 ?>
@@ -49,9 +51,13 @@ include '../../components/header/header.php';
 
 **Características:**
 - ✅ Header sticky (se queda fijo al hacer scroll)
+- ✅ Botón de inicio con ícono de casita que lleva al dashboard
+- ✅ Logo clickeable que también lleva al home
+- ✅ Menú desplegable de usuario con avatar y opciones
 - ✅ Responsive (se adapta a móvil)
 - ✅ z-index: 1000 para estar siempre visible
 - ✅ Estilos incluidos automáticamente
+- ✅ Animaciones suaves en hover
 
 ---
 
@@ -120,6 +126,7 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
         <?php
         $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
         $logout_path = 'controllers/login/logout.php';
+        $home_path = 'index.php';
         include 'components/header/header.php';
         ?>
         
@@ -164,6 +171,7 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
         <?php
         $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
         $logout_path = '../../controllers/login/logout.php';
+        $home_path = '../../index.php';
         include '../../components/header/header.php';
         ?>
         

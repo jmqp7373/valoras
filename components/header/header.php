@@ -9,6 +9,7 @@
  * - $logo_path: Ruta relativa al logo (ej: 'assets/images/logos/logoValoraHorizontal.png')
  * - $logout_path: Ruta relativa al script de logout (ej: 'controllers/login/logout.php')
  * - $profile_path: (Opcional) Ruta al perfil del usuario
+ * - $home_path: (Opcional) Ruta al dashboard principal
  */
 
 // Verificar que las variables necesarias estén definidas
@@ -17,6 +18,7 @@ if (!isset($user_apellidos)) $user_apellidos = '';
 if (!isset($logo_path)) $logo_path = 'assets/images/logos/logoValoraHorizontal.png';
 if (!isset($logout_path)) $logout_path = 'controllers/login/logout.php';
 if (!isset($profile_path)) $profile_path = '#'; // Ruta por defecto
+if (!isset($home_path)) $home_path = 'index.php'; // Ruta por defecto al home
 
 // Obtener iniciales del usuario para el avatar
 $iniciales = '';
@@ -25,7 +27,16 @@ if (!empty($user_apellidos)) $iniciales .= strtoupper(substr($user_apellidos, 0,
 if (empty($iniciales)) $iniciales = 'U';
 ?>
 <header class="dashboard-header">
-    <img src="<?php echo htmlspecialchars($logo_path); ?>" class="logo" alt="Valora Logo">
+    <div class="header-left">
+        <a href="<?php echo htmlspecialchars($home_path); ?>" class="home-link" title="Ir al Dashboard">
+            <svg class="home-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+        </a>
+        <a href="<?php echo htmlspecialchars($home_path); ?>" title="Ir al Dashboard">
+            <img src="<?php echo htmlspecialchars($logo_path); ?>" class="logo" alt="Valora Logo">
+        </a>
+    </div>
     
     <div class="user-menu-container">
         <button class="user-menu-btn" id="userMenuBtn" aria-label="Menú de usuario">
@@ -82,9 +93,50 @@ if (empty($iniciales)) $iniciales = 'U';
         z-index: 1000;
     }
     
+    /* Header Left - Logo y Home */
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .home-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(106, 27, 27, 0.2);
+    }
+    
+    .home-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
+        background: linear-gradient(135deg, #882A57 0%, #6A1B1B 100%);
+    }
+    
+    .home-link:active {
+        transform: translateY(0);
+    }
+    
+    .home-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
     .dashboard-header .logo {
         height: 40px;
         cursor: pointer;
+        transition: opacity 0.3s ease;
+    }
+    
+    .dashboard-header .logo:hover {
+        opacity: 0.8;
     }
     
     /* User Menu Container */

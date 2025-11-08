@@ -5,6 +5,10 @@
  * Muestra todos los tickets creados por el usuario
  */
 
+// Habilitar errores para debug
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once __DIR__ . '/../../config/database.php';
 startSessionSafely();
 
@@ -14,20 +18,50 @@ if(!isLoggedIn()) {
     exit();
 }
 
-// Si no hay tickets definidos, obtenerlos del controlador
-if(!isset($tickets)) {
-    require_once __DIR__ . '/../../controllers/TicketController.php';
-    $controller = new TicketController();
-    $controller->index();
-    exit();
-}
-
 $user_nombres = $_SESSION['user_nombres'] ?? '';
 $user_apellidos = $_SESSION['user_apellidos'] ?? '';
+$userCedula = $_SESSION['user_cedula'] ?? '';
 
 // Obtener mensajes de sesión
 $success = $_SESSION['ticket_success'] ?? '';
 unset($_SESSION['ticket_success']);
+
+// Obtener tickets del usuario directamente
+$tickets = [];
+try {
+    $pdo = getDBConnection();
+    
+    // Crear tabla si no existe
+    $createTable = "CREATE TABLE IF NOT EXISTS tickets (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_cedula VARCHAR(20) NOT NULL,
+        subject VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        attachment_path VARCHAR(500) DEFAULT NULL,
+        status ENUM('abierto', 'en_proceso', 'resuelto', 'cerrado') DEFAULT 'abierto',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user (user_cedula),
+        INDEX idx_status (status),
+        INDEX idx_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    
+    $pdo->exec($createTable);
+    
+    // Obtener tickets
+    $sql = "SELECT id, subject, status, created_at, updated_at 
+            FROM tickets 
+            WHERE user_cedula = :cedula 
+            ORDER BY created_at DESC";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':cedula' => $userCedula]);
+    $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Error obteniendo tickets: " . $e->getMessage());
+    echo "<!-- Error DB: " . $e->getMessage() . " -->";
+    $tickets = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

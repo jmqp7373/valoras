@@ -5,6 +5,10 @@
  * Formulario para que el usuario cree un ticket de soporte
  */
 
+// Habilitar errores para debug
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once __DIR__ . '/../../config/database.php';
 startSessionSafely();
 
@@ -12,6 +16,27 @@ startSessionSafely();
 if(!isLoggedIn()) {
     header('Location: ../login/login.php');
     exit();
+}
+
+// Crear tabla si no existe
+try {
+    $pdo = getDBConnection();
+    $createTable = "CREATE TABLE IF NOT EXISTS tickets (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_cedula VARCHAR(20) NOT NULL,
+        subject VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        attachment_path VARCHAR(500) DEFAULT NULL,
+        status ENUM('abierto', 'en_proceso', 'resuelto', 'cerrado') DEFAULT 'abierto',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user (user_cedula),
+        INDEX idx_status (status),
+        INDEX idx_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    $pdo->exec($createTable);
+} catch (PDOException $e) {
+    error_log("Error creando tabla tickets: " . $e->getMessage());
 }
 
 $user_nombres = $_SESSION['user_nombres'] ?? '';

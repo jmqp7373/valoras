@@ -198,7 +198,7 @@ unset($_SESSION['ticket_error'], $_SESSION['ticket_success']);
     <div class="ticket-container">
         <div class="ticket-card">
             <div class="ticket-header">
-                <img src="../../assets/images/logos/logo_valora.png" alt="Valora Logo">
+                <img src="../../assets/images/logos/logoValoraHorizontal.png" alt="Valora Logo">
                 <h2>🎫 Crear Ticket de Soporte</h2>
                 <p style="color: #666;">Cuéntanos en qué podemos ayudarte</p>
             </div>

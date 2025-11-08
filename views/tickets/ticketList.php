@@ -256,7 +256,7 @@ try {
 <body>
     <div class="tickets-container">
         <div class="tickets-header">
-            <img src="../../assets/images/logos/logo_valora.png" alt="Valora Logo">
+            <img src="../../assets/images/logos/logoValoraHorizontal.png" alt="Valora Logo">
             <h2>📋 Mis Tickets de Soporte</h2>
             <p style="color: #666;">Bienvenido, <?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></p>
         </div>

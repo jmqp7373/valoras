@@ -61,16 +61,46 @@ class Finanzas {
     
     /**
      * Obtiene todos los movimientos ordenados por fecha descendente
+     * Soporta filtros opcionales por fecha y categoría
      * 
+     * @param array $filtros Array con fechaInicio, fechaFin, categoria
      * @return array Lista de movimientos
      */
-    public function obtenerMovimientos() {
+    public function obtenerMovimientos($filtros = []) {
         try {
             $sql = "SELECT id, fecha, tipo, categoria, monto, descripcion, created_at 
-                    FROM finanzas 
-                    ORDER BY fecha DESC, created_at DESC";
+                    FROM finanzas";
             
-            $stmt = $this->conn->query($sql);
+            $where = [];
+            $params = [];
+            
+            // Filtro por fecha inicial
+            if (!empty($filtros['fechaInicio'])) {
+                $where[] = "fecha >= :fechaInicio";
+                $params[':fechaInicio'] = $filtros['fechaInicio'];
+            }
+            
+            // Filtro por fecha final
+            if (!empty($filtros['fechaFin'])) {
+                $where[] = "fecha <= :fechaFin";
+                $params[':fechaFin'] = $filtros['fechaFin'];
+            }
+            
+            // Filtro por categoría
+            if (!empty($filtros['categoria']) && $filtros['categoria'] !== 'Todas') {
+                $where[] = "categoria = :categoria";
+                $params[':categoria'] = $filtros['categoria'];
+            }
+            
+            // Agregar condiciones WHERE si existen filtros
+            if (count($where) > 0) {
+                $sql .= " WHERE " . implode(' AND ', $where);
+            }
+            
+            $sql .= " ORDER BY fecha DESC, created_at DESC";
+            
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error al obtener movimientos: " . $e->getMessage());

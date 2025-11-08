@@ -16,6 +16,72 @@ if (isset($_GET['action']) && $_GET['action'] === 'totales_json') {
     exit();
 }
 
+// Manejar petición AJAX para listar movimientos filtrados
+if (isset($_GET['action']) && $_GET['action'] === 'listar') {
+    $controller = new FinanzasController();
+    
+    // Obtener filtros desde GET
+    $filtros = [
+        'fechaInicio' => $_GET['fechaInicio'] ?? '',
+        'fechaFin' => $_GET['fechaFin'] ?? '',
+        'categoria' => $_GET['categoria'] ?? ''
+    ];
+    
+    $movimientos = $controller->listarMovimientos($filtros);
+    
+    // Generar HTML de la tabla
+    if (empty($movimientos)) {
+        echo '<div class="alert alert-info" style="background: #d1ecf1; color: #0c5460; padding: 1.5rem; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bee5eb; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <h3 style="margin-bottom: 0.5rem; font-family: \'Poppins\', sans-serif;">No se encontraron movimientos</h3>
+                <p style="margin: 0; font-size: 1rem;">Intenta ajustar los filtros o limpiarlos para ver todos los registros.</p>
+              </div>';
+    } else {
+        echo '<div class="table-responsive">
+                <table class="tabla-movimientos">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Categoría</th>
+                            <th>Monto</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>';
+        
+        foreach ($movimientos as $mov) {
+            $fecha = date('d/m/Y', strtotime($mov['fecha']));
+            $tipo = htmlspecialchars($mov['tipo']);
+            $categoria = htmlspecialchars($mov['categoria']);
+            $monto = number_format($mov['monto'], 2, ',', '.');
+            $descripcion = htmlspecialchars($mov['descripcion']);
+            $badgeClass = strtolower($tipo);
+            $montoClass = strtolower($tipo);
+            $icono = $tipo === 'Ingreso' ? '💰' : '💸';
+            
+            echo "<tr>
+                    <td>{$fecha}</td>
+                    <td>
+                        <span class='badge-tipo {$badgeClass}'>
+                            {$icono} {$tipo}
+                        </span>
+                    </td>
+                    <td>{$categoria}</td>
+                    <td class='monto-{$montoClass}'>
+                        \${$monto}
+                    </td>
+                    <td>{$descripcion}</td>
+                  </tr>";
+        }
+        
+        echo '    </tbody>
+                </table>
+              </div>';
+    }
+    exit();
+}
+
 class FinanzasController {
     private $finanzasModel;
     
@@ -141,11 +207,13 @@ class FinanzasController {
     
     /**
      * Lista todos los movimientos financieros
+     * Soporta filtros opcionales por fecha y categoría
      * 
+     * @param array $filtros Array con fechaInicio, fechaFin, categoria
      * @return array Lista de movimientos
      */
-    public function listarMovimientos() {
-        return $this->finanzasModel->obtenerMovimientos();
+    public function listarMovimientos($filtros = []) {
+        return $this->finanzasModel->obtenerMovimientos($filtros);
     }
     
     /**

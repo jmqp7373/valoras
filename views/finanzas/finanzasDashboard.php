@@ -161,6 +161,44 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
             <div class="card-finanzas" style="margin-top: 2rem;">
                 <h2 style="color: #1B263B; font-family: 'Poppins', sans-serif; margin-bottom: 1.5rem;">📊 Historial de Movimientos</h2>
                 
+                <!-- Filtros -->
+                <div class="filtros-container">
+                    <div class="filtros-grid">
+                        <div class="filtro-item">
+                            <label for="fechaInicio">Fecha Inicial</label>
+                            <input type="date" id="fechaInicio" class="filtro-input">
+                        </div>
+                        
+                        <div class="filtro-item">
+                            <label for="fechaFin">Fecha Final</label>
+                            <input type="date" id="fechaFin" class="filtro-input">
+                        </div>
+                        
+                        <div class="filtro-item">
+                            <label for="categoriaFiltro">Categoría</label>
+                            <select id="categoriaFiltro" class="filtro-input">
+                                <option value="Todas">Todas</option>
+                                <option value="Arriendo">🏠 Arriendo</option>
+                                <option value="Nómina">👥 Nómina</option>
+                                <option value="Servicios">⚡ Servicios</option>
+                                <option value="Personal">👤 Personal</option>
+                                <option value="Otro">📌 Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filtro-item filtro-botones">
+                            <button type="button" id="filtrarBtn" class="btn-filtrar">
+                                🔍 Filtrar
+                            </button>
+                            <button type="button" id="limpiarBtn" class="btn-limpiar">
+                                ✖ Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenedor de la tabla -->
+                <div id="tablaMovimientos">
                 <?php if (empty($movimientos)): ?>
                     <div class="alert alert-info" style="background: #d1ecf1; color: #0c5460; padding: 1.5rem; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bee5eb; text-align: center;">
                         <div style="font-size: 3rem; margin-bottom: 1rem;">�</div>
@@ -200,6 +238,7 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
                         </table>
                     </div>
                 <?php endif; ?>
+                </div><!-- Fin tablaMovimientos -->
             </div>
         </main>
     </div>
@@ -432,9 +471,96 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
             font-weight: 600;
         }
 
+        /* Estilos para filtros */
+        .filtros-container {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filtro-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filtro-item label {
+            font-weight: 500;
+            color: #222222;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .filtro-input {
+            padding: 0.75rem;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .filtro-input:focus {
+            outline: none;
+            border-color: #6A1B1B;
+        }
+
+        .filtro-botones {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: row;
+        }
+
+        .btn-filtrar,
+        .btn-limpiar {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-filtrar {
+            background: linear-gradient(135deg, #6A1B1B, #882A57);
+            color: white;
+        }
+
+        .btn-filtrar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
+        }
+
+        .btn-limpiar {
+            background: #E5E5E5;
+            color: #222222;
+        }
+
+        .btn-limpiar:hover {
+            background: #d0d0d0;
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filtro-botones {
+                flex-direction: column;
             }
 
             .dashboard-main {
@@ -461,6 +587,73 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 
         // Establecer fecha actual por defecto
         document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+
+        // FUNCIONALIDAD DE FILTROS
+        
+        /**
+         * Aplica los filtros seleccionados y actualiza la tabla
+         */
+        async function aplicarFiltros() {
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            const categoria = document.getElementById('categoriaFiltro').value;
+
+            // Construir parámetros de búsqueda
+            const params = new URLSearchParams({
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                categoria: categoria
+            });
+
+            try {
+                // Mostrar indicador de carga
+                const tablaContainer = document.getElementById('tablaMovimientos');
+                tablaContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6c757d;"><p style="font-size: 1.2rem;">⏳ Cargando...</p></div>';
+
+                // Hacer petición AJAX
+                const response = await fetch('../../controllers/FinanzasController.php?action=listar&' + params.toString());
+                const html = await response.text();
+
+                // Actualizar tabla
+                tablaContainer.innerHTML = html;
+            } catch (error) {
+                console.error('Error al filtrar movimientos:', error);
+                document.getElementById('tablaMovimientos').innerHTML = 
+                    '<div style="background: #f8d7da; color: #721c24; padding: 1.5rem; border-radius: 8px; text-align: center;">' +
+                    '<p>❌ Error al cargar los datos. Por favor, intenta de nuevo.</p>' +
+                    '</div>';
+            }
+        }
+
+        /**
+         * Limpia los filtros y muestra todos los movimientos
+         */
+        async function limpiarFiltros() {
+            // Restablecer valores de los filtros
+            document.getElementById('fechaInicio').value = '';
+            document.getElementById('fechaFin').value = '';
+            document.getElementById('categoriaFiltro').value = 'Todas';
+
+            // Recargar todos los movimientos
+            await aplicarFiltros();
+        }
+
+        // Event listeners para los botones
+        document.getElementById('filtrarBtn').addEventListener('click', aplicarFiltros);
+        document.getElementById('limpiarBtn').addEventListener('click', limpiarFiltros);
+
+        // Permitir filtrar con Enter en los inputs
+        document.getElementById('fechaInicio').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') aplicarFiltros();
+        });
+
+        document.getElementById('fechaFin').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') aplicarFiltros();
+        });
+
+        document.getElementById('categoriaFiltro').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') aplicarFiltros();
+        });
     </script>
 </body>
 </html>

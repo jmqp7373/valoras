@@ -38,9 +38,30 @@
 
 4. **Cambiar a producción:**
    ```php
-   'development_mode' => false, // Para envío real
+   'development_mode' => false, // Para envío real a usuarios
    'debug' => false, // Sin logs de debug
    ```
+
+### ⚠️ IMPORTANTE: Modo Desarrollo vs Producción
+
+**Modo Desarrollo (`development_mode = true`):**
+- ✅ Todos los emails se redirigen a `development_email`
+- ✅ Ideal para pruebas sin enviar a usuarios reales
+- ✅ Debug activado para logs detallados
+- ⚠️ Los usuarios NO reciben los emails
+
+**Modo Producción (`development_mode = false`):**
+- ✅ Emails se envían a los destinatarios reales
+- ✅ Los usuarios reciben sus códigos de recuperación
+- ✅ Debug desactivado para mejor rendimiento
+- ⚠️ Verificar credenciales SMTP antes de activar
+
+**Para activar envío real a usuarios:**
+```php
+// En config/email-config.php
+'development_mode' => false, // ← CAMBIAR ESTO
+'debug' => false,
+```
 
 ### 📧 Características del Sistema:
 

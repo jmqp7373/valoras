@@ -168,6 +168,75 @@ class PerfilController {
             return [];
         }
     }
+
+    /**
+     * Cambiar contraseña del usuario
+     */
+    public function cambiarPassword() {
+        startSessionSafely();
+
+        if (!isLoggedIn()) {
+            return ['success' => false, 'message' => 'No estás autenticado'];
+        }
+
+        // Validar campos requeridos
+        if (empty($_POST['password_actual']) || empty($_POST['password_nueva']) || empty($_POST['password_confirmar'])) {
+            return ['success' => false, 'message' => 'Todos los campos son obligatorios'];
+        }
+
+        $id_usuario = $_SESSION['user_id'];
+        $password_actual = $_POST['password_actual'];
+        $password_nueva = $_POST['password_nueva'];
+        $password_confirmar = $_POST['password_confirmar'];
+
+        // Validar que las contraseñas nuevas coincidan
+        if ($password_nueva !== $password_confirmar) {
+            return ['success' => false, 'message' => 'Las contraseñas nuevas no coinciden'];
+        }
+
+        // Validar longitud mínima
+        if (strlen($password_nueva) < 8) {
+            return ['success' => false, 'message' => 'La contraseña debe tener al menos 8 caracteres'];
+        }
+
+        try {
+            // Obtener contraseña actual de la base de datos
+            $query = "SELECT password FROM usuarios WHERE id_usuario = :id_usuario LIMIT 1";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':id_usuario', $id_usuario);
+            $stmt->execute();
+            
+            if ($stmt->rowCount() === 0) {
+                return ['success' => false, 'message' => 'Usuario no encontrado'];
+            }
+
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Verificar contraseña actual
+            if (!password_verify($password_actual, $usuario['password'])) {
+                return ['success' => false, 'message' => 'La contraseña actual es incorrecta'];
+            }
+
+            // Hashear nueva contraseña
+            $password_hash = password_hash($password_nueva, PASSWORD_DEFAULT);
+
+            // Actualizar contraseña en la base de datos
+            $query = "UPDATE usuarios SET password = :password WHERE id_usuario = :id_usuario";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':password', $password_hash);
+            $stmt->bindParam(':id_usuario', $id_usuario);
+
+            if ($stmt->execute()) {
+                return ['success' => true, 'message' => 'Contraseña actualizada exitosamente'];
+            }
+
+            return ['success' => false, 'message' => 'Error al actualizar la contraseña'];
+
+        } catch (PDOException $e) {
+            error_log("Error al cambiar contraseña: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error en la base de datos'];
+        }
+    }
 }
 
 // Manejo de peticiones AJAX
@@ -177,6 +246,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     switch ($_POST['action']) {
         case 'actualizar_perfil':
             $resultado = $controller->actualizarPerfil();
+            header('Content-Type: application/json');
+            echo json_encode($resultado);
+            exit();
+            
+        case 'cambiar_password':
+            $resultado = $controller->cambiarPassword();
             header('Content-Type: application/json');
             echo json_encode($resultado);
             exit();

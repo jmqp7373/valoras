@@ -596,6 +596,30 @@ unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']);
 
         function cerrarModal() {
             document.getElementById('modal-password').style.display = 'none';
+            // Limpiar formulario
+            document.querySelector('.form-password').reset();
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            const mensajeDiv = document.createElement('div');
+            mensajeDiv.className = `mensaje mensaje-${tipo}`;
+            mensajeDiv.textContent = mensaje;
+            mensajeDiv.style.position = 'fixed';
+            mensajeDiv.style.top = '100px';
+            mensajeDiv.style.left = '50%';
+            mensajeDiv.style.transform = 'translateX(-50%)';
+            mensajeDiv.style.zIndex = '3000';
+            mensajeDiv.style.minWidth = '300px';
+            mensajeDiv.style.textAlign = 'center';
+            
+            document.body.appendChild(mensajeDiv);
+            
+            // Eliminar después de 5 segundos
+            setTimeout(() => {
+                mensajeDiv.style.opacity = '0';
+                mensajeDiv.style.transition = 'opacity 0.5s';
+                setTimeout(() => mensajeDiv.remove(), 500);
+            }, 5000);
         }
 
         // Cerrar modal al hacer clic fuera
@@ -612,15 +636,45 @@ unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']);
             }
         });
 
-        // Validar que las contraseñas coincidan
-        document.querySelector('.form-password')?.addEventListener('submit', function(e) {
+        // Enviar formulario de cambio de contraseña con AJAX
+        document.querySelector('.form-password')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
             const nueva = document.getElementById('password_nueva').value;
             const confirmar = document.getElementById('password_confirmar').value;
             
             if (nueva !== confirmar) {
-                e.preventDefault();
-                alert('Las contraseñas no coinciden');
+                mostrarMensaje('Las contraseñas no coinciden', 'error');
                 return false;
+            }
+
+            // Mostrar loading en botón
+            const btnSubmit = this.querySelector('button[type="submit"]');
+            const textoOriginal = btnSubmit.textContent;
+            btnSubmit.textContent = 'Cambiando...';
+            btnSubmit.disabled = true;
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('../../controllers/PerfilController.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    mostrarMensaje(resultado.message, 'success');
+                    cerrarModal();
+                } else {
+                    mostrarMensaje(resultado.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarMensaje('Error al procesar la solicitud', 'error');
+            } finally {
+                btnSubmit.textContent = textoOriginal;
+                btnSubmit.disabled = false;
             }
         });
     </script>

@@ -24,6 +24,51 @@ $cedula = $userData['cedula'] ?? '';
 // Debug: Log para verificar datos
 error_log("verify3_Update - Cédula: {$cedula}, Teléfono actual: " . ($userData['celular'] ?? 'N/A') . ", Email actual: " . ($userData['email'] ?? 'N/A'));
 
+// Funciones para enmascarar datos sensibles
+function maskEmail($email) {
+    if(empty($email)) return '';
+    
+    $parts = explode('@', $email);
+    if(count($parts) !== 2) return $email;
+    
+    $username = $parts[0];
+    $domain = $parts[1];
+    $length = strlen($username);
+    
+    // Si el username es muy corto, mostrar todo con asteriscos
+    if($length <= 7) {
+        $maskedUsername = str_repeat('*', $length);
+    } else {
+        // Mostrar 1 al inicio, 5 asteriscos en el medio, y el resto al final
+        $start = substr($username, 0, 1);
+        $end = substr($username, -($length - 6));
+        $maskedUsername = $start . '*****' . $end;
+    }
+    
+    return $maskedUsername . '@' . $domain;
+}
+
+function maskPhone($phone) {
+    if(empty($phone)) return '';
+    
+    $cleanPhone = preg_replace('/[^0-9+]/', '', $phone);
+    $length = strlen($cleanPhone);
+    
+    // Si el número es muy corto, mostrar todo con asteriscos
+    if($length <= 7) {
+        return str_repeat('*', $length);
+    } else {
+        // Mostrar 3 al inicio, 5 asteriscos en el medio, y 2 al final
+        $start = substr($cleanPhone, 0, 3);
+        $end = substr($cleanPhone, -2);
+        return $start . '*****' . $end;
+    }
+}
+
+// Enmascarar datos para mostrar
+$maskedEmail = maskEmail($userData['email'] ?? '');
+$maskedPhone = maskPhone($userData['celular'] ?? '');
+
 // Mensajes de error/éxito
 $error = $_GET['error'] ?? '';
 $success = $_GET['success'] ?? '';
@@ -205,6 +250,18 @@ $success = $_GET['success'] ?? '';
                 <strong>Cédula:</strong> <?= htmlspecialchars($cedula) ?>
             </div>
             
+            <?php if($maskedPhone || $maskedEmail): ?>
+            <div class="alert alert-info" style="background-color: #fff3cd; border-color: #ffeaa7; color: #856404;">
+                <strong>🔒 Datos Actuales (Ocultos por Seguridad):</strong><br>
+                <?php if($maskedPhone): ?>
+                    📱 Celular: <?= htmlspecialchars($maskedPhone) ?><br>
+                <?php endif; ?>
+                <?php if($maskedEmail): ?>
+                    📧 Email: <?= htmlspecialchars($maskedEmail) ?>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+            
             <form action="../../controllers/UserUpdateController.php" method="POST">
                 <input type="hidden" name="cedula" value="<?= htmlspecialchars($cedula) ?>">
                 
@@ -214,10 +271,9 @@ $success = $_GET['success'] ?? '';
                            id="telefono" 
                            name="telefono" 
                            class="form-control" 
-                           placeholder="Ejemplo: 3103951529" 
+                           placeholder="<?= $maskedPhone ? 'Actual: ' . htmlspecialchars($maskedPhone) : 'Ejemplo: 3103951529' ?>" 
                            pattern="[0-9]{10}" 
                            title="Ingresa un número de 10 dígitos"
-                           value="<?= htmlspecialchars($userData['celular'] ?? '') ?>"
                            required>
                     <small>Ingresa 10 dígitos sin espacios ni guiones</small>
                 </div>
@@ -228,8 +284,7 @@ $success = $_GET['success'] ?? '';
                            id="email" 
                            name="email" 
                            class="form-control" 
-                           placeholder="Ejemplo: usuario@email.com"
-                           value="<?= htmlspecialchars($userData['email'] ?? '') ?>"
+                           placeholder="<?= $maskedEmail ? 'Actual: ' . htmlspecialchars($maskedEmail) : 'Ejemplo: usuario@email.com' ?>"
                            required>
                     <small>Ingresa un correo electrónico válido</small>
                 </div>

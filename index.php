@@ -46,8 +46,16 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                 </div>
                 
                 <div style="margin-top: 2rem; text-align: center;">
+                    <a href="views/tickets/ticketCreate.php" 
+                       style="background: linear-gradient(135deg, #882A57, #ee6f92); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px;">
+                        🎫 Crear Ticket de Soporte
+                    </a>
+                    <a href="views/tickets/ticketList.php" 
+                       style="background: #17a2b8; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px;">
+                        📋 Ver Mis Tickets
+                    </a>
                     <a href="views/admin/checksTests/system-check.php" 
-                       style="background: #8b5a83; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                       style="background: #8b5a83; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px;">
                         🔍 Verificación del Sistema
                     </a>
                 </div>

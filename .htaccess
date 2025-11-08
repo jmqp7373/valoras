@@ -37,3 +37,23 @@ AddDefaultCharset UTF-8
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+# Proteger directorio uploads (solo permitir desde PHP)
+<FilesMatch "^uploads/">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+# Rutas limpias para sistema de tickets
+RewriteEngine On
+RewriteBase /
+
+# Ruta: /tickets/create
+RewriteRule ^tickets/create$ views/tickets/ticketCreate.php [L]
+
+# Ruta: /tickets/list
+RewriteRule ^tickets/list$ views/tickets/ticketList.php [L]
+
+# Ruta: /tickets/store (POST)
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^tickets/store$ controllers/TicketController.php?action=store [L]

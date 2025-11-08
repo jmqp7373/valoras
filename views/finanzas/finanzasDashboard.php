@@ -43,14 +43,12 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Header -->
-        <header class="dashboard-header">
-            <img src="../../assets/images/logos/logoValoraHorizontal.png" class="logo" alt="Valora Logo">
-            <div class="user-info">
-                <span>Bienvenido, <?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></span>
-                <a href="../../controllers/login/logout.php" class="logout-btn">Cerrar Sesión</a>
-            </div>
-        </header>
+        <?php
+        $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
+        $logout_path = '../../controllers/login/logout.php';
+        $profile_path = '#';
+        include '../../components/header.php';
+        ?>
         
         <main class="dashboard-main">
             <!-- Título y botón de regreso -->
@@ -263,39 +261,6 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 
         .dashboard-container {
             min-height: 100vh;
-        }
-        
-        .dashboard-header {
-            background-color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .dashboard-header .logo {
-            height: 40px;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .logout-btn {
-            background-color: #ee6f92;
-            color: white;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-        }
-        
-        .logout-btn:hover {
-            background-color: #d63384;
         }
         
         .dashboard-main {
@@ -661,5 +626,10 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
             if (e.key === 'Enter') aplicarFiltros();
         });
     </script>
+
+    <?php
+    $base_path = '../../';
+    include '../../components/footer.php';
+    ?>
 </body>
 </html>

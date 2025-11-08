@@ -11,10 +11,18 @@ class PasswordResetController {
     private $twilioController;
     
     public function __construct() {
-        $this->db = new Database();
-        $this->usuario = new Usuario($this->db->getConnection());
-        $this->emailService = new EmailService();
-        $this->twilioController = new TwilioController();
+        try {
+            $this->db = new Database();
+            $connection = $this->db->getConnection();
+            $this->usuario = new Usuario($connection);
+            $this->emailService = new EmailService();
+            $this->twilioController = new TwilioController();
+        } catch (Exception $e) {
+            // Log error for debugging
+            error_log("Error en PasswordResetController constructor: " . $e->getMessage());
+            // Re-throw to be handled by caller
+            throw $e;
+        }
     }
     
     public function findUser($identifier, $method = 'cedula') {

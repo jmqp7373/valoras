@@ -12,7 +12,16 @@ try {
     die('Error al cargar archivos necesarios: ' . $e->getMessage());
 }
 
-$passwordController = new PasswordResetController();
+// Intentar crear el controlador y manejar errores de conexión
+try {
+    $passwordController = new PasswordResetController();
+} catch (Exception $e) {
+    // Error de conexión a la base de datos
+    $dbError = true;
+    $dbErrorMessage = 'No se puede conectar al servidor de base de datos. Por favor, verifica que el servicio MySQL esté activo e intenta nuevamente.';
+    error_log('Error al crear PasswordResetController: ' . $e->getMessage());
+}
+
 $result = null;
 $step = 'identify'; // 'identify', 'select_method', 'sent'
 
@@ -30,7 +39,13 @@ try {
 
 // Procesar formularios
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if(isset($_POST['action'])) {
+    // Verificar que el controlador se haya creado correctamente
+    if(!isset($passwordController)) {
+        $result = [
+            'success' => false,
+            'message' => 'No se puede procesar la solicitud. El servidor de base de datos no está disponible.'
+        ];
+    } else if(isset($_POST['action'])) {
         switch($_POST['action']) {
             case 'identify':
                 $identificationMethod = $_POST['identification_method'];
@@ -143,7 +158,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">
         <h2>🔐 Recuperar Contraseña</h2>
         
-        <?php if($result && !$result['success']): ?>
+        <?php if(isset($dbError) && $dbError): ?>
+            <div class="alert alert-error" style="background-color: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <strong>⚠️ Error de Conexión</strong><br>
+                <?php echo htmlspecialchars($dbErrorMessage); ?>
+            </div>
+        <?php elseif($result && !$result['success']): ?>
             <div class="alert alert-error" style="background-color: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
                 <?php echo htmlspecialchars($result['message']); ?>
             </div>

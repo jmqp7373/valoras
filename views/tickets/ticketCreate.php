@@ -42,6 +42,13 @@ try {
 $user_nombres = $_SESSION['user_nombres'] ?? '';
 $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 
+// Variables para header
+$logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
+$home_path = '../../index.php';
+$profile_path = '../usuario/miPerfil.php';
+$settings_path = '../usuario/configuracion.php';
+$logout_path = '../../controllers/login/logout.php';
+
 // Obtener mensajes de sesión
 $error = $_SESSION['ticket_error'] ?? '';
 $success = $_SESSION['ticket_success'] ?? '';
@@ -54,6 +61,8 @@ unset($_SESSION['ticket_error'], $_SESSION['ticket_success']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Ticket de Soporte - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         .ticket-container {
             max-width: 800px;
@@ -194,7 +203,9 @@ unset($_SESSION['ticket_error'], $_SESSION['ticket_success']);
         }
     </style>
 </head>
-<body>
+<body style="background-color: #F8F9FA;">
+    <?php include '../../components/header/header.php'; ?>
+    
     <div class="ticket-container">
         <div class="ticket-card">
             <div class="ticket-header">
@@ -330,5 +341,8 @@ unset($_SESSION['ticket_error'], $_SESSION['ticket_success']);
             counter.style.color = length >= 10 ? '#28a745' : '#dc3545';
         });
     </script>
+    
+    <?php include '../../components/footer.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

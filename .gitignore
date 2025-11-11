@@ -24,6 +24,7 @@ config/email-config.php
 config/database.php
 config/configGoogleVision.php
 config/configOpenAiChatgpt.php
+config/configStripchat.php
 
 # Logs y archivos de depuración
 *.log

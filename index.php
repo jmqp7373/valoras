@@ -62,7 +62,15 @@ $user_cedula = $_SESSION['user_cedula'] ?? '';
                        style="background: #17a2b8; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px;">
                         📋 Ver Mis Tickets
                     </a>
-                    <a href="views/admin/checksTests/system-check.php" 
+                    <a href="views/ventas/ventasModelo.php" 
+                       style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px; font-weight: 600;">
+                        💵 Ventas por Modelo
+                    </a>
+                    <a href="views/admin/permissionsPanel.php" 
+                       style="background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px; font-weight: 600;">
+                        ⚙️ Administración de Permisos
+                    </a>
+                    <a href="views/checksTests/system-check.php" 
                        style="background: #8b5a83; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px;">
                         🔍 Verificación del Sistema
                     </a>

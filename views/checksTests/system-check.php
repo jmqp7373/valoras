@@ -10,13 +10,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificación del Sistema - Valora.vip</title>
-    <link rel="stylesheet" href="../../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-card">
             <div class="brand">
-                <img src="../../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo">
+                <img src="../../assets/images/logos/logo_valora.png" class="logo" alt="Valora Logo">
                 <h1>🔍 Verificación del Sistema</h1>
             </div>
             
@@ -25,15 +25,15 @@
                 
                 <?php
                 // Verificar CSS
-                $cssExists = file_exists(__DIR__ . '/../../../assets/css/styles.css');
+                $cssExists = file_exists(__DIR__ . '/../../assets/css/styles.css');
                 echo "<p>" . ($cssExists ? "✅" : "❌") . " CSS: /assets/css/styles.css</p>";
                 
                 // Verificar logo
-                $logoExists = file_exists(__DIR__ . '/../../../assets/images/logos/logo_valora.png');
+                $logoExists = file_exists(__DIR__ . '/../../assets/images/logos/logo_valora.png');
                 echo "<p>" . ($logoExists ? "✅" : "❌") . " Logo: /assets/images/logos/logo_valora.png</p>";
                 
                 // Verificar banderas
-                $flagsDir = __DIR__ . '/../../../assets/images/flags/';
+                $flagsDir = __DIR__ . '/../../assets/images/flags/';
                 $flags = ['co.png', 'ar.png', 'cl.png', 'ec.png', 'us.png', 'mx.png', 'pe.png', 've.png'];
                 $flagsOk = 0;
                 foreach($flags as $flag) {
@@ -43,7 +43,7 @@
                 
                 // Verificar base de datos
                 try {
-                    require_once __DIR__ . '/../../../config/database.php';
+                    require_once __DIR__ . '/../../config/database.php';
                     $db = new Database();
                     $conn = $db->getConnection();
                     if ($conn) {
@@ -60,18 +60,18 @@
                 
                 // Verificar configuración de IA
                 echo "<h4>🤖 Sistema de Inteligencia Artificial:</h4>";
-                $configExists = file_exists(__DIR__ . '/../../../config/config.php');
+                $configExists = file_exists(__DIR__ . '/../../config/config.php');
                 echo "<p>" . ($configExists ? "✅" : "⚠️") . " Archivo config/config.php: " . ($configExists ? "Existe" : "Falta - copiar de config/config.example.php") . "</p>";
                 
                 if ($configExists) {
-                    require_once __DIR__ . '/../../../config/config.php';
+                    require_once __DIR__ . '/../../config/config.php';
                     $apiKeyConfigured = defined('OPENAI_API_KEY') && OPENAI_API_KEY !== 'sk-ejemplo-pon-tu-api-key-aqui-1234567890';
                     echo "<p>" . ($apiKeyConfigured ? "✅" : "⚠️") . " API Key OpenAI: " . ($apiKeyConfigured ? "Configurada" : "Falta configurar") . "</p>";
                 } else {
                     echo "<p>⚠️ API Key OpenAI: No verificable (config/config.php faltante)</p>";
                 }
                 
-                $aiGeneratorExists = file_exists(__DIR__ . '/../../../controllers/login/usernameGenerator.php');
+                $aiGeneratorExists = file_exists(__DIR__ . '/../../controllers/login/usernameGenerator.php');
                 echo "<p>" . ($aiGeneratorExists ? "✅" : "❌") . " Generador IA: controllers/login/usernameGenerator.php</p>";
                 
                 $aiViewExists = file_exists(__DIR__ . '/../../login/registranteUserAvailavilitySelect.php');
@@ -79,15 +79,15 @@
                 
                 // Verificar archivos principales
                 $files = [
-                    '../../../index.php' => 'Dashboard principal',
-                    '../../login/login.php' => 'Login',
-                    '../../login/register.php' => 'Registro con IA', 
-                    '../../login/password_reset.php' => 'Recuperar contraseña',
-                    '../../login/reset_password.php' => 'Reset contraseña',
-                    '../../../controllers/login/AuthController.php' => 'Controlador Auth',
-                    '../../../controllers/login/PasswordResetController.php' => 'Controlador Reset',
-                    '../../../models/Usuario.php' => 'Modelo Usuario',
-                    '../../../services/EmailService.php' => 'Servicio Email'
+                    '../../index.php' => 'Dashboard principal',
+                    '../login/login.php' => 'Login',
+                    '../login/register.php' => 'Registro con IA', 
+                    '../login/password_reset.php' => 'Recuperar contraseña',
+                    '../login/reset_password.php' => 'Reset contraseña',
+                    '../../controllers/login/AuthController.php' => 'Controlador Auth',
+                    '../../controllers/login/PasswordResetController.php' => 'Controlador Reset',
+                    '../../models/Usuario.php' => 'Modelo Usuario',
+                    '../../services/EmailService.php' => 'Servicio Email'
                 ];
                 
                 echo "<h4>📄 Archivos del Sistema:</h4>";

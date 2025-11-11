@@ -5,13 +5,18 @@
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #fce4ec;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Layout flex solo para páginas de autenticación */
+body.auth-layout {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
     padding: 20px;
-    box-sizing: border-box;
 }
 
 .login-container {
@@ -159,8 +164,8 @@ body {
 
 .logo {
     display: block;
-    margin: 0 auto 20px auto;
-    max-width: 150px;
+    margin: 0 auto 0px auto;
+    max-width: 180px;
 }
 
 /* Estilos para el select del código de país */

@@ -24,7 +24,7 @@
             <h4>Soporte</h4>
             <ul>
                 <li><a href="<?php echo isset($base_path) ? $base_path : ''; ?>views/tickets/ticketCreate.php">Crear Ticket</a></li>
-                <li><a href="<?php echo isset($base_path) ? $base_path : ''; ?>views/admin/checksTests/system-check.php">Verificación Sistema</a></li>
+                <li><a href="<?php echo isset($base_path) ? $base_path : ''; ?>views/checksTests/system-check.php">Verificación Sistema</a></li>
             </ul>
         </div>
         

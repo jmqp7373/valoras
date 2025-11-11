@@ -29,7 +29,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
-<body>
+<body class="auth-layout">
     <div class="login-container">
         <!-- Incluir el logo de Valora ubicado en assets/images/logo_valoras.png -->
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valoras company logo with stylized lettering on a clean white background conveying a professional and welcoming tone">

@@ -188,7 +188,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
         }
     </style>
 </head>
-<body>
+<body class="auth-layout">
     <div class="login-container">
         <img src="../../assets/images/logos/logo_valora.png" class='logo' alt="Valora Logo">
         

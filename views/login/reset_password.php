@@ -106,7 +106,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && $step == 2 && isset($_POST['password'
         }
     </style>
 </head>
-<body>
+<body class="auth-layout">
     <?php include '../../components/marcaPasos.php'; ?>
     
     <!-- CONTENEDOR PRINCIPAL SIN PADDING -->

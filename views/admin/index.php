@@ -34,17 +34,26 @@ if(!isLoggedIn()) {
                 <div style="margin: 20px 0;">
                     <h4>📋 Verificación y Tests:</h4>
                     <div style="margin-left: 20px;">
-                        <p><a href="checksTests/system-check.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
+                        <p><a href="../checksTests/system-check.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
                             🔍 Verificación Completa del Sistema</a> - Estado general de todos los componentes
                         </p>
-                        <p><a href="checksTests/test_database_config.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
+                        <p><a href="../checksTests/test_database_config.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
                             🗄️ Test de Base de Datos</a> - Verificar conectividad y configuración
                         </p>
-                        <p><a href="checksTests/test_ftp_connection.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
+                        <p><a href="../checksTests/test_ftp_connection.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
                             📡 Test de Conexión FTP</a> - Probar credenciales de deploy
                         </p>
-                        <p><a href="checksTests/test_ftp_interactive.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
+                        <p><a href="../checksTests/test_ftp_interactive.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
                             🔄 Test FTP Interactivo</a> - Test avanzado con logs detallados
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4>⚙️ Configuración y Seguridad:</h4>
+                    <div style="margin-left: 20px;">
+                        <p><a href="permissionsPanel.php" style="color: #882A57; text-decoration: none; font-weight: 500;">
+                            🔐 Administración de Permisos</a> - Gestionar permisos por rol y usuario
                         </p>
                     </div>
                 </div>

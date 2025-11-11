@@ -140,7 +140,6 @@ if (empty($iniciales)) $iniciales = 'U';
     }
     
     .dashboard-header .logo {
-        height: 40px;
         cursor: pointer;
         transition: opacity 0.3s ease;
     }

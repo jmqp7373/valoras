@@ -19,10 +19,15 @@ class Permisos {
      * Obtener todos los roles disponibles
      */
     public function obtenerRoles() {
-        $sql = "SELECT id, nombre, descripcion FROM roles ORDER BY id ASC";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT id, nombre, descripcion FROM roles ORDER BY id ASC";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error en obtenerRoles: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -32,6 +37,12 @@ class Permisos {
     public function obtenerModulos() {
         $modulos = [];
         $viewsPath = __DIR__ . '/../views/';
+        
+        // Verificar que el directorio views existe
+        if (!is_dir($viewsPath)) {
+            error_log("ERROR: No se encuentra el directorio views en: " . $viewsPath);
+            return $modulos;
+        }
         
         // Carpetas a escanear
         $carpetas = ['admin', 'checksTests', 'login', 'finanzas', 'ventas', 'tickets', 'usuario'];
@@ -44,16 +55,20 @@ class Permisos {
                 $this->escanearArchivosPhp($carpetaPath, $carpeta, $modulos);
                 
                 // Escanear subcarpetas
-                $subcarpetas = glob($carpetaPath . '/*', GLOB_ONLYDIR);
-                foreach ($subcarpetas as $subcarpeta) {
-                    $nombreSubcarpeta = basename($subcarpeta);
-                    $this->escanearArchivosPhp($subcarpeta, $carpeta . '/' . $nombreSubcarpeta, $modulos);
+                $subcarpetas = @glob($carpetaPath . '/*', GLOB_ONLYDIR);
+                if ($subcarpetas) {
+                    foreach ($subcarpetas as $subcarpeta) {
+                        $nombreSubcarpeta = basename($subcarpeta);
+                        $this->escanearArchivosPhp($subcarpeta, $carpeta . '/' . $nombreSubcarpeta, $modulos);
+                    }
                 }
             }
         }
         
         // Sincronizar con la base de datos
-        $this->sincronizarModulos($modulos);
+        if (!empty($modulos)) {
+            $this->sincronizarModulos($modulos);
+        }
         
         return $modulos;
     }
@@ -62,22 +77,26 @@ class Permisos {
      * Sincronizar módulos detectados con la tabla modulos
      */
     private function sincronizarModulos($modulosDetectados) {
-        foreach ($modulosDetectados as $clave => $rutaCompleta) {
-            // Extraer categoría
-            preg_match('/views\\\\([^\\\\]+)/', $rutaCompleta, $matches);
-            $categoria = $matches[1] ?? 'sistema';
-            
-            // Insertar o actualizar módulo
-            $sql = "INSERT INTO modulos (clave, ruta_completa, categoria, activo) 
-                    VALUES (?, ?, ?, 1)
-                    ON DUPLICATE KEY UPDATE 
-                        ruta_completa = VALUES(ruta_completa),
-                        categoria = VALUES(categoria),
-                        activo = 1,
-                        fecha_actualizacion = CURRENT_TIMESTAMP";
-            
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([$clave, $rutaCompleta, $categoria]);
+        try {
+            foreach ($modulosDetectados as $clave => $rutaCompleta) {
+                // Extraer categoría
+                preg_match('/views\\\\([^\\\\]+)/', $rutaCompleta, $matches);
+                $categoria = $matches[1] ?? 'sistema';
+                
+                // Insertar o actualizar módulo
+                $sql = "INSERT INTO modulos (clave, ruta_completa, categoria, activo) 
+                        VALUES (?, ?, ?, 1)
+                        ON DUPLICATE KEY UPDATE 
+                            ruta_completa = VALUES(ruta_completa),
+                            categoria = VALUES(categoria),
+                            activo = 1,
+                            fecha_actualizacion = CURRENT_TIMESTAMP";
+                
+                $stmt = $this->conn->prepare($sql);
+                $stmt->execute([$clave, $rutaCompleta, $categoria]);
+            }
+        } catch (Exception $e) {
+            error_log("Error sincronizando módulos: " . $e->getMessage());
         }
     }
     
@@ -87,40 +106,45 @@ class Permisos {
      * Ordenado alfabéticamente por carpeta y nombre de archivo
      */
     public function obtenerModulosConNombres() {
-        // Primero escanear archivos físicos para sincronizar
-        $modulosArchivos = $this->obtenerModulos();
-        
-        // Obtener TODOS los módulos de la BD ordenados alfabéticamente
-        $sql = "SELECT clave, ruta_completa, nombre_descriptivo, categoria, exento 
-                FROM modulos 
-                WHERE activo = 1
-                ORDER BY categoria ASC, ruta_completa ASC";
-        $stmt = $this->conn->query($sql);
-        $modulosDB = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        $resultado = [];
-        
-        // Procesar cada módulo de la BD
-        foreach ($modulosDB as $moduloDB) {
-            $clave = $moduloDB['clave'];
-            $rutaDB = $moduloDB['ruta_completa'];
-            $nombreDescriptivo = $moduloDB['nombre_descriptivo'];
-            $exento = (int)$moduloDB['exento'];
+        try {
+            // Primero escanear archivos físicos para sincronizar
+            $modulosArchivos = $this->obtenerModulos();
             
-            // Verificar si el archivo físico existe
-            $rutaFisica = __DIR__ . '/../' . str_replace('\\', '/', $rutaDB);
-            $archivoExiste = file_exists($rutaFisica);
+            // Obtener TODOS los módulos de la BD ordenados alfabéticamente
+            $sql = "SELECT clave, ruta_completa, nombre_descriptivo, categoria, exento 
+                    FROM modulos 
+                    WHERE activo = 1
+                    ORDER BY categoria ASC, ruta_completa ASC";
+            $stmt = $this->conn->query($sql);
+            $modulosDB = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Agregar módulo con información completa
-            $resultado[$clave] = [
-                'ruta' => $rutaDB,
-                'nombre_descriptivo' => $nombreDescriptivo,
-                'archivo_existe' => $archivoExiste,
-                'exento' => $exento
-            ];
+            $resultado = [];
+            
+            // Procesar cada módulo de la BD
+            foreach ($modulosDB as $moduloDB) {
+                $clave = $moduloDB['clave'];
+                $rutaDB = $moduloDB['ruta_completa'];
+                $nombreDescriptivo = $moduloDB['nombre_descriptivo'];
+                $exento = (int)$moduloDB['exento'];
+                
+                // Verificar si el archivo físico existe
+                $rutaFisica = __DIR__ . '/../' . str_replace('\\', '/', $rutaDB);
+                $archivoExiste = @file_exists($rutaFisica);
+                
+                // Agregar módulo con información completa
+                $resultado[$clave] = [
+                    'ruta' => $rutaDB,
+                    'nombre_descriptivo' => $nombreDescriptivo,
+                    'archivo_existe' => $archivoExiste,
+                    'exento' => $exento
+                ];
+            }
+            
+            return $resultado;
+        } catch (Exception $e) {
+            error_log("Error en obtenerModulosConNombres: " . $e->getMessage());
+            return [];
         }
-        
-        return $resultado;
     }
     
     /**
@@ -141,7 +165,11 @@ class Permisos {
      * Escanear archivos PHP en una carpeta específica
      */
     private function escanearArchivosPhp($path, $categoria, &$modulos) {
-        $archivos = glob($path . '/*.php');
+        $archivos = @glob($path . '/*.php');
+        
+        if (!$archivos) {
+            return;
+        }
         
         foreach ($archivos as $archivo) {
             $nombreArchivo = basename($archivo);
@@ -347,14 +375,19 @@ class Permisos {
      * Verificar si un usuario es admin o superadmin
      */
     public function esAdmin($idUsuario) {
-        $sql = "SELECT r.nombre 
-                FROM usuarios u
-                INNER JOIN roles r ON u.id_rol = r.id
-                WHERE u.id_usuario = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$idUsuario]);
-        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        return $resultado && in_array($resultado['nombre'], ['admin', 'superadmin']);
+        try {
+            $sql = "SELECT r.nombre 
+                    FROM usuarios u
+                    INNER JOIN roles r ON u.id_rol = r.id
+                    WHERE u.id_usuario = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([$idUsuario]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $resultado && in_array($resultado['nombre'], ['admin', 'superadmin']);
+        } catch (Exception $e) {
+            error_log("Error en esAdmin: " . $e->getMessage());
+            return false;
+        }
     }
 }

@@ -6,6 +6,10 @@
  * Fecha: 2025-11-09
  */
 
+// Activar errores para debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../models/Permisos.php';
 startSessionSafely();
@@ -17,12 +21,17 @@ if(!isLoggedIn()) {
 }
 
 // Verificar permisos de administrador
-$db = getDBConnection();
-$permisosModel = new Permisos($db);
-$idUsuario = $_SESSION['user_id'] ?? null;
+try {
+    $db = getDBConnection();
+    $permisosModel = new Permisos($db);
+    $idUsuario = $_SESSION['user_id'] ?? null;
 
-if (!$idUsuario || !$permisosModel->esAdmin($idUsuario)) {
-    die('Acceso denegado. Solo administradores pueden acceder a esta sección.');
+    if (!$idUsuario || !$permisosModel->esAdmin($idUsuario)) {
+        die('Acceso denegado. Solo administradores pueden acceder a esta sección.');
+    }
+} catch (Exception $e) {
+    error_log("Error en permissionsPanel: " . $e->getMessage());
+    die("Error del sistema: " . $e->getMessage() . "<br>Por favor contacte al administrador.");
 }
 
 // Generar token CSRF
@@ -41,7 +50,12 @@ $settings_path = '../usuario/configuracion.php';
 $logout_path = '../../controllers/login/logout.php';
 
 // OPTIMIZACIÓN: Solo obtener roles en el servidor (carga inicial rápida)
-$roles = $permisosModel->obtenerRoles();
+try {
+    $roles = $permisosModel->obtenerRoles();
+} catch (Exception $e) {
+    error_log("Error obteniendo roles: " . $e->getMessage());
+    $roles = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

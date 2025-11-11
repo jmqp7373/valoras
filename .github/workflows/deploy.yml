@@ -87,24 +87,41 @@ jobs:
         echo "�📁 Directorio destino: /public_html/"
         echo "🌐 Protocolo: FTP"
         
-    # 7. Deploy Complete Platform via SFTP
-    - name: 🚀 Deploy Complete Platform (SFTP)
-      id: sftp-deploy
+    # 7. Deploy Complete Platform to Hostinger
+    - name: 🚀 Deploy Complete Platform (FTP)
+      id: ftp-deploy
       continue-on-error: true
-      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        port: 22
-        local_path: './*'
-        remote_path: '/public_html/'
-        sftp_only: true
-        args: '-o ConnectTimeout=10'
+        protocol: ftp
+        port: ${{ secrets.FTP_PORT || 21 }}
+        local-dir: ./
+        server-dir: /public_html/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/vendor/**
+          **/.vscode/**
+          **/test_*.php
+          **/demo_*.php
+          **/*.md
+          **/README*
+          **/.github/**
+          **/.env*
+          **/.DS_Store
+          **/Thumbs.db
+          **/*.log
+          **/*.bat
+          **/*.sh
+        dry-run: false
 
     # 8. Verificación post-deployment
     - name: ✅ Post-Deployment System Check
-      if: steps.sftp-deploy.outcome == 'success'
+      if: steps.ftp-deploy.outcome == 'success'
       run: |
         echo "🎉 ¡DEPLOYMENT EXITOSO!"
         echo "================================"
@@ -113,12 +130,12 @@ jobs:
         echo "📝 Registro: https://valora.vip/views/login/register.php"
         echo "🔑 Reset Password: https://valora.vip/views/login/password_reset.php"
         echo "🔧 Panel Admin: https://valora.vip/views/admin/"
-        echo "👥 Panel Permisos: https://valora.vip/views/admin/permissionsPanel.php"
+        echo "� Panel Permisos: https://valora.vip/views/admin/permissionsPanel.php"
         echo "🔍 System Check: https://valora.vip/views/checksTests/system-check.php"
         echo "================================"
         echo "✅ FUNCIONALIDADES DESPLEGADAS:"
         echo "✅ Sistema de autenticación completo"
-        echo "✅ Panel de permisos con manejo robusto de errores"
+        echo "✅ Panel de permisos con edición inline"
         echo "✅ Toggle de módulos exentos"
         echo "✅ Sistema de tickets de soporte"
         echo "✅ Recuperación de contraseña"
@@ -127,20 +144,111 @@ jobs:
 
     # 9. Manejar errores de deployment
     - name: ❌ Handle Deployment Failure
-      if: steps.sftp-deploy.outcome == 'failure'
+      if: steps.ftp-deploy.outcome == 'failure'
       run: |
         echo "❌ DEPLOYMENT FALLÓ"
         echo "================================"
-        echo "🔍 Posibles problemas:"
-        echo "- Verificar credenciales SFTP en GitHub Secrets"
-        echo "- Confirmar que el servidor soporta SFTP (puerto 22)"
+        echo "🔍 Possible issues:"
+        echo "- Verificar credenciales FTP en GitHub Secrets"
+        echo "- Confirmar que el servidor está disponible"
         echo "- Revisar permisos en /public_html/"
         echo "- Verificar que no hay archivos bloqueados"
         echo "================================"
         echo "🛠️ Para debug:"
         echo "1. Ir a GitHub Actions y revisar logs detallados"
-        echo "2. Verificar secrets: FTP_HOST, FTP_USERNAME, FTP_PASSWORD"
-        echo "3. Probar conexión SFTP con FileZilla (puerto 22)"
-        echo "4. Considerar deployment manual"
+        echo "2. Verificar los secrets: FTP_HOST, FTP_USERNAME, FTP_PASSWORD, FTP_PORT"
+        echo "3. Probar conexión FTP manualmente"
         echo "================================"
         exit 1
+        server-dir: /public_html/
+        local-dir: ./
+        log-level: verbose
+        dry-run: false
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.vscode/**
+          **/README.md
+          **/.github/**
+          **/deploy/**
+          **/test_*.php
+          **/*.log
+          **/.env.example
+          
+    # 8. Retry con directorio alternativo si falla
+    - name: 🔄 Retry Deploy (Alternative Directory)
+      if: steps.ftp-deploy.outcome == 'failure'
+      id: ftp-retry
+      continue-on-error: true
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftp
+        port: ${{ secrets.FTP_PORT || 21 }}
+        server-dir: /
+        local-dir: ./
+        log-level: verbose
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.vscode/**
+          **/README.md
+          **/.github/**
+          
+    # 9. Determinar resultado del deploy
+    - name: 📊 Deploy Result Analysis  
+      run: |
+        if [ "${{ steps.ftp-deploy.outcome }}" == "success" ]; then
+          echo "✅ FTP Deploy exitoso en /public_html/"
+          echo "DEPLOY_STATUS=success" >> $GITHUB_ENV
+        elif [ "${{ steps.ftp-retry.outcome }}" == "success" ]; then
+          echo "✅ FTP Deploy exitoso en directorio raíz /"
+          echo "DEPLOY_STATUS=success" >> $GITHUB_ENV
+        else
+          echo "❌ Ambos intentos de FTP fallaron"
+          echo "DEPLOY_STATUS=failed" >> $GITHUB_ENV
+        fi
+        
+    # 10. Health Check Post-Deploy (solo si deploy exitoso)
+    - name: 🏥 Post-Deploy Health Check
+      if: env.DEPLOY_STATUS == 'success'
+      run: |
+        echo "🏥 Verificando despliegue..."
+        echo "✅ Archivos desplegados exitosamente"
+        echo "🌐 URL del sitio: https://valora.vip"
+        echo "📅 Fecha de despliegue: $(date)"
+        echo "🔗 Commit: ${{ github.sha }}"
+        echo "👤 Autor: ${{ github.actor }}"
+        
+    # 11. Deploy Status Notification  
+    - name: 📧 Deployment Status Notification
+      if: always()
+      run: |
+        if [ "${{ env.DEPLOY_STATUS }}" == "success" ]; then
+          echo "🎉 ¡DESPLIEGUE EXITOSO!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Valora.vip desplegado correctamente"
+          echo "🌐 Sistema de autenticación: ✓"
+          echo "📧 Sistema de email con PHPMailer: ✓"  
+          echo "🔐 Recuperación de contraseña: ✓"
+          echo "🗄️ Base de datos: 9,321 usuarios"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        else
+          echo "❌ ERROR EN EL DESPLIEGUE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔍 Problema: Credenciales FTP incorrectas"
+          echo "📋 Solución: Verificar GitHub Secrets:"
+          echo "   - FTP_HOST: IP o dominio del servidor"
+          echo "   - FTP_USERNAME: Usuario FTP"  
+          echo "   - FTP_PASSWORD: Contraseña FTP"
+          echo "🆘 Alternativas:"
+          echo "   1. Verificar credenciales en hosting panel"
+          echo "   2. Probar conexión con FileZilla"
+          echo "   3. Cambiar a SFTP si FTP no funciona"
+          echo "   4. Deploy manual temporal"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        fi

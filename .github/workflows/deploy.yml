@@ -1,4 +1,4 @@
-name: 🚀 Deploy Valora.vip - AI Username System & Complete Platform
+name: 🚀 Deploy Valora.vip - Complete Platform
 
 # Despliegue automático cuando hay cambios en main
 on:
@@ -105,19 +105,18 @@ jobs:
           **/.git*/**
           **/node_modules/**
           **/vendor/**
+          **/.vscode/**
+          **/test_*.php
+          **/demo_*.php
+          **/*.md
+          **/README*
+          **/.github/**
           **/.env*
           **/.DS_Store
           **/Thumbs.db
           **/*.log
-          **/composer.lock
-          **/*.md
-          **/README*
-          **/.github/**
-          **/tests/**
           **/*.bat
           **/*.sh
-          **/import_database.bat
-          **/setup-ai.sh
         dry-run: false
 
     # 8. Verificación post-deployment
@@ -128,19 +127,19 @@ jobs:
         echo "================================"
         echo "🌐 Sitio Web: https://valora.vip"
         echo "🔐 Login: https://valora.vip/views/login/login.php"
-        echo "📝 Registro IA: https://valora.vip/views/login/registranteUserAvailavilitySelect.php"
+        echo "📝 Registro: https://valora.vip/views/login/register.php"
         echo "🔑 Reset Password: https://valora.vip/views/login/password_reset.php"
-        echo "🔧 Panel Admin: https://valora.vip/views/admin"
-        echo "📊 System Check: https://valora.vip/views/admin/checksTests/system-check.php"
+        echo "🔧 Panel Admin: https://valora.vip/views/admin/"
+        echo "� Panel Permisos: https://valora.vip/views/admin/permissionsPanel.php"
+        echo "🔍 System Check: https://valora.vip/views/checksTests/system-check.php"
         echo "================================"
-        echo "🤖 NUEVAS FUNCIONALIDADES DESPLEGADAS:"
-        echo "✅ Sistema de IA para generación de usernames"
-        echo "✅ Wizard de 3 pasos con 100 características"
-        echo "✅ Validación de disponibilidad en tiempo real"
-        echo "✅ Sistema de recuperación de contraseña por email/SMS"
-        echo "✅ Panel administrativo completo"
-        echo "✅ Restricciones de edad y validaciones"
-        echo "✅ Arquitectura MVC completa"
+        echo "✅ FUNCIONALIDADES DESPLEGADAS:"
+        echo "✅ Sistema de autenticación completo"
+        echo "✅ Panel de permisos con edición inline"
+        echo "✅ Toggle de módulos exentos"
+        echo "✅ Sistema de tickets de soporte"
+        echo "✅ Recuperación de contraseña"
+        echo "✅ Panel administrativo"
         echo "================================"
 
     # 9. Manejar errores de deployment

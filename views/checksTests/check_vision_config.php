@@ -2,12 +2,10 @@
 /**
  * Diagnóstico de Configuración para Google Vision API
  * 
- * UBICACIÓN: https://valora.vip/check_vision_config.php
+ * UBICACIÓN: https://valora.vip/views/checksTests/check_vision_config.php
  * 
  * Este script verifica que todo esté configurado correctamente
  * para usar Google Cloud Vision API en verify1_document.php (flujo multi-página)
- * 
- * ⚠️ ELIMINAR DESPUÉS DE VALIDAR LA CONFIGURACIÓN
  */
 
 header('Content-Type: text/html; charset=UTF-8');

@@ -67,6 +67,7 @@ $botones = $pageHeader['botones'] ?? [];
                 $btnId = $boton['id'] ?? 'btn' . $index;
                 $btnLabel = $boton['label'] ?? 'Botón ' . ($index + 1);
                 $isActive = $boton['active'] ?? false;
+                $btnUrl = $boton['url'] ?? '#';
                 $isFirst = $index === 0;
                 $isLast = $index === count($botones) - 1;
                 
@@ -85,6 +86,7 @@ $botones = $pageHeader['botones'] ?? [];
                 <button type="button" 
                         class="header-view-btn <?= $isActive ? 'active' : '' ?>" 
                         id="<?= htmlspecialchars($btnId) ?>" 
+                        <?= !$isActive ? 'onclick="window.location.href=\'' . htmlspecialchars($btnUrl) . '\'"' : '' ?>
                         style="<?= $isActive 
                             ? 'background: linear-gradient(135deg, #6A1B1B 0%, #8B2E57 100%); color: white; border: none; padding: 12px 28px; border-radius: ' . $borderRadius . '; font-weight: 400; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-shadow: none; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 0.2px; position: relative; z-index: 2; min-width: 200px; text-align: center;'
                             : 'background: #D8D8D8; color: #5A5A5A; border: none; padding: 12px 28px; border-radius: ' . $borderRadius . '; font-weight: 400; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-shadow: none; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 0.2px; position: relative; z-index: 1; min-width: 200px; text-align: center;' 

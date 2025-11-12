@@ -53,8 +53,7 @@ $logout_path = '../../controllers/login/logout.php';
 try {
     $roles = $permisosModel->obtenerRoles();
     
-    // Obtener nombre descriptivo del módulo actual
-    // Probar con diferentes formatos de ruta
+    // Obtener módulo actual y sus hermanos de categoría
     $rutasAlternativas = [
         'views\\admin\\permissionsPanel.php',
         'views/admin/permissionsPanel.php',
@@ -62,21 +61,61 @@ try {
     ];
     
     $tituloModulo = 'Panel de Permisos del Sistema'; // Valor por defecto
+    $categoriaActual = 'admin'; // Categoría por defecto
+    $rutaActual = '';
+    $moduloActualData = null;
     
-    foreach ($rutasAlternativas as $rutaActual) {
-        $stmt = $db->prepare("SELECT nombre_descriptivo FROM modulos WHERE ruta_completa = ? LIMIT 1");
-        $stmt->execute([$rutaActual]);
-        $moduloActual = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Buscar el módulo actual
+    foreach ($rutasAlternativas as $ruta) {
+        $stmt = $db->prepare("SELECT nombre_descriptivo, categoria, ruta_completa FROM modulos WHERE ruta_completa = ? LIMIT 1");
+        $stmt->execute([$ruta]);
+        $moduloActualData = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if ($moduloActual && !empty($moduloActual['nombre_descriptivo'])) {
-            $tituloModulo = $moduloActual['nombre_descriptivo'];
+        if ($moduloActualData && !empty($moduloActualData['nombre_descriptivo'])) {
+            $tituloModulo = $moduloActualData['nombre_descriptivo'];
+            $categoriaActual = $moduloActualData['categoria'];
+            $rutaActual = $moduloActualData['ruta_completa'];
             break;
+        }
+    }
+    
+    // Obtener todos los módulos de la misma categoría para generar botones dinámicos
+    $botonesModulos = [];
+    if ($categoriaActual) {
+        $stmt = $db->prepare("
+            SELECT nombre_descriptivo, ruta_completa 
+            FROM modulos 
+            WHERE categoria = ? 
+            AND eliminado = 0 
+            AND activo = 1
+            ORDER BY ruta_completa ASC
+        ");
+        $stmt->execute([$categoriaActual]);
+        $modulosCategoria = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($modulosCategoria as $modulo) {
+            // Extraer nombre del archivo sin extensión
+            $nombreArchivo = basename($modulo['ruta_completa'], '.php');
+            
+            // Determinar si es el módulo actual
+            $esActivo = ($modulo['ruta_completa'] === $rutaActual);
+            
+            // Generar URL relativa
+            $urlModulo = './' . $nombreArchivo . '.php';
+            
+            $botonesModulos[] = [
+                'id' => 'btn' . ucfirst($nombreArchivo),
+                'label' => $modulo['nombre_descriptivo'] ?: ucfirst($nombreArchivo),
+                'active' => $esActivo,
+                'url' => $urlModulo
+            ];
         }
     }
 } catch (Exception $e) {
     error_log("Error obteniendo roles: " . $e->getMessage());
     $roles = [];
     $tituloModulo = 'Panel de Permisos del Sistema';
+    $botonesModulos = [];
 }
 ?>
 <!DOCTYPE html>
@@ -158,18 +197,7 @@ try {
             'titulo' => $tituloModulo,
             'icono' => '⚙️',
             'descripcion' => 'Visualiza y gestiona los permisos de acceso por rol y por usuario individual',
-            'botones' => [
-                [
-                    'id' => 'btnRoles',
-                    'label' => '🧩 Permisos por Rol',
-                    'active' => true
-                ],
-                [
-                    'id' => 'btnUsuarios',
-                    'label' => '👤 Permisos Individuales',
-                    'active' => false
-                ]
-            ]
+            'botones' => $botonesModulos  // Botones dinámicos desde la base de datos
         ];
         include __DIR__ . '/../../components/header/headerTitulo.php';
         ?>

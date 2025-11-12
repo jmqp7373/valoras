@@ -61,9 +61,14 @@ unset($_SESSION['ticket_error'], $_SESSION['ticket_success']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Ticket de Soporte - Valora</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
+        body {
+            background-color: #F8F9FA;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        
         .ticket-container {
             max-width: 800px;
             margin: 40px auto;
@@ -343,6 +348,5 @@ unset($_SESSION['ticket_error'], $_SESSION['ticket_success']);
     </script>
     
     <?php include '../../components/footer.php'; ?>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

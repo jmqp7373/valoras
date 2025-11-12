@@ -101,6 +101,7 @@ if (empty($iniciales)) $iniciales = 'U';
         position: sticky;
         top: 0;
         z-index: 1000;
+        overflow: visible;
     }
     
     /* Header Left - Logo y Home */
@@ -151,6 +152,7 @@ if (empty($iniciales)) $iniciales = 'U';
     /* User Menu Container */
     .user-menu-container {
         position: relative;
+        overflow: visible;
     }
     
     /* User Menu Button */
@@ -215,6 +217,10 @@ if (empty($iniciales)) $iniciales = 'U';
         transform: translateY(-10px);
         transition: all 0.3s ease;
         z-index: 1001;
+        max-height: none;
+        overflow: visible;
+        min-height: 300px;
+        height: auto;
     }
     
     .user-dropdown.show {
@@ -225,7 +231,7 @@ if (empty($iniciales)) $iniciales = 'U';
     
     /* Dropdown Header */
     .dropdown-header {
-        padding: 1.5rem;
+        padding: 1rem 1.5rem;
         display: flex;
         align-items: center;
         gap: 1rem;
@@ -275,6 +281,15 @@ if (empty($iniciales)) $iniciales = 'U';
         list-style: none;
         margin: 0;
         padding: 0.5rem 0;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    .dropdown-menu li {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
     .dropdown-item {
@@ -282,19 +297,41 @@ if (empty($iniciales)) $iniciales = 'U';
         align-items: center;
         gap: 0.75rem;
         padding: 0.75rem 1.5rem;
-        color: #222222;
+        color: #222222 !important;
         text-decoration: none;
         transition: background-color 0.2s;
         font-family: 'Poppins', sans-serif;
         font-size: 0.95rem;
     }
     
+    .dropdown-item span {
+        color: #222222 !important;
+    }
+    
+    .dropdown-item svg {
+        fill: #222222 !important;
+        color: #222222 !important;
+    }
+    
     .dropdown-item:hover {
-        background-color: #f8f9fa;
+        background-color: #f8f9fa !important;
+    }
+    
+    .dropdown-item:hover span {
+        color: #222222 !important;
     }
     
     .dropdown-item.logout {
-        color: #dc3545;
+        color: #dc3545 !important;
+    }
+    
+    .dropdown-item.logout span {
+        color: #dc3545 !important;
+    }
+    
+    .dropdown-item.logout svg {
+        fill: #dc3545 !important;
+        color: #dc3545 !important;
     }
     
     .dropdown-item.logout:hover {

@@ -45,8 +45,8 @@ if (!isset($_SESSION['csrf_token']) || $token !== $_SESSION['csrf_token']) {
 }
 
 // Obtener datos
+$accion = $_POST['accion'] ?? 'actualizar_nombre';
 $clave = $_POST['clave'] ?? '';
-$nombreDescriptivo = trim($_POST['nombre_descriptivo'] ?? '');
 
 if (empty($clave)) {
     http_response_code(400);
@@ -54,16 +54,49 @@ if (empty($clave)) {
     exit();
 }
 
-// Actualizar nombre descriptivo (puede estar vacío para resetear)
-$resultado = $permisosModel->actualizarNombreDescriptivo($clave, $nombreDescriptivo);
-
-if ($resultado) {
-    echo json_encode([
-        'success' => true,
-        'message' => 'Nombre descriptivo actualizado correctamente',
-        'nombre' => $nombreDescriptivo
-    ]);
+// Procesar según la acción
+if ($accion === 'marcar_eliminado') {
+    // Marcar módulo como eliminado
+    $resultado = $permisosModel->marcarComoEliminado($clave);
+    
+    if ($resultado) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Módulo marcado como eliminado correctamente'
+        ]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Error al marcar módulo como eliminado']);
+    }
+} elseif ($accion === 'toggle_exento') {
+    // Toggle estado exento
+    $exento = isset($_POST['exento']) ? (int)$_POST['exento'] : 0;
+    $resultado = $permisosModel->toggleExento($clave, $exento);
+    
+    if ($resultado) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Estado exento actualizado correctamente',
+            'exento' => $exento
+        ]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Error al actualizar estado exento']);
+    }
 } else {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Error al actualizar el nombre descriptivo']);
+    // Acción por defecto: actualizar nombre descriptivo
+    $nombreDescriptivo = trim($_POST['nombre_descriptivo'] ?? '');
+    $resultado = $permisosModel->actualizarNombreDescriptivo($clave, $nombreDescriptivo);
+    
+    if ($resultado) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Nombre descriptivo actualizado correctamente',
+            'nombre' => $nombreDescriptivo
+        ]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Error al actualizar el nombre descriptivo']);
+    }
 }
+

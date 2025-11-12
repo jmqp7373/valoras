@@ -52,9 +52,31 @@ $logout_path = '../../controllers/login/logout.php';
 // OPTIMIZACIÓN: Solo obtener roles en el servidor (carga inicial rápida)
 try {
     $roles = $permisosModel->obtenerRoles();
+    
+    // Obtener nombre descriptivo del módulo actual
+    // Probar con diferentes formatos de ruta
+    $rutasAlternativas = [
+        'views\\admin\\permissionsPanel.php',
+        'views/admin/permissionsPanel.php',
+        'admin\\permissionsPanel.php'
+    ];
+    
+    $tituloModulo = 'Panel de Permisos del Sistema'; // Valor por defecto
+    
+    foreach ($rutasAlternativas as $rutaActual) {
+        $stmt = $db->prepare("SELECT nombre_descriptivo FROM modulos WHERE ruta_completa = ? LIMIT 1");
+        $stmt->execute([$rutaActual]);
+        $moduloActual = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($moduloActual && !empty($moduloActual['nombre_descriptivo'])) {
+            $tituloModulo = $moduloActual['nombre_descriptivo'];
+            break;
+        }
+    }
 } catch (Exception $e) {
     error_log("Error obteniendo roles: " . $e->getMessage());
     $roles = [];
+    $tituloModulo = 'Panel de Permisos del Sistema';
 }
 ?>
 <!DOCTYPE html>
@@ -68,6 +90,13 @@ try {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../../assets/css/permissionsPanel.css">
     <style>
+        body {
+            background-color: #F8F9FA;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        
         /* Estilos para skeleton loading */
         .skeleton {
             animation: skeleton-loading 1s linear infinite alternate;
@@ -99,6 +128,7 @@ try {
     </style>
 </head>
 <body style="background-color: #F8F9FA;">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <?php include '../../components/header/header.php'; ?>
     
     <!-- Loading Overlay -->
@@ -114,50 +144,39 @@ try {
     
     <div class="container" style="max-width: 1400px; padding: 40px 20px;">
         <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb" style="font-size: 14px;">
-                <li class="breadcrumb-item"><a href="../../index.php" style="color: #6A1B1B; text-decoration: none;">Dashboard</a></li>
-                <li class="breadcrumb-item active text-muted" aria-current="page">Administración de Permisos</li>
-            </ol>
-        </nav>
+        <?php
+        $breadcrumbs = [
+            ['label' => 'Dashboard', 'url' => '../../index.php'],
+            ['label' => 'Administración de Permisos', 'url' => null]
+        ];
+        include __DIR__ . '/../../components/header/breadcrumbs.php';
+        ?>
 
         <!-- Título Principal -->
-        <div class="text-center mb-5">
-            <h2 class="fw-bold text-uppercase mb-2" style="color: #6A1B1B; letter-spacing: 1px;">
-                ⚙️ Panel de Permisos del Sistema
-            </h2>
-            <p class="text-muted mb-4">
-                Visualiza y gestiona los permisos de acceso por rol y por usuario individual
-            </p>
-            
-            <!-- Botones de Vista -->
-            <div class="btn-group" role="group" aria-label="Vista de permisos">
-                <button type="button" class="btn btn-primary active" id="btnRoles" style="background: linear-gradient(135deg, #6A1B1B, #882A57); border: none; padding: 10px 30px;">
-                    🧩 Permisos por Rol
-                </button>
-                <button type="button" class="btn btn-secondary" id="btnUsuarios" style="padding: 10px 30px;">
-                    👤 Permisos Individuales
-                </button>
-            </div>
-        </div>
+        <?php
+        $pageHeader = [
+            'titulo' => $tituloModulo,
+            'icono' => '⚙️',
+            'descripcion' => 'Visualiza y gestiona los permisos de acceso por rol y por usuario individual',
+            'botones' => [
+                [
+                    'id' => 'btnRoles',
+                    'label' => '🧩 Permisos por Rol',
+                    'active' => true
+                ],
+                [
+                    'id' => 'btnUsuarios',
+                    'label' => '👤 Permisos Individuales',
+                    'active' => false
+                ]
+            ]
+        ];
+        include __DIR__ . '/../../components/header/headerTitulo.php';
+        ?>
 
         <!-- Vista de Permisos por Rol -->
         <div id="rolesView">
             <?php if (!empty($roles)): ?>
-            
-            <!-- Subtítulo y Botón Toggle Exentos -->
-            <div class="text-center mb-4">
-                <h4 class="fw-bold mb-2" style="color: #6A1B1B;">📊 Matriz de Permisos por Rol</h4>
-                <p class="text-muted mb-3">Visualiza y gestiona los permisos de acceso cruzados por rol y módulo</p>
-                
-                <!-- Botón Toggle Exentos -->
-                <button type="button" 
-                        id="btnToggleExentos" 
-                        class="btn btn-outline-secondary"
-                        style="padding: 10px 25px; border-radius: 8px; font-weight: 600;">
-                    <i class="bi bi-eye-slash-fill me-2"></i>Ocultar Exentos
-                </button>
-            </div>
             
             <!-- Tabla Maestra de Permisos -->
             <div class="table-responsive rounded-3 shadow-sm" style="border-radius: 12px; overflow: hidden;">
@@ -175,8 +194,20 @@ try {
                     <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; border-bottom: 3px solid #7b1733;">
                         <tr>
                             <th rowspan="2" class="align-middle text-center" style="min-width: 400px; max-width: 500px; vertical-align: middle; position: sticky; left: 0; z-index: 11; background: linear-gradient(135deg, #6A1B1B, #882A57); padding: 15px; color: white; font-size: 1.1rem; font-weight: 700;">
-                                <i class="bi bi-file-earmark-code-fill me-2" style="font-size: 1.3rem;"></i>
-                                <strong style="letter-spacing: 0.5px;">Archivo / Ruta</strong>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <i class="bi bi-file-earmark-code-fill" style="font-size: 1.3rem;"></i>
+                                        <strong style="letter-spacing: 0.5px;">Archivo / Ruta</strong>
+                                    </div>
+                                    <button type="button" 
+                                            id="btnToggleExentos" 
+                                            class="btn btn-sm"
+                                            style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
+                                            onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.borderColor='rgba(255,255,255,0.5)';"
+                                            onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.borderColor='rgba(255,255,255,0.3)';">
+                                        <i class="bi bi-eye-slash-fill" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Exentos
+                                    </button>
+                                </div>
                             </th>
                             <?php 
                             $idx = 0;
@@ -368,7 +399,6 @@ try {
 
     <?php include '../../components/footer.php'; ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Pasar el token CSRF a JavaScript
         window.csrfToken = '<?= $_SESSION['csrf_token'] ?>';

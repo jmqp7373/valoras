@@ -144,12 +144,24 @@ function generarFilaModulo(modulo, index) {
                     <div style="flex: 1;">
     `;
     
-    // Si el archivo no existe físicamente, mostrar alerta de archivo renombrado
+    // Si el archivo no existe físicamente, mostrar alerta y botón eliminar
     if (archivoExiste === false) {
         html += `
-                        <div class="archivo-renombrado" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; color: #ff6b6b;">
-                            <i class="bi bi-file-earmark-x-fill me-1"></i>
-                            ⚠️ Archivo Renombrado o Eliminado
+                        <div class="archivo-renombrado" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; color: #ff6b6b; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                            <div style="flex: 1;">
+                                <i class="bi bi-file-earmark-x-fill me-1"></i>
+                                ⚠️ Archivo Renombrado o Eliminado
+                            </div>
+                            <button class="eliminar-modulo-btn" 
+                                    data-clave="${escapeHtml(clave)}"
+                                    style="background: none; border: none; padding: 4px; cursor: pointer; color: #d1d5db; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; border-radius: 6px;"
+                                    title="Marcar como eliminado permanentemente"
+                                    onmouseover="this.style.backgroundColor='rgba(255,107,107,0.15)'; this.style.color='#ff6b6b';"
+                                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='#d1d5db';">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="display: block;">
+                                    <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.748 1.748 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
+                                </svg>
+                            </button>
                         </div>
                         <div style="font-size: 0.72rem; font-family: 'Courier New', monospace; opacity: 0.7;" title="${escapeHtml(modulo.ruta)}">
                             Último nombre conocido: ${escapeHtml(rutaMostrar)}
@@ -190,6 +202,18 @@ function generarFilaModulo(modulo, index) {
     
     html += `
                     </div>
+                    <!-- Botón para marcar/desmarcar como exento -->
+                    <button class="toggle-exento-btn" 
+                            data-clave="${escapeHtml(clave)}"
+                            data-exento="${esExento ? '1' : '0'}"
+                            style="background: none; border: none; padding: 4px; cursor: pointer; color: ${esExento ? '#ffc107' : '#d1d5db'}; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; border-radius: 6px; margin-top: 8px;"
+                            title="${esExento ? 'Marcar como NO exento' : 'Marcar como exento'}"
+                            onmouseover="this.style.backgroundColor='rgba(255,193,7,0.15)'; this.style.color='#ffc107';"
+                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='${esExento ? '#ffc107' : '#d1d5db'}';">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="display: block;">
+                            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.158-.242.234-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 0 2.04 4.327z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </td>
@@ -287,6 +311,23 @@ function inicializarEventListeners() {
         });
     });
     
+    // Event listener para botones de eliminar módulo
+    document.querySelectorAll('.eliminar-modulo-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const clave = this.getAttribute('data-clave');
+            marcarModuloEliminado(clave);
+        });
+    });
+    
+    // Event listener para botones de toggle exento
+    document.querySelectorAll('.toggle-exento-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const clave = this.getAttribute('data-clave');
+            const exentoActual = this.getAttribute('data-exento') === '1';
+            toggleExentoModulo(clave, exentoActual);
+        });
+    });
+    
     // Event listener para checkboxes de permisos
     document.querySelectorAll('.permiso-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
@@ -347,6 +388,7 @@ async function guardarNombreDescriptivo(inputElement) {
         const formData = new FormData();
         formData.append('clave', clave);
         formData.append('nombre_descriptivo', nuevoNombre);
+        formData.append('csrf_token', window.csrfToken);
         
         const response = await fetch('../../controllers/ModulosController.php', {
             method: 'POST',
@@ -390,6 +432,104 @@ async function guardarNombreDescriptivo(inputElement) {
     } finally {
         // Rehabilitar input
         inputElement.disabled = false;
+    }
+}
+
+// Marcar módulo como eliminado
+async function marcarModuloEliminado(clave) {
+    // Confirmar acción
+    if (!confirm('¿Estás seguro de marcar este módulo como eliminado? Esta acción lo ocultará permanentemente del panel.')) {
+        return;
+    }
+    
+    console.log('🗑️ Marcando módulo como eliminado:', clave);
+    
+    try {
+        const formData = new FormData();
+        formData.append('accion', 'marcar_eliminado');
+        formData.append('clave', clave);
+        formData.append('csrf_token', window.csrfToken);
+        
+        const response = await fetch('../../controllers/ModulosController.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Módulo marcado como eliminado correctamente');
+            
+            // Eliminar la fila de la tabla con animación
+            const fila = document.querySelector(`tr[data-modulo-clave="${clave}"]`);
+            if (fila) {
+                fila.style.transition = 'opacity 0.3s, transform 0.3s';
+                fila.style.opacity = '0';
+                fila.style.transform = 'translateX(-20px)';
+                
+                setTimeout(() => {
+                    fila.remove();
+                    
+                    // Actualizar datos globales
+                    modulosData = modulosData.filter(m => m.clave !== clave);
+                    
+                    mostrarMensajeExito('✓ Módulo eliminado');
+                }, 300);
+            }
+            
+        } else {
+            throw new Error(data.message || 'Error al eliminar módulo');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        mostrarError('Error al eliminar el módulo: ' + error.message);
+    }
+}
+
+// Toggle estado exento de un módulo
+async function toggleExentoModulo(clave, exentoActual) {
+    const nuevoEstado = exentoActual ? 0 : 1;
+    const accion = nuevoEstado ? 'exento' : 'no exento';
+    
+    console.log(`🔄 Cambiando módulo ${clave} a ${accion}`);
+    
+    try {
+        const formData = new FormData();
+        formData.append('accion', 'toggle_exento');
+        formData.append('clave', clave);
+        formData.append('exento', nuevoEstado);
+        formData.append('csrf_token', window.csrfToken);
+        
+        const response = await fetch('../../controllers/ModulosController.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log(`✅ Módulo marcado como ${accion} correctamente`);
+            
+            // Actualizar el módulo en los datos globales
+            const modulo = modulosData.find(m => m.clave === clave);
+            if (modulo) {
+                modulo.exento = nuevoEstado;
+            }
+            
+            // Recargar la tabla para reflejar los cambios
+            renderizarTabla();
+            inicializarEventListeners();
+            
+            mostrarMensajeExito(`✓ Módulo marcado como ${accion}`);
+            
+        } else {
+            throw new Error(data.message || 'Error al cambiar estado exento');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        mostrarError('Error al cambiar estado exento: ' + error.message);
     }
 }
 

@@ -110,10 +110,10 @@ class Permisos {
             // Primero escanear archivos físicos para sincronizar
             $modulosArchivos = $this->obtenerModulos();
             
-            // Obtener TODOS los módulos de la BD ordenados alfabéticamente
+            // Obtener TODOS los módulos de la BD ordenados alfabéticamente (excluyendo eliminados)
             $sql = "SELECT clave, ruta_completa, nombre_descriptivo, categoria, exento 
                     FROM modulos 
-                    WHERE activo = 1
+                    WHERE activo = 1 AND eliminado = 0
                     ORDER BY categoria ASC, ruta_completa ASC";
             $stmt = $this->conn->query($sql);
             $modulosDB = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -157,6 +157,34 @@ class Permisos {
             return $stmt->execute([$nombreDescriptivo, $clave]);
         } catch (Exception $e) {
             error_log("Error actualizando nombre descriptivo: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Marcar un módulo como eliminado
+     */
+    public function marcarComoEliminado($clave) {
+        try {
+            $sql = "UPDATE modulos SET eliminado = 1, fecha_actualizacion = CURRENT_TIMESTAMP WHERE clave = ?";
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([$clave]);
+        } catch (Exception $e) {
+            error_log("Error marcando módulo como eliminado: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Toggle estado exento de un módulo
+     */
+    public function toggleExento($clave, $exento) {
+        try {
+            $sql = "UPDATE modulos SET exento = ?, fecha_actualizacion = CURRENT_TIMESTAMP WHERE clave = ?";
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([$exento, $clave]);
+        } catch (Exception $e) {
+            error_log("Error actualizando estado exento: " . $e->getMessage());
             return false;
         }
     }

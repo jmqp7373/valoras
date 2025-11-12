@@ -58,8 +58,9 @@ $botones = $pageHeader['botones'] ?? [];
             display: inline-flex;
             gap: 0;
             background: transparent;
-            border-radius: 0;
-            box-shadow: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         ">
             <?php foreach ($botones as $index => $boton): ?>
                 <?php 
@@ -72,11 +73,11 @@ $botones = $pageHeader['botones'] ?? [];
                 // Determinar border-radius según posición
                 $borderRadius = '';
                 if ($isFirst && $isLast) {
-                    $borderRadius = '8px';
+                    $borderRadius = '10px';
                 } elseif ($isFirst) {
-                    $borderRadius = '8px 0 0 8px';
+                    $borderRadius = '10px 0 0 10px';
                 } elseif ($isLast) {
-                    $borderRadius = '0 8px 8px 0';
+                    $borderRadius = '0 10px 10px 0';
                 } else {
                     $borderRadius = '0';
                 }
@@ -85,16 +86,16 @@ $botones = $pageHeader['botones'] ?? [];
                         class="header-view-btn <?= $isActive ? 'active' : '' ?>" 
                         id="<?= htmlspecialchars($btnId) ?>" 
                         style="<?= $isActive 
-                            ? 'background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%); color: white; border: none; padding: 14px 32px; border-radius: ' . $borderRadius . '; font-weight: 500; font-size: 15px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(106, 27, 27, 0.25); font-family: \'Poppins\', sans-serif; letter-spacing: 0.3px; position: relative; z-index: ' . ($isActive ? '2' : '1') . ';'
-                            : 'background: linear-gradient(135deg, #8B8B8B 0%, #A8A8A8 100%); color: white; border: none; padding: 14px 32px; border-radius: ' . $borderRadius . '; font-weight: 500; font-size: 15px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); font-family: \'Poppins\', sans-serif; letter-spacing: 0.3px; opacity: 0.85; position: relative; z-index: 1;' 
+                            ? 'background: linear-gradient(135deg, #6A1B1B 0%, #8B2E57 100%); color: white; border: none; padding: 12px 28px; border-radius: ' . $borderRadius . '; font-weight: 400; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-shadow: none; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 0.2px; position: relative; z-index: 2; min-width: 200px; text-align: center;'
+                            : 'background: #D8D8D8; color: #5A5A5A; border: none; padding: 12px 28px; border-radius: ' . $borderRadius . '; font-weight: 400; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-shadow: none; font-family: system-ui, -apple-system, sans-serif; letter-spacing: 0.2px; position: relative; z-index: 1; min-width: 200px; text-align: center;' 
                         ?>"
                         onmouseover="<?= $isActive 
-                            ? 'this.style.boxShadow=\'0 4px 12px rgba(106, 27, 27, 0.35)\'; this.style.transform=\'translateY(-1px)\';' 
-                            : 'this.style.opacity=\'1\'; this.style.boxShadow=\'0 4px 12px rgba(0, 0, 0, 0.25)\'; this.style.transform=\'translateY(-1px)\';' 
+                            ? 'this.style.background=\'linear-gradient(135deg, #7A2B2B 0%, #9B3E67 100%)\';' 
+                            : 'this.style.background=\'#C8C8C8\';' 
                         ?>"
                         onmouseout="<?= $isActive 
-                            ? 'this.style.boxShadow=\'0 2px 8px rgba(106, 27, 27, 0.25)\'; this.style.transform=\'translateY(0)\';' 
-                            : 'this.style.opacity=\'0.85\'; this.style.boxShadow=\'0 2px 8px rgba(0, 0, 0, 0.15)\'; this.style.transform=\'translateY(0)\';' 
+                            ? 'this.style.background=\'linear-gradient(135deg, #6A1B1B 0%, #8B2E57 100%)\';' 
+                            : 'this.style.background=\'#D8D8D8\';' 
                         ?>">
                     <?= $btnLabel ?>
                 </button>
@@ -104,18 +105,18 @@ $botones = $pageHeader['botones'] ?? [];
 </div>
 
 <style>
-    /* Estilos mejorados para los botones del header - estilo unificado */
+    /* Estilos para botones estilo segmented control como la imagen */
     .header-buttons-container {
-        animation: fadeInUp 0.5s ease;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
+        animation: fadeInUp 0.4s ease;
+        display: inline-flex;
+        border-radius: 10px;
         overflow: hidden;
     }
     
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
         }
         to {
             opacity: 1;
@@ -126,9 +127,9 @@ $botones = $pageHeader['botones'] ?? [];
     .header-view-btn {
         position: relative;
         overflow: hidden;
-        font-family: 'Poppins', sans-serif;
-        letter-spacing: 0.3px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         border: none !important;
+        outline: none !important;
     }
     
     .header-view-btn::before {
@@ -139,21 +140,17 @@ $botones = $pageHeader['botones'] ?? [];
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.25);
         transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
+        transition: width 0.5s, height 0.5s;
     }
     
     .header-view-btn:active::before {
-        width: 300px;
-        height: 300px;
+        width: 250px;
+        height: 250px;
     }
     
     .header-view-btn:focus {
         outline: none;
-    }
-    
-    .header-view-btn.active {
-        box-shadow: 0 2px 8px rgba(106, 27, 27, 0.25) !important;
     }
 </style>

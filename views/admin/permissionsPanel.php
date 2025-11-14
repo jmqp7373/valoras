@@ -27,7 +27,8 @@ try {
     $idUsuario = $_SESSION['user_id'] ?? null;
 
     if (!$idUsuario || !$permisosModel->esAdmin($idUsuario)) {
-        die('Acceso denegado. Solo administradores pueden acceder a esta sección.');
+        header('Location: acceso_denegado.php');
+        exit();
     }
 } catch (Exception $e) {
     error_log("Error en permissionsPanel: " . $e->getMessage());
@@ -42,134 +43,66 @@ if (!isset($_SESSION['csrf_token'])) {
 $user_nombres = $_SESSION['user_nombres'] ?? '';
 $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 
-// Variables para header
+// ============================================
+// OBTENER INFORMACIÓN DEL MÓDULO DESDE LA BD
+// ============================================
+try {
+    $stmt = $db->prepare("SELECT titulo, subtitulo, icono FROM modulos WHERE ruta_completa = ? AND activo = 1 LIMIT 1");
+    $stmt->execute(['views\admin\permissionsPanel.php']);
+    $modulo = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Error obteniendo módulo: " . $e->getMessage());
+    $modulo = null;
+}
+
+// ============================================
+// CONFIGURACIÓN PARA MASTER LAYOUT
+// ============================================
+
+// Meta información de la página
+$page_title = "Panel de Permisos - Valora";
+
+// Título, subtítulo e icono desde la base de datos
+$titulo_pagina = $modulo['titulo'] ?? 'Panel de Permisos del Sistema';
+$subtitulo_pagina = $modulo['subtitulo'] ?? 'Administra roles y permisos del sistema';
+$icono_pagina = $modulo['icono'] ?? '🔐';
+
+// Variables para header.php
 $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
 $home_path = '../../index.php';
 $profile_path = '../usuario/miPerfil.php';
 $settings_path = '../usuario/configuracion.php';
 $logout_path = '../../controllers/login/logout.php';
 
+// Variables para breadcrumbs.php
+$breadcrumbs = [
+    ['label' => 'Dashboard', 'url' => '../../index.php'],
+    ['label' => 'Administración de Permisos', 'url' => null]
+];
+
+// CSS y JS adicionales
+$additional_css = ['../../assets/css/permissionsPanel.css'];
+$additional_js = [
+    '../../assets/js/permissionsPanelAjax.js'
+];
+
 // OPTIMIZACIÓN: Solo obtener roles en el servidor (carga inicial rápida)
 try {
     $roles = $permisosModel->obtenerRoles();
-    
-    // Obtener módulo actual y sus hermanos de categoría
-    $rutasAlternativas = [
-        'views\\admin\\permissionsPanel.php',
-        'views/admin/permissionsPanel.php',
-        'admin\\permissionsPanel.php'
-    ];
-    
-    $tituloModulo = 'Panel de Permisos del Sistema'; // Valor por defecto
-    $categoriaActual = 'admin'; // Categoría por defecto
-    $rutaActual = '';
-    $moduloActualData = null;
-    
-    // Buscar el módulo actual
-    foreach ($rutasAlternativas as $ruta) {
-        $stmt = $db->prepare("SELECT nombre_descriptivo, categoria, ruta_completa FROM modulos WHERE ruta_completa = ? LIMIT 1");
-        $stmt->execute([$ruta]);
-        $moduloActualData = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($moduloActualData && !empty($moduloActualData['nombre_descriptivo'])) {
-            $tituloModulo = $moduloActualData['nombre_descriptivo'];
-            $categoriaActual = $moduloActualData['categoria'];
-            $rutaActual = $moduloActualData['ruta_completa'];
-            break;
-        }
-    }
-    
-    // Obtener todos los módulos de la misma categoría para generar botones dinámicos
-    $botonesModulos = [];
-    if ($categoriaActual) {
-        $stmt = $db->prepare("
-            SELECT nombre_descriptivo, ruta_completa 
-            FROM modulos 
-            WHERE categoria = ? 
-            AND eliminado = 0 
-            AND activo = 1
-            ORDER BY ruta_completa ASC
-        ");
-        $stmt->execute([$categoriaActual]);
-        $modulosCategoria = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        foreach ($modulosCategoria as $modulo) {
-            // Extraer nombre del archivo sin extensión
-            $nombreArchivo = basename($modulo['ruta_completa'], '.php');
-            
-            // Determinar si es el módulo actual
-            $esActivo = ($modulo['ruta_completa'] === $rutaActual);
-            
-            // Generar URL relativa
-            $urlModulo = './' . $nombreArchivo . '.php';
-            
-            $botonesModulos[] = [
-                'id' => 'btn' . ucfirst($nombreArchivo),
-                'label' => $modulo['nombre_descriptivo'] ?: ucfirst($nombreArchivo),
-                'active' => $esActivo,
-                'url' => $urlModulo
-            ];
-        }
-    }
 } catch (Exception $e) {
     error_log("Error obteniendo roles: " . $e->getMessage());
     $roles = [];
-    $tituloModulo = 'Panel de Permisos del Sistema';
-    $botonesModulos = [];
 }
+
+// Los botones se generan automáticamente en headerTitulo.php
+// basados en la categoría del módulo actual
+
+// ============================================
+// CAPTURAR CONTENIDO DE LA PÁGINA
+// ============================================
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración de Permisos - Valora</title>
-    <link rel="stylesheet" href="../../assets/css/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../../assets/css/permissionsPanel.css">
-    <style>
-        body {
-            background-color: #F8F9FA;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        /* Estilos para skeleton loading */
-        .skeleton {
-            animation: skeleton-loading 1s linear infinite alternate;
-        }
-        
-        @keyframes skeleton-loading {
-            0% { background-color: hsl(200, 20%, 80%); }
-            100% { background-color: hsl(200, 20%, 95%); }
-        }
-        
-        .skeleton-text {
-            width: 100%;
-            height: 20px;
-            border-radius: 4px;
-        }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-    </style>
-</head>
-<body style="background-color: #F8F9FA;">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <?php include '../../components/header/header.php'; ?>
-    
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="text-center" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
@@ -181,42 +114,13 @@ try {
         </div>
     </div>
     
-    <div class="container" style="max-width: 1400px; padding: 40px 20px;">
-        <!-- Breadcrumb -->
-        <?php
-        $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => '../../index.php'],
-            ['label' => 'Administración de Permisos', 'url' => null]
-        ];
-        include __DIR__ . '/../../components/header/breadcrumbs.php';
-        ?>
-
-        <!-- Título Principal -->
-        <?php
-        $pageHeader = [
-            'titulo' => $tituloModulo,
-            'icono' => '⚙️',
-            'descripcion' => 'Visualiza y gestiona los permisos de acceso por rol y por usuario individual',
-            'botones' => $botonesModulos  // Botones dinámicos desde la base de datos
-        ];
-        include __DIR__ . '/../../components/header/headerTitulo.php';
-        ?>
-
-        <!-- Vista de Permisos por Rol -->
+    <!-- Vista de Permisos por Rol -->
+    <div class="container-fluid" style="padding: 20px 40px;">
         <div id="rolesView">
             <?php if (!empty($roles)): ?>
             
             <!-- Tabla Maestra de Permisos -->
             <div class="table-responsive rounded-3 shadow-sm" style="border-radius: 12px; overflow: hidden;">
-                
-                <!-- Panel flotante de restauración -->
-                <div id="panelRestauracion" style="display: none; position: sticky; top: 20px; z-index: 100; background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                    <div class="text-center mb-3">
-                        <h5 class="mb-2">👁️ Todas las columnas están ocultas</h5>
-                        <p class="mb-0 small">Haz clic en un botón para mostrar ese rol:</p>
-                    </div>
-                    <div class="d-flex justify-content-center gap-3 flex-wrap" id="botonesRestauracion"></div>
-                </div>
                 
                 <table class="table table-bordered table-hover table-sm mb-0" id="tablaPermisos">
                     <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; border-bottom: 3px solid #7b1733;">
@@ -233,7 +137,7 @@ try {
                                             style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
                                             onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.borderColor='rgba(255,255,255,0.5)';"
                                             onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.borderColor='rgba(255,255,255,0.3)';">
-                                        <i class="bi bi-eye-slash-fill" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Exentos
+                                        <i class="bi bi-eye-slash-fill" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Exentos
                                     </button>
                                 </div>
                             </th>
@@ -246,27 +150,18 @@ try {
                                     class="text-center rol-header rol-col-<?= $rol['id'] ?>" 
                                     style="min-width: 200px; border-left: 2px solid rgba(255,255,255,0.3); padding: 12px;"
                                     data-original-rowspan="1">
-                                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                        <span>
-                                            <?php
-                                            $iconos = [
-                                                'superadmin' => '👑',
-                                                'admin' => '🔐',
-                                                'promotor' => '📢',
-                                                'modelo' => '⭐',
-                                                'soporte' => '🛠️'
-                                            ];
-                                            echo ($iconos[strtolower($rol['nombre'])] ?? '🔹') . ' ' . htmlspecialchars(ucfirst($rol['nombre']));
-                                            ?>
-                                        </span>
-                                        <button type="button" 
-                                                class="btn btn-sm toggle-rol-btn active" 
-                                                data-rol-id="<?= $rol['id'] ?>"
-                                                style="background: rgba(255, 255, 255, 0.25); border: 2px solid rgba(255, 255, 255, 0.6); color: #ffffff; padding: 6px 10px; font-size: 1.3rem; cursor: pointer; transition: all 0.2s ease; border-radius: 8px; min-width: 40px; height: 36px; display: flex; align-items: center; justify-content: center;"
-                                                title="Ocultar columnas de <?= htmlspecialchars($rol['nombre']) ?>">
-                                            <i class="bi bi-eye-fill" style="font-size: 1.3rem;"></i>
-                                        </button>
-                                    </div>
+                                    <span>
+                                        <?php
+                                        $iconos = [
+                                            'superadmin' => '👑',
+                                            'admin' => '🔐',
+                                            'promotor' => '📢',
+                                            'modelo' => '⭐',
+                                            'soporte' => '🛠️'
+                                        ];
+                                        echo ($iconos[strtolower($rol['nombre'])] ?? '🔹') . ' ' . htmlspecialchars(ucfirst($rol['nombre']));
+                                        ?>
+                                    </span>
                                 </th>
                             <?php 
                             $idx++;
@@ -297,23 +192,6 @@ try {
                         <!-- Los datos se cargan vía AJAX -->
                     </tbody>
                 </table>
-            </div>
-            
-            <!-- Leyenda con Badges -->
-            <div class="mt-4 p-3 bg-white rounded-3 shadow-sm">
-                <div class="d-flex justify-content-center gap-4 flex-wrap align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                        <strong class="text-muted">Leyenda:</strong>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="checkbox" checked disabled class="form-check-input" style="width: 20px; height: 20px;">
-                        <span class="badge bg-success">✔ Permitido</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="checkbox" disabled class="form-check-input" style="width: 20px; height: 20px;">
-                        <span class="badge bg-secondary">✖ Denegado</span>
-                    </div>
-                </div>
             </div>
             
             <?php else: ?>
@@ -356,13 +234,6 @@ try {
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Botón Volver -->
-        <div class="text-center mt-5">
-            <a href="../../index.php" class="btn btn-outline-dark rounded-pill px-5 py-3 fw-semibold shadow-sm" style="border: 2px solid #7b1733; color: #7b1733; transition: all 0.3s ease;">
-                <i class="bi bi-arrow-left-circle me-2"></i>Volver al Dashboard
-            </a>
         </div>
     </div>
 
@@ -425,13 +296,17 @@ try {
         </div>
     </div>
 
-    <?php include '../../components/footer.php'; ?>
-
     <script>
         // Pasar el token CSRF a JavaScript
         window.csrfToken = '<?= $_SESSION['csrf_token'] ?>';
     </script>
-    <script src="../../assets/js/permissionsPanel.js"></script>
-    <script src="../../assets/js/permissionsPanelAjax.js"></script>
-</body>
-</html>
+
+<?php
+// Capturar el contenido generado
+$content = ob_get_clean();
+
+// ============================================
+// CARGAR LAYOUT MASTER
+// ============================================
+include __DIR__ . '/../layouts/master.php';
+?>

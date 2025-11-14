@@ -1,0 +1,215 @@
+/**
+ * Dropdown Máscara de Rol - Estilos
+ * Proyecto: Valora.vip
+ * Version: 1.0
+ */
+
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+
+.role-switcher-dropdown {
+    display: inline-block;
+}
+
+/* ============================================
+   BOTÓN DEL DROPDOWN
+   ============================================ */
+
+.role-switcher-btn {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.role-switcher-btn:hover {
+    background: linear-gradient(135deg, #7A2B2B 0%, #983A67 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.role-switcher-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.role-switcher-btn .role-icon {
+    margin-right: 0;
+    flex-shrink: 0;
+}
+
+.role-switcher-btn .role-name {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Estado: Modo de Prueba Activo (cuando NO es Superadmin) */
+.role-switcher-btn.en-modo-prueba {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    animation: fade-alert-llamativo 1.5s ease-in-out infinite;
+}
+
+.role-switcher-btn.en-modo-prueba:hover {
+    background: linear-gradient(135deg, #7A2B2B 0%, #983A67 100%);
+    animation: none; /* Detener animación en hover */
+}
+
+/* Animación fade llamativa para alertar que está en modo prueba */
+@keyframes fade-alert-llamativo {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 2px 4px rgba(106, 27, 27, 0.2);
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        box-shadow: 0 4px 20px rgba(136, 42, 87, 0.9);
+        transform: scale(1.08);
+    }
+}
+
+/* ============================================
+   DROPDOWN MENU
+   ============================================ */
+
+.role-dropdown-custom {
+    min-width: 220px;
+    padding: 8px 0;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-top: 8px;
+}
+
+.role-dropdown-custom .dropdown-header-custom {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.role-dropdown-custom .dropdown-divider {
+    margin: 4px 0;
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================
+   ITEMS DEL DROPDOWN
+   ============================================ */
+
+.role-dropdown-custom .dropdown-item {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.role-dropdown-custom .dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #6A1B1B;
+}
+
+.role-dropdown-custom .dropdown-item.active {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.role-dropdown-custom .dropdown-item.active:hover {
+    background: linear-gradient(135deg, #7A2B2B 0%, #983A67 100%);
+    color: white;
+}
+
+/* ============================================
+   ICONOS
+   ============================================ */
+
+.role-dropdown-custom .check-icon {
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.role-dropdown-custom .check-spacer {
+    display: inline-block;
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.role-dropdown-custom .restore-icon {
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   BOTÓN DE RESTAURAR
+   ============================================ */
+
+.role-dropdown-custom .restore-btn {
+    color: #ff9800;
+    font-weight: 600;
+}
+
+.role-dropdown-custom .restore-btn:hover {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .role-switcher-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .role-switcher-btn .role-icon {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .role-dropdown-custom {
+        min-width: 200px;
+    }
+    
+    .role-dropdown-custom .dropdown-item {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.role-dropdown-custom.show {
+    animation: fadeIn 0.2s ease;
+}

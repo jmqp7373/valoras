@@ -29,58 +29,79 @@ $totales = $finanzasController->calcularTotales();
 // Obtener información del usuario
 $user_nombres = $_SESSION['user_nombres'] ?? '';
 $user_apellidos = $_SESSION['user_apellidos'] ?? '';
+
+// Variables para header
+$logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
+$home_path = '../../index.php';
+$profile_path = '../usuario/miPerfil.php';
+$settings_path = '../usuario/configuracion.php';
+$logout_path = '../../controllers/login/logout.php';
+
+// ============================================
+// CONFIGURACIÓN MASTER LAYOUT
+// ============================================
+
+// Consultar información del módulo desde la base de datos
+try {
+    $db = getDBConnection();
+    $stmt = $db->prepare("
+        SELECT titulo, subtitulo, icono 
+        FROM modulos 
+        WHERE ruta_completa = ?
+    ");
+    $stmt->execute(['views\finanzas\finanzasDashboard.php']);
+    $modulo = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $modulo = [
+        'titulo' => 'Gestión de Finanzas',
+        'subtitulo' => 'Control y análisis financiero',
+        'icono' => '💰'
+    ];
+}
+
+// Variables para master.php
+$page_title = $modulo['titulo'] ?? 'Gestión de Finanzas';
+$titulo_pagina = $modulo['titulo'] ?? 'Gestión de Finanzas';
+$subtitulo_pagina = $modulo['subtitulo'] ?? 'Control y análisis financiero';
+$icono_pagina = $modulo['icono'] ?? '💰';
+
+// Breadcrumbs
+$breadcrumbs = [
+    ['label' => 'Dashboard', 'url' => '../../index.php'],
+    ['label' => 'Gestión de Finanzas', 'url' => null]
+];
+
+// CSS adicional
+$additional_css = ['../../assets/css/finanzasDashboard.css'];
+
+// JavaScript adicional
+$additional_js = [];
+
+// ============================================
+// CAPTURA DE CONTENIDO
+// ============================================
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Finanzas - Valora</title>
-    <link rel="stylesheet" href="../../assets/css/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="dashboard-container">
-        <?php
-        $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
-        $logout_path = '../../controllers/login/logout.php';
-        $profile_path = '../../views/usuario/miPerfil.php';
-        $home_path = '../../index.php';
-        $settings_path = '../../views/usuario/configuracion.php';
-        include '../../components/header/header.php';
-        ?>
-        
-        <main class="dashboard-main">
-            <!-- Título y botón de regreso -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1 style="font-family: 'Poppins', sans-serif; color: #222222; margin: 0;">💰 Gestión de Finanzas</h1>
-                <a href="../../index.php" style="background: #6A1B1B; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-family: 'Poppins', sans-serif;">
-                    ← Volver al Dashboard
-                </a>
-            </div>
 
-            <!-- Mensajes de éxito/error -->
-            <?php if (isset($_SESSION['success_finanzas'])): ?>
-                <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
-                    <?php 
-                    echo htmlspecialchars($_SESSION['success_finanzas']); 
-                    unset($_SESSION['success_finanzas']);
-                    ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if (isset($_SESSION['error_finanzas'])): ?>
-                <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
-                    <?php 
-                    echo htmlspecialchars($_SESSION['error_finanzas']); 
-                    unset($_SESSION['error_finanzas']);
-                    ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Formulario de registro de movimiento -->
+<div class="container-fluid" style="padding: 20px 40px;">
+    <!-- Mensajes de éxito/error -->
+    <?php if (isset($_SESSION['success_finanzas'])): ?>
+        <div class="mensaje-exito">
+            <?php 
+            echo htmlspecialchars($_SESSION['success_finanzas']); 
+            unset($_SESSION['success_finanzas']);
+            ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['error_finanzas'])): ?>
+        <div class="mensaje-error">
+            <?php 
+            echo htmlspecialchars($_SESSION['error_finanzas']); 
+            unset($_SESSION['error_finanzas']);
+            ?>
+        </div>
+    <?php endif; ?>            <!-- Formulario de registro de movimiento -->
             <div class="card-finanzas">
                 <h2 style="color: #1B263B; font-family: 'Poppins', sans-serif; margin-bottom: 1.5rem;">📝 Registrar Nuevo Movimiento</h2>
                 <form method="POST" action="" id="formMovimiento">
@@ -240,313 +261,9 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
                 <?php endif; ?>
                 </div><!-- Fin tablaMovimientos -->
             </div>
-        </main>
-    </div>
+        </div>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Reset de estilos del body para permitir scroll */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-            display: block !important;
-            height: auto !important;
-            min-height: 100vh;
-            overflow-y: auto !important;
-            padding: 0 !important;
-        }
-
-        .dashboard-container {
-            min-height: 100vh;
-        }
-        
-        .dashboard-main {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .card-finanzas {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-weight: 500;
-            color: #222222;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 0.75rem;
-            border: 1px solid #E5E5E5;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.95rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #6A1B1B;
-        }
-
-        .btn-registrar {
-            background: linear-gradient(135deg, #6A1B1B, #882A57);
-            color: white;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        .btn-registrar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
-        }
-
-        .totales-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .total-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .total-card.ingreso {
-            border-left: 5px solid #28a745;
-        }
-
-        .total-card.gasto {
-            border-left: 5px solid #dc3545;
-        }
-
-        .total-card.balance {
-            border-left: 5px solid #222222;
-        }
-
-        .total-icon {
-            font-size: 3rem;
-        }
-
-        .total-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .total-label {
-            font-size: 0.9rem;
-            color: #6c757d;
-            font-weight: 500;
-        }
-
-        .total-amount {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #222222;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .tabla-movimientos {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-        }
-
-        .tabla-movimientos thead {
-            background-color: #1B263B;
-            color: white;
-        }
-
-        .tabla-movimientos th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-        }
-
-        .tabla-movimientos td {
-            padding: 1rem;
-            border-bottom: 1px solid #E5E5E5;
-        }
-
-        .tabla-movimientos tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .badge-tipo {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: inline-block;
-        }
-
-        .badge-tipo.ingreso {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .badge-tipo.gasto {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .monto-ingreso {
-            color: #28a745;
-            font-weight: 600;
-        }
-
-        .monto-gasto {
-            color: #dc3545;
-            font-weight: 600;
-        }
-
-        /* Estilos para filtros */
-        .filtros-container {
-            background-color: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .filtros-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            align-items: end;
-        }
-
-        .filtro-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filtro-item label {
-            font-weight: 500;
-            color: #222222;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .filtro-input {
-            padding: 0.75rem;
-            border: 1px solid #E5E5E5;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.95rem;
-            transition: border-color 0.3s;
-        }
-
-        .filtro-input:focus {
-            outline: none;
-            border-color: #6A1B1B;
-        }
-
-        .filtro-botones {
-            display: flex;
-            gap: 0.5rem;
-            flex-direction: row;
-        }
-
-        .btn-filtrar,
-        .btn-limpiar {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            flex: 1;
-        }
-
-        .btn-filtrar {
-            background: linear-gradient(135deg, #6A1B1B, #882A57);
-            color: white;
-        }
-
-        .btn-filtrar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
-        }
-
-        .btn-limpiar {
-            background: #E5E5E5;
-            color: #222222;
-        }
-
-        .btn-limpiar:hover {
-            background: #d0d0d0;
-        }
-
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filtros-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filtro-botones {
-                flex-direction: column;
-            }
-
-            .dashboard-main {
-                padding: 1rem;
-            }
-
-            .totales-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-
-    <script>
+        <script>
         // Validación del formulario
         document.getElementById('formMovimiento').addEventListener('submit', function(e) {
             const monto = document.getElementById('monto').value;
@@ -625,13 +342,11 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
         });
 
         document.getElementById('categoriaFiltro').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') aplicarFiltros();
-        });
-    </script>
+    if (e.key === 'Enter') aplicarFiltros();
+});
+</script>
 
-    <?php
-    $base_path = '../../';
-    include '../../components/footer.php';
-    ?>
-</body>
-</html>
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../layouts/master.php';
+?>

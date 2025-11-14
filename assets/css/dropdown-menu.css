@@ -1,0 +1,147 @@
+/**
+ * Dropdown Menu Styles - Valora.vip
+ * Version: 2.0 - Optimizado y simplificado
+ */
+
+/* ===== DROPDOWN PRINCIPAL ===== */
+.dropdown-menu.user-dropdown-custom {
+    min-width: 220px !important;
+    max-width: 320px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Items del menu */
+.dropdown-menu.user-dropdown-custom .dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 0.65rem 1.2rem !important;
+    color: #222222 !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.9rem !important;
+    transition: all 0.15s ease !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-item:hover {
+    background-color: #f0f2f5 !important;
+}
+
+/* ===== SUBMENU EN CASCADA ===== */
+.dropdown-menu.user-dropdown-custom .dropdown-submenu {
+    position: relative;
+}
+
+/* Contenedor del submenu */
+.dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-menu {
+    position: absolute !important;
+    top: 0 !important;
+    right: 100% !important;
+    margin-top: -6px !important;
+    margin-right: -1px !important;
+    width: max-content !important;
+    max-width: 280px !important;
+    padding: 0.5rem 0 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+    display: none !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-submenu:hover > .dropdown-menu {
+    display: block !important;
+}
+
+/* Toggle de categoria */
+.dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-toggle {
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    width: 100% !important;
+    min-width: 200px !important;
+    padding: 0.75rem 1.2rem 0.75rem 2.5rem !important;
+    margin: 0.2rem 0.5rem !important;
+    font-weight: 600 !important;
+    background-color: #fafafa !important;
+    border: 1px solid #f0f0f0 !important;
+    border-radius: 4px !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-toggle:hover {
+    background-color: #f0f2f5 !important;
+}
+
+/* Flecha de categoria */
+.dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-toggle::before {
+    content: '\2039' !important;
+    position: absolute !important;
+    left: 0.8rem !important;
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    color: #6A1B1B !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-toggle::after {
+    display: none !important;
+}
+
+/* Texto de categoria */
+.dropdown-menu.user-dropdown-custom .category-name {
+    text-transform: uppercase !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.5px !important;
+    color: #555 !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-toggle:hover .category-name {
+    color: #000 !important;
+}
+
+/* Items dentro del submenu */
+.dropdown-menu.user-dropdown-custom .dropdown-submenu .dropdown-menu .dropdown-item {
+    padding: 0.65rem 1.2rem !important;
+    font-size: 0.88rem !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-submenu .dropdown-menu .dropdown-item:hover {
+    padding-left: 1.4rem !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-submenu .dropdown-menu .dropdown-item:first-child {
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-submenu .dropdown-menu .dropdown-item:last-child {
+    border-radius: 0 0 8px 8px !important;
+}
+
+/* ===== DIVIDER ===== */
+.dropdown-menu.user-dropdown-custom .dropdown-divider {
+    margin: 0.5rem 0 !important;
+    background-color: #E5E5E5 !important;
+}
+
+/* ===== LOGOUT ===== */
+.dropdown-menu.user-dropdown-custom .dropdown-item.text-danger {
+    color: #dc3545 !important;
+    font-weight: 500 !important;
+}
+
+.dropdown-menu.user-dropdown-custom .dropdown-item.text-danger:hover {
+    background-color: #fff5f5 !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .dropdown-menu.user-dropdown-custom {
+        min-width: 260px !important;
+    }
+    
+    .dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-menu {
+        position: static !important;
+        margin-left: 1rem !important;
+    }
+}

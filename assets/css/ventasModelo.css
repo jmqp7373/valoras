@@ -1,0 +1,244 @@
+/**
+ * Estilos para Vista de Ventas por Modelo
+ * Proyecto: Valora.vip
+ */
+
+.ventas-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px 40px;
+}
+
+.filter-section {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+}
+
+.filter-section label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    display: block;
+    font-size: 15px;
+}
+
+.filter-section select {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #fafafa;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.filter-section select:focus {
+    outline: none;
+    border-color: #882A57;
+    box-shadow: 0 0 0 3px rgba(136, 42, 87, 0.1);
+    background-color: white;
+}
+
+.btn-consultar {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-consultar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(136, 42, 87, 0.3);
+}
+
+.modelo-info {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    border-left: 5px solid #882A57;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.modelo-info h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modelo-info p {
+    margin: 8px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.total-badge {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 18px;
+    display: inline-block;
+    margin-top: 15px;
+    box-shadow: 0 3px 10px rgba(136, 42, 87, 0.3);
+}
+
+.ventas-table-container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow-x: auto;
+}
+
+.ventas-table-container h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.ventas-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ventas-table thead {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    color: white;
+}
+
+.ventas-table th {
+    padding: 16px 18px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ventas-table th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.ventas-table th:last-child {
+    border-top-right-radius: 8px;
+}
+
+.ventas-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+    font-size: 14px;
+}
+
+.ventas-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.ventas-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.ventas-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.amount {
+    font-weight: 700;
+    color: #28a745;
+    font-size: 16px;
+}
+
+.alert {
+    padding: 18px 24px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.alert-warning {
+    background-color: #fff8e1;
+    border-left: 4px solid #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    color: #0c5460;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 50px 20px;
+    color: #999;
+    font-size: 16px;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 28px;
+    background: white;
+    color: #882A57;
+    border: 2px solid #882A57;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 15px;
+}
+
+.back-button:hover {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(136, 42, 87, 0.3);
+}
+
+.btn-importar {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 15px;
+}
+
+.btn-importar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-importar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#resultadoImportacion {
+    margin-top: 20px;
+}

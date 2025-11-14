@@ -1217,6 +1217,38 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                     <!-- Las sugerencias aparecerán aquí -->
                 </div>
                 
+                <!-- Opción manual para ingresar nombre de usuario personalizado -->
+                <div style="margin: 30px 0 25px; text-align: center;">
+                    <div style="max-width: 450px; margin: 0 auto;">
+                        <p style="color: #666; font-size: 14px; margin-bottom: 15px; font-weight: 500;">
+                            ¿Ninguna opción te convenció?<br>Crea tu propio nombre de usuario:
+                        </p>
+                        <div style="position: relative; display: flex; gap: 10px; align-items: center;">
+                            <input 
+                                type="text" 
+                                id="customUsernameInput" 
+                                placeholder="Escribe tu nombre de usuario aquí..." 
+                                style="flex: 1; padding: 14px 16px; border: 2px solid #ee6f92; border-radius: 12px; font-size: 16px; font-family: 'Poppins', sans-serif; background-color: #fafafa; transition: all 0.3s ease;"
+                                onfocus="this.style.borderColor='#882A57'; this.style.backgroundColor='white';"
+                                onblur="this.style.borderColor='#ee6f92'; this.style.backgroundColor='#fafafa';"
+                                oninput="handleCustomUsernameInput(this.value)"
+                            >
+                            <button 
+                                type="button" 
+                                id="useCustomBtn"
+                                onclick="useCustomUsername()"
+                                style="padding: 14px 20px; background: linear-gradient(135deg, #ee6f92, #882A57); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; opacity: 0.5; pointer-events: none;"
+                                disabled
+                            >
+                                ✓ Usar este
+                            </button>
+                        </div>
+                        <p id="customUsernameHint" style="color: #999; font-size: 12px; margin-top: 8px; min-height: 18px;">
+                            Mínimo 4 caracteres, solo letras, números y guiones bajos
+                        </p>
+                    </div>
+                </div>
+                
                 <button type="button" class="continue-btn" id="checkAvailabilityBtn" style="display: none;">
                     🔍 Verificar Disponibilidad
                 </button>
@@ -1935,7 +1967,10 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                             // Mostrar explicación personalizada del nombre SIN cambiar scroll
                             showNameAnalysis(cleanName);
                             
-                            document.getElementById('checkAvailabilityBtn').style.display = 'block';
+                            // Actualizar el botón de verificar disponibilidad con el nombre seleccionado
+                            const checkBtn = document.getElementById('checkAvailabilityBtn');
+                            checkBtn.style.display = 'block';
+                            checkBtn.textContent = `🔍 Verificar Disponibilidad de "${cleanName}"`;
                         });
                         
                         usernameGrid.appendChild(div);
@@ -2066,7 +2101,11 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                             });
                             this.classList.add('selected');
                             selectedUsername = cleanName;
-                            document.getElementById('checkAvailabilityBtn').style.display = 'block';
+                            
+                            // Actualizar el botón de verificar disponibilidad con el nombre seleccionado
+                            const checkBtn = document.getElementById('checkAvailabilityBtn');
+                            checkBtn.style.display = 'block';
+                            checkBtn.textContent = `🔍 Verificar Disponibilidad de "${cleanName}"`;
                         });
                         
                         usernameGrid.appendChild(div);
@@ -2253,6 +2292,96 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             document.getElementById('continueBtn').style.display = 'none';
         });
 
+        // ============================================
+        // FUNCIONES PARA NOMBRE DE USUARIO PERSONALIZADO
+        // ============================================
+        
+        function handleCustomUsernameInput(value) {
+            const useCustomBtn = document.getElementById('useCustomBtn');
+            const customUsernameHint = document.getElementById('customUsernameHint');
+            const cleanValue = value.trim();
+            
+            // Validar nombre de usuario
+            const isValid = /^[a-zA-Z0-9_]{4,15}$/.test(cleanValue);
+            
+            if (cleanValue.length === 0) {
+                customUsernameHint.textContent = 'Mínimo 4 caracteres, solo letras, números y guiones bajos';
+                customUsernameHint.style.color = '#999';
+                useCustomBtn.style.opacity = '0.5';
+                useCustomBtn.style.pointerEvents = 'none';
+                useCustomBtn.disabled = true;
+            } else if (cleanValue.length < 4) {
+                customUsernameHint.textContent = '❌ Muy corto (mínimo 4 caracteres)';
+                customUsernameHint.style.color = '#dc3545';
+                useCustomBtn.style.opacity = '0.5';
+                useCustomBtn.style.pointerEvents = 'none';
+                useCustomBtn.disabled = true;
+            } else if (cleanValue.length > 15) {
+                customUsernameHint.textContent = '❌ Muy largo (máximo 15 caracteres)';
+                customUsernameHint.style.color = '#dc3545';
+                useCustomBtn.style.opacity = '0.5';
+                useCustomBtn.style.pointerEvents = 'none';
+                useCustomBtn.disabled = true;
+            } else if (!isValid) {
+                customUsernameHint.textContent = '❌ Solo se permiten letras, números y guiones bajos';
+                customUsernameHint.style.color = '#dc3545';
+                useCustomBtn.style.opacity = '0.5';
+                useCustomBtn.style.pointerEvents = 'none';
+                useCustomBtn.disabled = true;
+            } else {
+                customUsernameHint.textContent = '✓ Nombre válido, haz clic en "Usar este" para continuar';
+                customUsernameHint.style.color = '#28a745';
+                useCustomBtn.style.opacity = '1';
+                useCustomBtn.style.pointerEvents = 'auto';
+                useCustomBtn.disabled = false;
+            }
+        }
+        
+        function useCustomUsername() {
+            const customInput = document.getElementById('customUsernameInput');
+            const customValue = customInput.value.trim();
+            
+            if (!customValue || customValue.length < 4) {
+                alert('Por favor ingresa un nombre de usuario válido (mínimo 4 caracteres)');
+                return;
+            }
+            
+            // Validar formato
+            if (!/^[a-zA-Z0-9_]{4,15}$/.test(customValue)) {
+                alert('El nombre de usuario solo puede contener letras, números y guiones bajos');
+                return;
+            }
+            
+            // Deseleccionar cualquier nombre de las sugerencias
+            const allItems = document.querySelectorAll('.username-item');
+            allItems.forEach(item => item.classList.remove('selected'));
+            
+            // Ocultar análisis de nombres de sugerencias
+            const nameAnalysisContainer = document.getElementById('nameAnalysisContainer');
+            if (nameAnalysisContainer) {
+                nameAnalysisContainer.style.display = 'none';
+            }
+            
+            // Asignar el nombre personalizado
+            selectedUsername = customValue;
+            
+            // Mostrar botón de verificar disponibilidad
+            const checkBtn = document.getElementById('checkAvailabilityBtn');
+            checkBtn.style.display = 'block';
+            checkBtn.textContent = `🔍 Verificar Disponibilidad de "${customValue}"`;
+            
+            // Limpiar el campo y resetear el botón
+            customInput.value = '';
+            const useCustomBtn = document.getElementById('useCustomBtn');
+            useCustomBtn.style.opacity = '0.5';
+            useCustomBtn.style.pointerEvents = 'none';
+            useCustomBtn.disabled = true;
+            document.getElementById('customUsernameHint').textContent = 'Mínimo 4 caracteres, solo letras, números y guiones bajos';
+            document.getElementById('customUsernameHint').style.color = '#999';
+            
+            // Scroll suave hacia el botón de verificar
+            checkBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
     </script>
 

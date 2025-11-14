@@ -1,0 +1,57 @@
+/**
+ * Master Layout Styles - Valora.vip
+ * Estilos globales para el sistema de layout maestro
+ */
+
+/* ============================================
+   ESTILOS GLOBALES DEL BODY
+   ============================================ */
+body {
+    background-color: #F8F9FA;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ============================================
+   CONTENEDOR PRINCIPAL ESTANDARIZADO
+   ============================================ */
+.dashboard-main {
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 40px;
+    box-sizing: border-box;
+}
+
+/* Para pantallas pequeñas, reducir el padding lateral */
+@media (max-width: 768px) {
+    .dashboard-main {
+        padding: 20px;
+    }
+}
+
+/* ============================================
+   CARDS Y TARJETAS
+   ============================================ */
+.dashboard-main .card {
+    max-width: 100%;
+}
+
+/* ============================================
+   GRIDS RESPONSIVOS ESTANDARIZADOS
+   ============================================ */
+.dashboard-main .settings-grid,
+.dashboard-main .dashboard-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Para pantallas muy pequeñas, usar una sola columna */
+@media (max-width: 576px) {
+    .dashboard-main .settings-grid,
+    .dashboard-main .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

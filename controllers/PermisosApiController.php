@@ -90,7 +90,7 @@ try {
             'clave' => $clave,
             'ruta' => $rutaCompleta,
             'rutaMostrar' => $rutaMostrar,
-            'nombreDescriptivo' => $data['nombre_descriptivo'] ?? '',
+            'nombreDescriptivo' => $data['titulo'] ?? '',
             'categoria' => $categoria,
             'archivoExiste' => $data['archivo_existe'] ?? true,
             'exento' => $data['exento'] ?? 0

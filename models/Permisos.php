@@ -20,7 +20,7 @@ class Permisos {
      */
     public function obtenerRoles() {
         try {
-            $sql = "SELECT id, nombre, descripcion FROM roles ORDER BY id ASC";
+            $sql = "SELECT id, nombre, descripcion FROM roles ORDER BY nivel_orden ASC";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -110,10 +110,10 @@ class Permisos {
             // Primero escanear archivos físicos para sincronizar
             $modulosArchivos = $this->obtenerModulos();
             
-            // Obtener TODOS los módulos de la BD ordenados alfabéticamente (excluyendo eliminados)
-            $sql = "SELECT clave, ruta_completa, nombre_descriptivo, categoria, exento 
+            // Obtener TODOS los módulos de la BD ordenados alfabéticamente
+            $sql = "SELECT clave, ruta_completa, titulo, categoria, exento 
                     FROM modulos 
-                    WHERE activo = 1 AND eliminado = 0
+                    WHERE activo = 1
                     ORDER BY categoria ASC, ruta_completa ASC";
             $stmt = $this->conn->query($sql);
             $modulosDB = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -124,7 +124,7 @@ class Permisos {
             foreach ($modulosDB as $moduloDB) {
                 $clave = $moduloDB['clave'];
                 $rutaDB = $moduloDB['ruta_completa'];
-                $nombreDescriptivo = $moduloDB['nombre_descriptivo'];
+                $titulo = $moduloDB['titulo'];
                 $exento = (int)$moduloDB['exento'];
                 
                 // Verificar si el archivo físico existe
@@ -134,7 +134,7 @@ class Permisos {
                 // Agregar módulo con información completa
                 $resultado[$clave] = [
                     'ruta' => $rutaDB,
-                    'nombre_descriptivo' => $nombreDescriptivo,
+                    'titulo' => $titulo,
                     'archivo_existe' => $archivoExiste,
                     'exento' => $exento
                 ];
@@ -148,29 +148,29 @@ class Permisos {
     }
     
     /**
-     * Actualizar nombre descriptivo de un módulo
+     * Actualizar título de un módulo
      */
     public function actualizarNombreDescriptivo($clave, $nombreDescriptivo) {
         try {
-            $sql = "UPDATE modulos SET nombre_descriptivo = ? WHERE clave = ?";
+            $sql = "UPDATE modulos SET titulo = ? WHERE clave = ?";
             $stmt = $this->conn->prepare($sql);
             return $stmt->execute([$nombreDescriptivo, $clave]);
         } catch (Exception $e) {
-            error_log("Error actualizando nombre descriptivo: " . $e->getMessage());
+            error_log("Error actualizando título: " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Marcar un módulo como eliminado
+     * Eliminar un módulo permanentemente
      */
     public function marcarComoEliminado($clave) {
         try {
-            $sql = "UPDATE modulos SET eliminado = 1, fecha_actualizacion = CURRENT_TIMESTAMP WHERE clave = ?";
+            $sql = "DELETE FROM modulos WHERE clave = ?";
             $stmt = $this->conn->prepare($sql);
             return $stmt->execute([$clave]);
         } catch (Exception $e) {
-            error_log("Error marcando módulo como eliminado: " . $e->getMessage());
+            error_log("Error eliminando módulo: " . $e->getMessage());
             return false;
         }
     }

@@ -27,7 +27,7 @@ const ICONOS_CATEGORIA = {
 let rolesData = [];
 let modulosData = [];
 let permisosData = {};
-let mostrarExentos = true; // Control de visibilidad de módulos exentos
+let mostrarExentos = false; // Ocultar exentos por defecto
 
 // Función principal de carga
 async function cargarPermisosAjax() {
@@ -47,6 +47,9 @@ async function cargarPermisosAjax() {
             modulos: data.modulos.length,
             permisos: Object.keys(data.permisos).length
         });
+        
+        console.log('📦 Sample de módulos:', data.modulos.slice(0, 2));
+        console.log('📦 Sample de permisos:', data.permisos);
         
         // Guardar datos globales
         rolesData = data.roles;
@@ -352,9 +355,9 @@ function toggleExentos() {
     const btnToggleExentos = document.getElementById('btnToggleExentos');
     if (btnToggleExentos) {
         // Actualizar texto del botón
-        const icono = mostrarExentos ? 'bi-eye-slash-fill' : 'bi-eye-fill';
+        const icono = mostrarExentos ? 'bi-eye-fill' : 'bi-eye-slash-fill';
         const texto = mostrarExentos ? 'Ocultar Exentos' : 'Mostrar Exentos';
-        btnToggleExentos.innerHTML = `<i class="bi ${icono} me-2"></i>${texto}`;
+        btnToggleExentos.innerHTML = `<i class="bi ${icono}" style="font-size: 0.9rem; margin-right: 6px;"></i>${texto}`;
     }
     
     console.log('🔄 Toggle exentos:', mostrarExentos ? 'MOSTRANDO' : 'OCULTANDO');
@@ -387,7 +390,7 @@ async function guardarNombreDescriptivo(inputElement) {
     try {
         const formData = new FormData();
         formData.append('clave', clave);
-        formData.append('nombre_descriptivo', nuevoNombre);
+        formData.append('titulo', nuevoNombre);
         formData.append('csrf_token', window.csrfToken);
         
         const response = await fetch('../../controllers/ModulosController.php', {

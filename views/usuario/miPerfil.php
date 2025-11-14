@@ -39,149 +39,165 @@ $dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado',
 $dias_seleccionados = $perfil['dias_descanso'] ?? [];
 $progreso = $perfil['progreso_perfil'] ?? 0;
 
-// Variables para el header
-$user_nombres = $_SESSION['user_nombres'] ?? '';
-$user_apellidos = $_SESSION['user_apellidos'] ?? '';
+// ============================================
+// OBTENER INFORMACIÓN DEL MÓDULO DESDE LA BD
+// ============================================
+try {
+    $pdo = getDBConnection();
+    $stmt = $pdo->prepare("SELECT titulo, subtitulo, icono FROM modulos WHERE ruta_completa = ? AND activo = 1 LIMIT 1");
+    $stmt->execute(['views\usuario\miPerfil.php']);
+    $modulo = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Error obteniendo módulo: " . $e->getMessage());
+    $modulo = null;
+}
+
+// ============================================
+// CONFIGURACIÓN PARA MASTER LAYOUT
+// ============================================
+
+// Meta información de la página
+$page_title = "Mi Perfil - Valora";
+
+// Título, subtítulo e icono desde la base de datos
+$titulo_pagina = $modulo['titulo'] ?? 'Mi Perfil';
+$subtitulo_pagina = $modulo['subtitulo'] ?? 'Completa tu información personal y profesional';
+$icono_pagina = $modulo['icono'] ?? '👤';
+
+// Variables para header.php
+$logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
+$home_path = '../../index.php';
+$profile_path = '../usuario/miPerfil.php';
+$settings_path = '../usuario/configuracion.php';
+$logout_path = '../../controllers/login/logout.php';
+
+// Variables para breadcrumbs.php
+$breadcrumbs = [
+    ['label' => 'Dashboard', 'url' => '../../index.php'],
+    ['label' => 'Mi Perfil', 'url' => null]
+];
+
+// CSS adicional específico de esta página
+$additional_css = [];
+
+// JS adicional específico de esta página
+$additional_js = [];
+
+// ============================================
+// CAPTURAR CONTENIDO DE LA PÁGINA
+// ============================================
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - Valora</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="dashboard-container">
-        <?php
-        $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
-        $logout_path = '../../controllers/login/logout.php';
-        $profile_path = '../../views/usuario/miPerfil.php';
-        $home_path = '../../index.php';
-        $settings_path = '../../views/usuario/configuracion.php';
-        include '../../components/header/header.php';
-        ?>
 
-        <main class="dashboard-main">
-            <!-- Encabezado de la página -->
-            <div class="page-header">
-                <div>
-                    <h1>👤 Mi Perfil</h1>
-                    <p class="subtitle">Completa tu información personal y profesional</p>
-                </div>
-                <a href="../../index.php" class="btn-back">← Volver al Dashboard</a>
+<main class="dashboard-main">
+    <!-- Barra de progreso del perfil -->
+    <div class="card-progreso">
+        <div class="progreso-header">
+            <div>
+                <h3>Progreso del Perfil</h3>
+                <p>Completa tu información para acceder a todas las funcionalidades</p>
             </div>
-
-            <!-- Barra de progreso del perfil -->
-            <div class="card-progreso">
-                <div class="progreso-header">
-                    <div>
-                        <h3>Progreso del Perfil</h3>
-                        <p>Completa tu información para acceder a todas las funcionalidades</p>
-                    </div>
-                    <div class="progreso-circulo">
-                        <svg viewBox="0 0 100 100">
-                            <circle class="progreso-bg" cx="50" cy="50" r="40"></circle>
-                            <circle class="progreso-fill" cx="50" cy="50" r="40" 
-                                    style="stroke-dashoffset: calc(251 - (251 * <?php echo $progreso; ?>) / 100)"></circle>
-                        </svg>
-                        <span class="progreso-texto"><?php echo $progreso; ?>%</span>
-                    </div>
-                </div>
-                
-                <?php if ($progreso < 100): ?>
-                <div class="alerta-perfil">
-                    ⚠️ <strong>Perfil incompleto.</strong> 
-                    Completa la información faltante para activar todas las funciones del sistema.
-                </div>
-                <?php endif; ?>
+            <div class="progreso-circulo">
+                <svg viewBox="0 0 100 100">
+                    <circle class="progreso-bg" cx="50" cy="50" r="40"></circle>
+                    <circle class="progreso-fill" cx="50" cy="50" r="40" 
+                            style="stroke-dashoffset: calc(251 - (251 * <?php echo $progreso; ?>) / 100)"></circle>
+                </svg>
+                <span class="progreso-texto"><?php echo $progreso; ?>%</span>
             </div>
+        </div>
+        
+        <?php if ($progreso < 100): ?>
+        <div class="alerta-perfil">
+            ⚠️ <strong>Perfil incompleto.</strong> 
+            Completa la información faltante para activar todas las funciones del sistema.
+        </div>
+        <?php endif; ?>
+    </div>
 
-            <!-- Mensaje de confirmación/error -->
-            <?php if ($mensaje): ?>
-            <div class="mensaje mensaje-<?php echo $tipo_mensaje; ?>">
-                <?php echo htmlspecialchars($mensaje); ?>
-            </div>
-            <?php endif; ?>
+    <!-- Mensaje de confirmación/error -->
+    <?php if ($mensaje): ?>
+    <div class="mensaje mensaje-<?php echo $tipo_mensaje; ?>">
+        <?php echo htmlspecialchars($mensaje); ?>
+    </div>
+    <?php endif; ?>
 
-            <!-- Formulario del perfil -->
-            <form method="POST" enctype="multipart/form-data" class="form-perfil">
-                <input type="hidden" name="guardar_perfil" value="1">
+    <!-- Formulario del perfil -->
+    <form method="POST" enctype="multipart/form-data" class="form-perfil">
+        <input type="hidden" name="guardar_perfil" value="1">
 
-                <!-- Sección 1: Información Personal -->
-                <div class="card-seccion">
-                    <h2 class="seccion-titulo">1️⃣ Información Personal</h2>
-                    
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="nombres">Nombres <span class="requerido">*</span></label>
-                            <input type="text" id="nombres" name="nombres" 
-                                   value="<?php echo htmlspecialchars($perfil['nombres'] ?? ''); ?>" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="apellidos">Apellidos <span class="requerido">*</span></label>
-                            <input type="text" id="apellidos" name="apellidos" 
-                                   value="<?php echo htmlspecialchars($perfil['apellidos'] ?? ''); ?>" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="cedula">Cédula <span class="requerido">*</span></label>
-                            <input type="text" id="cedula" name="cedula" 
-                                   value="<?php echo htmlspecialchars($perfil['cedula'] ?? ''); ?>" readonly 
-                                   title="La cédula no puede modificarse">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="celular">Celular <span class="requerido">*</span></label>
-                            <input type="tel" id="celular" name="celular" 
-                                   value="<?php echo htmlspecialchars($perfil['celular'] ?? ''); ?>" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="fecha_de_nacimiento">Fecha de Nacimiento</label>
-                            <input type="date" id="fecha_de_nacimiento" name="fecha_de_nacimiento" 
-                                   value="<?php echo htmlspecialchars($perfil['fecha_de_nacimiento'] ?? ''); ?>">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="tipo_sangre">Tipo de Sangre</label>
-                            <select id="tipo_sangre" name="tipo_sangre">
-                                <option value="">Seleccionar...</option>
-                                <?php
-                                $tipos_sangre = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
-                                foreach ($tipos_sangre as $tipo) {
-                                    $selected = ($perfil['tipo_sangre'] ?? '') === $tipo ? 'selected' : '';
-                                    echo "<option value=\"$tipo\" $selected>$tipo</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ciudad">Ciudad</label>
-                            <input type="text" id="ciudad" name="ciudad" 
-                                   value="<?php echo htmlspecialchars($perfil['ciudad'] ?? ''); ?>">
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="direccion">Dirección de Residencia</label>
-                            <input type="text" id="direccion" name="direccion" 
-                                   value="<?php echo htmlspecialchars($perfil['direccion'] ?? ''); ?>">
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="email">Correo Electrónico <span class="requerido">*</span></label>
-                            <input type="email" id="email" name="email" 
-                                   value="<?php echo htmlspecialchars($perfil['email'] ?? ''); ?>" required>
-                        </div>
-                    </div>
+        <!-- Sección 1: Información Personal -->
+        <div class="card-seccion">
+            <h2 class="seccion-titulo">1️⃣ Información Personal</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nombres">Nombres <span class="requerido">*</span></label>
+                    <input type="text" id="nombres" name="nombres" 
+                           value="<?php echo htmlspecialchars($perfil['nombres'] ?? ''); ?>" required>
                 </div>
 
-                <!-- Sección 2: Contacto de Emergencia -->
-                <div class="card-seccion">
+                <div class="form-group">
+                    <label for="apellidos">Apellidos <span class="requerido">*</span></label>
+                    <input type="text" id="apellidos" name="apellidos" 
+                           value="<?php echo htmlspecialchars($perfil['apellidos'] ?? ''); ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cedula">Cédula <span class="requerido">*</span></label>
+                    <input type="text" id="cedula" name="cedula" 
+                           value="<?php echo htmlspecialchars($perfil['cedula'] ?? ''); ?>" readonly 
+                   title="La cédula no puede modificarse">
+                </div>
+
+                <div class="form-group">
+                    <label for="celular">Celular <span class="requerido">*</span></label>
+                    <input type="tel" id="celular" name="celular" 
+                           value="<?php echo htmlspecialchars($perfil['celular'] ?? ''); ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_de_nacimiento">Fecha de Nacimiento</label>
+                    <input type="date" id="fecha_de_nacimiento" name="fecha_de_nacimiento" 
+                           value="<?php echo htmlspecialchars($perfil['fecha_de_nacimiento'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo_sangre">Tipo de Sangre</label>
+                    <select id="tipo_sangre" name="tipo_sangre">
+                        <option value="">Seleccionar...</option>
+                        <?php
+                        $tipos_sangre = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
+                        foreach ($tipos_sangre as $tipo) {
+                            $selected = ($perfil['tipo_sangre'] ?? '') === $tipo ? 'selected' : '';
+                            echo "<option value=\"$tipo\" $selected>$tipo</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ciudad">Ciudad</label>
+                    <input type="text" id="ciudad" name="ciudad" 
+                           value="<?php echo htmlspecialchars($perfil['ciudad'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="direccion">Dirección de Residencia</label>
+                    <input type="text" id="direccion" name="direccion" 
+                           value="<?php echo htmlspecialchars($perfil['direccion'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="email">Correo Electrónico <span class="requerido">*</span></label>
+                    <input type="email" id="email" name="email" 
+                           value="<?php echo htmlspecialchars($perfil['email'] ?? ''); ?>" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 2: Contacto de Emergencia -->
+        <div class="card-seccion">
                     <h2 class="seccion-titulo">2️⃣ Contacto de Emergencia</h2>
                     
                     <div class="form-grid">
@@ -341,63 +357,50 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
                             <label for="foto_cedula_reverso">Cédula - Lado Reverso <span class="requerido">*</span></label>
                             <input type="file" id="foto_cedula_reverso" name="foto_cedula_reverso" 
                                    accept="image/jpeg,image/png,application/pdf" onchange="previsualizarImagen(this, 'preview_foto_cedula_reverso')">
-                            <div class="preview-container">
-                                <img id="preview_foto_cedula_reverso" 
-                                     src="<?php echo !empty($perfil['foto_cedula_reverso']) ? '../../' . $perfil['foto_cedula_reverso'] : ''; ?>" 
-                                     alt="Vista previa" 
-                                     style="<?php echo !empty($perfil['foto_cedula_reverso']) ? '' : 'display:none'; ?>">
-                            </div>
+                        <div class="preview-container">
+                            <img id="preview_foto_cedula_reverso" 
+                                 src="<?php echo !empty($perfil['foto_cedula_reverso']) ? '../../' . $perfil['foto_cedula_reverso'] : ''; ?>" 
+                                 alt="Vista previa" 
+                                 style="<?php echo !empty($perfil['foto_cedula_reverso']) ? '' : 'display:none'; ?>">
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Sección 8: Notas del Artista -->
-                <div class="card-seccion">
-                    <h2 class="seccion-titulo">8️⃣ Notas del Artista</h2>
-                    
-                    <div class="form-group full-width">
-                        <label for="notas">Observaciones Personales</label>
-                        <textarea id="notas" name="notas" rows="5" 
-                                  placeholder="Espacio libre para notas, observaciones o información adicional relevante..."><?php echo htmlspecialchars($perfil['notas'] ?? ''); ?></textarea>
-                    </div>
-                </div>
+        <!-- Sección 8: Notas del Artista -->
+        <div class="card-seccion">
+            <h2 class="seccion-titulo">8️⃣ Notas del Artista</h2>
+            
+            <div class="form-group full-width">
+                <label for="notas">Observaciones Personales</label>
+                <textarea id="notas" name="notas" rows="5" 
+                          placeholder="Espacio libre para notas, observaciones o información adicional relevante..."><?php echo htmlspecialchars($perfil['notas'] ?? ''); ?></textarea>
+            </div>
+        </div>
 
-                <!-- Botón de Guardar -->
-                <div class="form-actions">
-                    <button type="submit" class="btn-guardar">
-                        💾 Guardar Cambios
-                    </button>
-                    <p class="nota-guardado">Los cambios se guardan automáticamente, incluso si faltan campos por completar</p>
-                </div>
-            </form>
-        </main>
+        <!-- Botón de Guardar -->
+        <div class="form-actions">
+            <button type="submit" class="btn-guardar">
+                💾 Guardar Cambios
+            </button>
+        </div>
+    </form>
+</main>
 
-        <?php
-        $base_path = '../../';
-        include '../../components/footer.php';
-        ?>
-    </div>
-
-    <style>
-        /* Reset del body */
-        body {
-            display: block !important;
-            height: auto !important;
-            min-height: 100vh;
-            overflow-y: auto !important;
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
+<style>
+    /* Reset del body */
+    body {
+        display: block !important;
+        height: auto !important;
+        min-height: 100vh;
+        overflow-y: auto !important;
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+    }
 
         .dashboard-container {
             min-height: 100vh;
-        }
-
-        .dashboard-main {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
         }
 
         /* Encabezado de página */
@@ -745,5 +748,11 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
             }
         });
     </script>
-</body>
-</html>
+
+<?php
+// Capturar el contenido generado
+$content = ob_get_clean();
+
+// Incluir el master layout
+include __DIR__ . '/../layouts/master.php';
+?>

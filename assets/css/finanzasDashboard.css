@@ -1,0 +1,340 @@
+/**
+ * Estilos para Dashboard de Finanzas
+ * Valora.vip
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Reset de estilos del body para permitir scroll */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    display: block !important;
+    height: auto !important;
+    min-height: 100vh;
+    overflow-y: auto !important;
+    padding: 0 !important;
+}
+
+.dashboard-container {
+    min-height: 100vh;
+}
+
+.dashboard-main {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.card-finanzas {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #222222;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #6A1B1B;
+}
+
+.btn-registrar {
+    background: linear-gradient(135deg, #6A1B1B, #882A57);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+    width: auto;
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+.btn-registrar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
+}
+
+.totales-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.total-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.total-card.ingreso {
+    border-left: 5px solid #28a745;
+}
+
+.total-card.gasto {
+    border-left: 5px solid #dc3545;
+}
+
+.total-card.balance {
+    border-left: 5px solid #222222;
+}
+
+.total-icon {
+    font-size: 3rem;
+}
+
+.total-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.total-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.total-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #222222;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.tabla-movimientos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.tabla-movimientos thead {
+    background-color: #1B263B;
+    color: white;
+}
+
+.tabla-movimientos th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.tabla-movimientos td {
+    padding: 1rem;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.tabla-movimientos tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge-tipo {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.badge-tipo.ingreso {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-tipo.gasto {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.monto-ingreso {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.monto-gasto {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Estilos para filtros */
+.filtros-container {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
+}
+
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.filtro-item label {
+    font-weight: 500;
+    color: #222222;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.filtro-input {
+    padding: 0.75rem;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+}
+
+.filtro-input:focus {
+    outline: none;
+    border-color: #6A1B1B;
+}
+
+.filtro-botones {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: row;
+}
+
+.btn-filtrar,
+.btn-limpiar {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+}
+
+.btn-filtrar {
+    background: linear-gradient(135deg, #6A1B1B, #882A57);
+    color: white;
+}
+
+.btn-filtrar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
+}
+
+.btn-limpiar {
+    background: #E5E5E5;
+    color: #222222;
+}
+
+.btn-limpiar:hover {
+    background: #d0d0d0;
+}
+
+.volver-btn {
+    background: #6A1B1B;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.volver-btn:hover {
+    background: #882A57;
+    transform: translateY(-2px);
+}
+
+.mensaje-exito {
+    background: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+}
+
+.mensaje-error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filtro-botones {
+        flex-direction: column;
+    }
+
+    .dashboard-main {
+        padding: 1rem;
+    }
+
+    .totales-grid {
+        grid-template-columns: 1fr;
+    }
+}

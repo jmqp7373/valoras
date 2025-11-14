@@ -31,7 +31,7 @@ class VentasController {
                         u.apellidos,
                         c.usuario as credencial_usuario,
                         c.email_de_registro as credencial_email
-                    FROM ventas v
+                    FROM ventas_strip v
                     INNER JOIN usuarios u ON v.id_usuario = u.id_usuario
                     INNER JOIN credenciales c ON v.id_credencial = c.id_credencial
                     WHERE v.id_usuario = :usuario_id
@@ -99,7 +99,7 @@ class VentasController {
     public function getTotalVentasUsuario($usuario_id) {
         try {
             $sql = "SELECT SUM(total_earnings) as total 
-                    FROM ventas 
+                    FROM ventas_strip 
                     WHERE id_usuario = :usuario_id";
             
             $stmt = $this->db->prepare($sql);
@@ -273,7 +273,7 @@ class VentasController {
     private function insertarVenta($usuario_id, $credencial_id, $period_start, $period_end, $total_earnings) {
         try {
             // Verificar si ya existe el registro para evitar duplicados
-            $sqlCheck = "SELECT COUNT(*) as count FROM ventas 
+            $sqlCheck = "SELECT COUNT(*) as count FROM ventas_strip 
                          WHERE id_usuario = :usuario_id 
                          AND id_credencial = :credencial_id 
                          AND period_start = :period_start 
@@ -290,7 +290,7 @@ class VentasController {
             $exists = $stmtCheck->fetch(PDO::FETCH_ASSOC);
             if ($exists['count'] > 0) {
                 // Ya existe, actualizar en lugar de insertar
-                $sqlUpdate = "UPDATE ventas 
+                $sqlUpdate = "UPDATE ventas_strip 
                              SET total_earnings = :total_earnings,
                                  updated_at = CURRENT_TIMESTAMP
                              WHERE id_usuario = :usuario_id 
@@ -309,7 +309,7 @@ class VentasController {
             }
             
             // Insertar nuevo registro
-            $sql = "INSERT INTO ventas (id_usuario, id_credencial, period_start, period_end, total_earnings) 
+            $sql = "INSERT INTO ventas_strip (id_usuario, id_credencial, period_start, period_end, total_earnings) 
                     VALUES (:usuario_id, :credencial_id, :period_start, :period_end, :total_earnings)";
             
             $stmt = $this->db->prepare($sql);

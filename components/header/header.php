@@ -26,6 +26,158 @@ $iniciales = '';
 if (!empty($user_nombres)) $iniciales .= strtoupper(substr($user_nombres, 0, 1));
 if (!empty($user_apellidos)) $iniciales .= strtoupper(substr($user_apellidos, 0, 1));
 if (empty($iniciales)) $iniciales = 'U';
+
+// Calcular la ruta del CSS basándose en la misma lógica que $logo_path
+// Esto asegura que el CSS use la misma profundidad que las imágenes
+if (strpos($logo_path, '../../') === 0) {
+    $css_path = '../../assets/css/dropdown-menu.css';
+    $base_controller_path = '../../controllers/';
+} elseif (strpos($logo_path, '../') === 0) {
+    $css_path = '../assets/css/dropdown-menu.css';
+    $base_controller_path = '../controllers/';
+} else {
+    $css_path = 'assets/css/dropdown-menu.css';
+    $base_controller_path = 'controllers/';
+}
+
+// ============================================
+// OBTENER MÓDULOS DINÁMICAMENTE DESDE LA BD
+// ============================================
+$modulos_por_categoria = [];
+$es_superadmin = false;
+$rol_actual = null;
+$todos_roles = [];
+
+try {
+    // Detectar la conexión disponible
+    $dbConnection = null;
+    if (isset($pdo) && $pdo instanceof PDO) {
+        $dbConnection = $pdo;
+    } elseif (isset($db) && $db instanceof PDO) {
+        $dbConnection = $db;
+    } else {
+        // Intentar crear conexión si no existe
+        if (file_exists(__DIR__ . '/../../config/database.php')) {
+            require_once __DIR__ . '/../../config/database.php';
+            $dbConnection = getDBConnection();
+        }
+    }
+    
+    if ($dbConnection) {
+        // Verificar si el usuario es Superadmin (nivel_orden = 1)
+        $user_id = $_SESSION['user_id'] ?? null;
+        if ($user_id) {
+            $stmt = $dbConnection->prepare("
+                SELECT r.id, r.nombre, r.nivel_orden, u.nivel_orden as usuario_nivel_orden
+                FROM usuarios u 
+                JOIN roles r ON u.id_rol = r.id 
+                WHERE u.id_usuario = ?
+            ");
+            $stmt->execute([$user_id]);
+            $rol_actual = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Usuario es Superadmin si:
+            // 1. Tiene nivel_orden = 1 en usuarios O en roles
+            // 2. O tiene un rol_original_id guardado en sesión (está en modo prueba)
+            $es_superadmin_original = ($rol_actual && ($rol_actual['usuario_nivel_orden'] == 1 || $rol_actual['nivel_orden'] == 1));
+            $esta_en_modo_prueba = isset($_SESSION['rol_original_id']);
+            
+            if ($es_superadmin_original || $esta_en_modo_prueba) {
+                $es_superadmin = true;
+                
+                // Obtener todos los roles para el dropdown
+                $stmt = $dbConnection->query("SELECT id, nombre, nivel_orden FROM roles ORDER BY nivel_orden ASC");
+                $todos_roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+        
+        // ============================================
+        // VERIFICACIÓN DE PERMISOS DE ACCESO AL MÓDULO
+        // ============================================
+        if ($user_id && $rol_actual) {
+            // Obtener la ruta actual del archivo que está siendo ejecutado
+            $archivo_actual = $_SERVER['PHP_SELF'] ?? '';
+            
+            error_log("[HEADER PERMISOS] Archivo actual: " . $archivo_actual);
+            
+            // Convertir la ruta a formato relativo desde views/
+            // Ejemplo: /valora.vip/views/finanzas/finanzasDashboard.php -> views\finanzas\finanzasDashboard.php
+            if (preg_match('/views\/(.+\.php)/', $archivo_actual, $matches)) {
+                $ruta_relativa = 'views\\' . str_replace('/', '\\', $matches[1]);
+                
+                error_log("[HEADER PERMISOS] Ruta relativa detectada: " . $ruta_relativa);
+                
+                // Buscar el módulo en la BD
+                $stmt = $dbConnection->prepare("SELECT id, clave, exento FROM modulos WHERE ruta_completa = ? LIMIT 1");
+                $stmt->execute([$ruta_relativa]);
+                $modulo_actual = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($modulo_actual) {
+                    error_log("[HEADER PERMISOS] Módulo encontrado: " . $modulo_actual['clave'] . " | Exento: " . ($modulo_actual['exento'] ? 'SÍ' : 'NO'));
+                    
+                    // Si el módulo NO es exento, verificar permisos
+                    if (!$modulo_actual['exento']) {
+                        // Usar rol de prueba si existe, sino el rol real
+                        $id_rol_a_verificar = $_SESSION['rol_prueba_id'] ?? $rol_actual['id'];
+                        
+                        error_log("[HEADER PERMISOS] Verificando permisos para rol ID: " . $id_rol_a_verificar);
+                        
+                        // Verificar si tiene permiso de VER este módulo
+                        $stmt = $dbConnection->prepare("
+                            SELECT puede_ver 
+                            FROM roles_permisos 
+                            WHERE id_rol = ? AND modulo = ?
+                        ");
+                        $stmt->execute([$id_rol_a_verificar, $modulo_actual['clave']]);
+                        $permiso = $stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        error_log("[HEADER PERMISOS] Permiso encontrado: " . ($permiso ? 'SÍ' : 'NO') . " | Puede ver: " . ($permiso && $permiso['puede_ver'] ? 'SÍ' : 'NO'));
+                        
+                        // Si NO tiene permiso o el permiso está en 0, redirigir
+                        if (!$permiso || !$permiso['puede_ver']) {
+                            error_log("[HEADER PERMISOS] ❌ ACCESO DENEGADO - Redirigiendo a acceso_denegado.php");
+                            
+                            // Calcular ruta a acceso_denegado.php según profundidad actual
+                            $profundidad = substr_count($archivo_actual, '/') - 2; // Restar /valora.vip/
+                            $ruta_denegado = str_repeat('../', $profundidad) . 'views/admin/acceso_denegado.php';
+                            
+                            header('Location: ' . $ruta_denegado);
+                            exit();
+                        } else {
+                            error_log("[HEADER PERMISOS] ✅ ACCESO PERMITIDO");
+                        }
+                    }
+                } else {
+                    error_log("[HEADER PERMISOS] ⚠️ Módulo NO encontrado en BD para ruta: " . $ruta_relativa);
+                }
+            } else {
+                error_log("[HEADER PERMISOS] ⚠️ Ruta no coincide con patrón views/");
+            }
+        }
+        
+        // Obtener todos los módulos activos ordenados por categoría y orden
+        $stmt = $dbConnection->prepare("
+            SELECT clave, titulo, categoria, ruta_completa, icono 
+            FROM modulos 
+            WHERE activo = 1 
+            ORDER BY categoria, titulo
+        ");
+        $stmt->execute();
+        $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Agrupar módulos por categoría
+        foreach ($modulos as $modulo) {
+            $categoria = $modulo['categoria'] ?? 'General';
+            if (!isset($modulos_por_categoria[$categoria])) {
+                $modulos_por_categoria[$categoria] = [];
+            }
+            $modulos_por_categoria[$categoria][] = $modulo;
+        }
+    }
+} catch (Exception $e) {
+    // Si hay error, continuar sin módulos dinámicos
+    error_log("Error al cargar módulos en header: " . $e->getMessage());
+}
 ?>
 <header class="dashboard-header">
     <div class="header-left">
@@ -39,56 +191,85 @@ if (empty($iniciales)) $iniciales = 'U';
         </a>
     </div>
     
-    <div class="user-menu-container">
-        <button class="user-menu-btn" id="userMenuBtn" aria-label="Menú de usuario">
-            <div class="user-avatar"><?php echo htmlspecialchars($iniciales); ?></div>
-            <span class="user-name"><?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></span>
-            <svg class="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                <path d="M6 9L1 4h10L6 9z"/>
-            </svg>
-        </button>
+    <div class="header-right">
+        <!-- Dropdown de Máscara de Rol (componente separado) -->
+        <?php include __DIR__ . '/dropdownMascara.php'; ?>
         
-        <div class="user-dropdown" id="userDropdown">
-            <div class="dropdown-header">
+        <!-- Menú de usuario -->
+        <div class="dropdown">
+            <button class="user-menu-btn dropdown-toggle" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="user-avatar"><?php echo htmlspecialchars($iniciales); ?></div>
+                <span class="user-name"><?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></span>
+            </button>
+        
+        <ul class="dropdown-menu dropdown-menu-end user-dropdown-custom" aria-labelledby="userMenuDropdown">
+            <li class="dropdown-header-custom">
                 <div class="user-avatar-large"><?php echo htmlspecialchars($iniciales); ?></div>
                 <div class="user-details">
                     <p class="user-full-name"><?php echo htmlspecialchars($user_nombres . ' ' . $user_apellidos); ?></p>
                     <p class="user-email"><?php echo htmlspecialchars($_SESSION['user_email'] ?? 'usuario@valora.vip'); ?></p>
                 </div>
-            </div>
+            </li>
             
-            <div class="dropdown-divider"></div>
+            <li><hr class="dropdown-divider"></li>
             
-            <ul class="dropdown-menu">
-                <li>
-                    <a href="<?php echo htmlspecialchars($profile_path); ?>" class="dropdown-item">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 1.5c-2.67 0-8 1.34-8 4v1.5h16v-1.5c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                        <span>Mi Perfil</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo htmlspecialchars($settings_path); ?>" class="dropdown-item">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 10.5l-1.414 1.414L8 10.828l-2.086 2.086L4.5 11.5 6.586 9.414 4.5 7.328l1.414-1.414L8 7.999l2.086-2.085 1.414 1.414-2.086 2.086L11.5 11.5z"/>
-                            <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 01-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 01.872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 012.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 012.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 01.872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 01-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 01-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 100-5.86 2.929 2.929 0 000 5.858z"/>
-                        </svg>
-                        <span>Configuración</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo htmlspecialchars($logout_path); ?>" class="dropdown-item logout">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M10 3.5V2H2v12h8v-1.5H3.5v-9H10zM13.5 8l-3-3v2H6v2h4.5v2l3-3z"/>
-                        </svg>
-                        <span>Cerrar Sesión</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
+            <!-- Módulos dinámicos agrupados por categoría -->
+            <?php if (!empty($modulos_por_categoria)): ?>
+                <?php foreach ($modulos_por_categoria as $categoria => $modulos): ?>
+                    <?php if ($categoria !== 'login'): // Ocultar módulos de login del menú ?>
+                    <li class="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <span class="category-name"><?php echo htmlspecialchars(ucfirst($categoria)); ?></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <?php foreach ($modulos as $modulo): ?>
+                                <?php
+                                // Calcular ruta relativa desde el archivo actual
+                                $ruta_modulo = $modulo['ruta_completa'];
+                                // Si la ruta ya empieza con /, es absoluta desde el dominio
+                                if (strpos($ruta_modulo, '/') !== 0 && strpos($ruta_modulo, 'http') !== 0) {
+                                    // Es una ruta relativa desde la raíz del proyecto
+                                    $ruta_modulo = '../../' . $ruta_modulo;
+                                }
+                                ?>
+                                <li>
+                                    <a class="dropdown-item" href="<?php echo htmlspecialchars($ruta_modulo); ?>">
+                                        <?php if (!empty($modulo['icono'])): ?>
+                                            <span style="margin-right: 8px;"><?php echo htmlspecialchars($modulo['icono']); ?></span>
+                                        <?php endif; ?>
+                                        <?php echo htmlspecialchars($modulo['titulo']); ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+                
+                <li><hr class="dropdown-divider"></li>
+            <?php endif; ?>
+            
+            <!-- Opción de Cerrar Sesión -->
+            <li>
+                <a class="dropdown-item text-danger" href="<?php echo htmlspecialchars($logout_path); ?>">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 8px;">
+                        <path d="M10 3.5V2H2v12h8v-1.5H3.5v-9H10zM13.5 8l-3-3v2H6v2h4.5v2l3-3z"/>
+                    </svg>
+                    Cerrar Sesión
+                </a>
+            </li>
+        </ul>
     </div>
+    </div> <!-- Cierre de header-right -->
 </header>
+
+<!-- Dropdown Menu Styles -->
+<link rel="stylesheet" href="<?php echo $css_path; ?>?v=<?php echo filemtime(__DIR__ . '/../../assets/css/dropdown-menu.css'); ?>">
+
+<!-- Dropdown Máscara de Rol Styles -->
+<?php if ($es_superadmin): ?>
+<link rel="stylesheet" href="<?php echo str_replace('dropdown-menu.css', 'dropdownMascara.css', $css_path); ?>?v=<?php echo filemtime(__DIR__ . '/../../assets/css/dropdownMascara.css'); ?>">
+<?php endif; ?>
 
 <style>
     .dashboard-header {
@@ -100,7 +281,7 @@ if (empty($iniciales)) $iniciales = 'U';
         align-items: center;
         position: sticky;
         top: 0;
-        z-index: 1000;
+        z-index: 100;
         overflow: visible;
     }
     
@@ -141,6 +322,8 @@ if (empty($iniciales)) $iniciales = 'U';
     }
     
     .dashboard-header .logo {
+        max-width: 180px;
+        height: auto;
         cursor: pointer;
         transition: opacity 0.3s ease;
     }
@@ -149,29 +332,39 @@ if (empty($iniciales)) $iniciales = 'U';
         opacity: 0.8;
     }
     
+    /* Header Right - Contenedor de dropdowns */
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
     /* User Menu Container */
-    .user-menu-container {
+    .dropdown {
         position: relative;
-        overflow: visible;
     }
     
     /* User Menu Button */
     .user-menu-btn {
-        display: flex;
+        display: flex !important;
         align-items: center;
         gap: 0.75rem;
-        background: transparent;
-        border: 1px solid #E5E5E5;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
+        background: transparent !important;
+        border: 1px solid #E5E5E5 !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 50px !important;
         cursor: pointer;
         transition: all 0.3s;
         font-family: 'Poppins', sans-serif;
     }
     
     .user-menu-btn:hover {
-        background-color: #f8f9fa;
-        border-color: #6A1B1B;
+        background-color: #f8f9fa !important;
+        border-color: #6A1B1B !important;
+    }
+    
+    .user-menu-btn::after {
+        display: none !important;
     }
     
     /* User Avatar */
@@ -194,47 +387,15 @@ if (empty($iniciales)) $iniciales = 'U';
         font-weight: 500;
     }
     
-    .dropdown-icon {
-        transition: transform 0.3s;
-        color: #666;
-    }
-    
-    .user-menu-btn:hover .dropdown-icon {
-        color: #6A1B1B;
-    }
-    
-    /* Dropdown Menu */
-    .user-dropdown {
-        position: absolute;
-        top: calc(100% + 0.5rem);
-        right: 0;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        min-width: 280px;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.3s ease;
-        z-index: 1001;
-        max-height: none;
-        overflow: visible;
-        min-height: 300px;
-        height: auto;
-    }
-    
-    .user-dropdown.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-    
-    /* Dropdown Header */
-    .dropdown-header {
+    /* Dropdown Header Custom */
+    .dropdown-header-custom {
         padding: 1rem 1.5rem;
         display: flex;
         align-items: center;
         gap: 1rem;
+        border-bottom: 2px solid #E5E5E5;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px 12px 0 0 !important;
     }
     
     .user-avatar-large {
@@ -248,6 +409,7 @@ if (empty($iniciales)) $iniciales = 'U';
         justify-content: center;
         font-weight: 700;
         font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(106, 27, 27, 0.2);
     }
     
     .user-details {
@@ -269,78 +431,7 @@ if (empty($iniciales)) $iniciales = 'U';
         font-family: 'Poppins', sans-serif;
     }
     
-    /* Dropdown Divider */
-    .dropdown-divider {
-        height: 1px;
-        background-color: #E5E5E5;
-        margin: 0;
-    }
-    
-    /* Dropdown Menu Items */
-    .dropdown-menu {
-        list-style: none;
-        margin: 0;
-        padding: 0.5rem 0;
-        max-height: none !important;
-        height: auto !important;
-        overflow: visible !important;
-    }
-    
-    .dropdown-menu li {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-    
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1.5rem;
-        color: #222222 !important;
-        text-decoration: none;
-        transition: background-color 0.2s;
-        font-family: 'Poppins', sans-serif;
-        font-size: 0.95rem;
-    }
-    
-    .dropdown-item span {
-        color: #222222 !important;
-    }
-    
-    .dropdown-item svg {
-        fill: #222222 !important;
-        color: #222222 !important;
-    }
-    
-    .dropdown-item:hover {
-        background-color: #f8f9fa !important;
-    }
-    
-    .dropdown-item:hover span {
-        color: #222222 !important;
-    }
-    
-    .dropdown-item.logout {
-        color: #dc3545 !important;
-    }
-    
-    .dropdown-item.logout span {
-        color: #dc3545 !important;
-    }
-    
-    .dropdown-item.logout svg {
-        fill: #dc3545 !important;
-        color: #dc3545 !important;
-    }
-    
-    .dropdown-item.logout:hover {
-        background-color: #fff5f5;
-    }
-    
-    .dropdown-item svg {
-        flex-shrink: 0;
-    }
+    /* Nota: Los estilos del dropdown están en assets/css/dropdown-menu.css */
 
     @media (max-width: 768px) {
         .dashboard-header {
@@ -354,56 +445,56 @@ if (empty($iniciales)) $iniciales = 'U';
         .user-menu-btn {
             padding: 0.5rem;
         }
-        
-        .user-dropdown {
-            right: -1rem;
-            min-width: 260px;
-        }
     }
 </style>
 
 <script>
-    // Dropdown functionality
-    (function() {
-        const userMenuBtn = document.getElementById('userMenuBtn');
-        const userDropdown = document.getElementById('userDropdown');
+// ============================================
+// MANEJO DE SUBMENÚS EN CASCADA
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar los submenús en cascada
+    const dropdownSubmenus = document.querySelectorAll('.dropdown-submenu');
+    
+    dropdownSubmenus.forEach(function(submenu) {
+        const toggle = submenu.querySelector('.dropdown-toggle');
+        const submenuDropdown = submenu.querySelector('.dropdown-menu');
         
-        if (userMenuBtn && userDropdown) {
-            // Toggle dropdown
-            userMenuBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                userDropdown.classList.toggle('show');
-                
-                // Rotate icon
-                const icon = this.querySelector('.dropdown-icon');
-                if (icon) {
-                    icon.style.transform = userDropdown.classList.contains('show') 
-                        ? 'rotate(180deg)' 
-                        : 'rotate(0deg)';
+        if (toggle && submenuDropdown) {
+            // Desktop: mostrar en hover
+            submenu.addEventListener('mouseenter', function() {
+                if (window.innerWidth > 768) {
+                    submenuDropdown.classList.add('show');
                 }
             });
             
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.remove('show');
-                    const icon = userMenuBtn.querySelector('.dropdown-icon');
-                    if (icon) {
-                        icon.style.transform = 'rotate(0deg)';
-                    }
+            submenu.addEventListener('mouseleave', function() {
+                if (window.innerWidth > 768) {
+                    submenuDropdown.classList.remove('show');
                 }
             });
             
-            // Close dropdown when pressing Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && userDropdown.classList.contains('show')) {
-                    userDropdown.classList.remove('show');
-                    const icon = userMenuBtn.querySelector('.dropdown-icon');
-                    if (icon) {
-                        icon.style.transform = 'rotate(0deg)';
-                    }
+            // Mobile: toggle en click
+            toggle.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    submenuDropdown.classList.toggle('show');
                 }
             });
         }
-    })();
+    });
+    
+    // Cerrar submenús cuando se cierra el menú principal
+    const mainDropdown = document.getElementById('userMenuDropdown');
+    if (mainDropdown) {
+        mainDropdown.addEventListener('hidden.bs.dropdown', function() {
+            document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(function(submenu) {
+                submenu.classList.remove('show');
+            });
+        });
+    }
+});
 </script>
+
+</header>

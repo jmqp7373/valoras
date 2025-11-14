@@ -56,17 +56,17 @@ if (empty($clave)) {
 
 // Procesar según la acción
 if ($accion === 'marcar_eliminado') {
-    // Marcar módulo como eliminado
+    // Eliminar módulo permanentemente
     $resultado = $permisosModel->marcarComoEliminado($clave);
     
     if ($resultado) {
         echo json_encode([
             'success' => true,
-            'message' => 'Módulo marcado como eliminado correctamente'
+            'message' => 'Módulo eliminado correctamente'
         ]);
     } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al marcar módulo como eliminado']);
+        echo json_encode(['success' => false, 'message' => 'Error al eliminar módulo']);
     }
 } elseif ($accion === 'toggle_exento') {
     // Toggle estado exento
@@ -84,19 +84,19 @@ if ($accion === 'marcar_eliminado') {
         echo json_encode(['success' => false, 'message' => 'Error al actualizar estado exento']);
     }
 } else {
-    // Acción por defecto: actualizar nombre descriptivo
-    $nombreDescriptivo = trim($_POST['nombre_descriptivo'] ?? '');
-    $resultado = $permisosModel->actualizarNombreDescriptivo($clave, $nombreDescriptivo);
+    // Acción por defecto: actualizar título
+    $titulo = trim($_POST['titulo'] ?? $_POST['nombre_descriptivo'] ?? '');
+    $resultado = $permisosModel->actualizarNombreDescriptivo($clave, $titulo);
     
     if ($resultado) {
         echo json_encode([
             'success' => true,
-            'message' => 'Nombre descriptivo actualizado correctamente',
-            'nombre' => $nombreDescriptivo
+            'message' => 'Título actualizado correctamente',
+            'nombre' => $titulo
         ]);
     } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al actualizar el nombre descriptivo']);
+        echo json_encode(['success' => false, 'message' => 'Error al actualizar el título']);
     }
 }
 

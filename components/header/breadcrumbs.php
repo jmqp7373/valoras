@@ -66,7 +66,6 @@ if (!isset($breadcrumbs) || !is_array($breadcrumbs) || empty($breadcrumbs)) {
     /* Separador personalizado para las migas de pan */
     .breadcrumb-wrapper .breadcrumb-item + .breadcrumb-item::before {
         content: "›";
-        font-size: 18px;
         font-weight: 600;
         color: #6A1B1B;
         padding: 0 8px;

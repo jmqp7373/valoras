@@ -1,0 +1,188 @@
+/* 
+ * Estilos para Lista de Tickets - ticketList.php
+ * Valora.vip
+ */
+
+.tickets-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px 40px;
+}
+
+.tickets-header {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.tickets-header img {
+    max-width: 150px;
+    margin-bottom: 15px;
+}
+
+.tickets-header h2 {
+    color: #882A57;
+    margin-bottom: 10px;
+}
+
+.tickets-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+.alert-success {
+    background-color: #efe;
+    border: 1px solid #cfc;
+    color: #3c3;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #882A57, #ee6f92);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: transform 0.2s;
+    margin-bottom: 20px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(136, 42, 87, 0.4);
+    color: white;
+}
+
+.btn-secondary {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background 0.2s;
+    margin-left: 10px;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    color: white;
+}
+
+.tickets-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tickets-table th {
+    background: linear-gradient(135deg, #882A57, #ee6f92);
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.tickets-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.tickets-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.tickets-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.tickets-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-abierto {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-en_proceso {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-resuelto {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-cerrado {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-view {
+    padding: 6px 12px;
+    background: #17a2b8;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-view:hover {
+    background: #138496;
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-state img {
+    max-width: 200px;
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .tickets-table {
+        font-size: 14px;
+    }
+    
+    .tickets-table th,
+    .tickets-table td {
+        padding: 10px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        display: block;
+        margin: 10px 0;
+    }
+}

@@ -760,6 +760,22 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             }
         }
 
+        /* Animación para llamar la atención del botón de verificar */
+        @keyframes pulseAttention {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 25px rgba(238, 111, 146, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 12px 35px rgba(238, 111, 146, 0.6);
+            }
+        }
+
+        .pulse-attention {
+            animation: pulseAttention 1.5s ease-in-out infinite;
+        }
+
         .name-analysis-card {
             animation: fadeInUp 0.5s ease-out;
         }
@@ -2009,6 +2025,9 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                             const checkBtn = document.getElementById('checkAvailabilityBtn');
                             checkBtn.style.display = 'block';
                             checkBtn.textContent = `🔍 Verificar Disponibilidad de "${cleanName}"`;
+                            
+                            // Agregar animación de atención al botón
+                            checkBtn.classList.add('pulse-attention');
                         });
                         
                         usernameGrid.appendChild(div);
@@ -2027,6 +2046,9 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         // Manejar verificación de disponibilidad
         document.getElementById('checkAvailabilityBtn').addEventListener('click', function() {
             if (!selectedUsername) return;
+
+            // Remover animación de atención al hacer clic
+            this.classList.remove('pulse-attention');
 
             // Mostrar paso 3 y ocultar paso 2
             document.getElementById('block2').style.display = 'none';
@@ -2140,10 +2162,16 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                             this.classList.add('selected');
                             selectedUsername = cleanName;
                             
+                            // Mostrar análisis del nombre
+                            showNameAnalysis(cleanName);
+                            
                             // Actualizar el botón de verificar disponibilidad con el nombre seleccionado
                             const checkBtn = document.getElementById('checkAvailabilityBtn');
                             checkBtn.style.display = 'block';
                             checkBtn.textContent = `🔍 Verificar Disponibilidad de "${cleanName}"`;
+                            
+                            // Agregar animación de atención al botón
+                            checkBtn.classList.add('pulse-attention');
                         });
                         
                         usernameGrid.appendChild(div);
@@ -2394,19 +2422,51 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             const allItems = document.querySelectorAll('.username-item');
             allItems.forEach(item => item.classList.remove('selected'));
             
-            // Ocultar análisis de nombres de sugerencias
+            // Mostrar la alerta verde con el nombre personalizado
             const nameAnalysisContainer = document.getElementById('nameAnalysisContainer');
-            if (nameAnalysisContainer) {
-                nameAnalysisContainer.style.display = 'none';
+            const nameAnalysisContent = document.getElementById('nameAnalysisContent');
+            
+            if (nameAnalysisContainer && nameAnalysisContent) {
+                // Cambiar el estilo del contenedor a verde
+                nameAnalysisContainer.style.background = 'linear-gradient(135deg, #e8f5e8, #f1f8f1)';
+                nameAnalysisContainer.style.border = '2px solid #28a745';
+                nameAnalysisContainer.style.borderRadius = '10px';
+                nameAnalysisContainer.style.padding = '8px';
+                nameAnalysisContainer.style.marginBottom = '12px';
+                
+                // Mostrar el contenido de la alerta verde
+                nameAnalysisContent.innerHTML = `
+                    <div class="selected-username-display">
+                        <div class="selected-badge">
+                            <span class="check-icon">✅</span>
+                            <span class="selected-text">Has seleccionado:</span>
+                            <span class="selected-username">${customValue}</span>
+                        </div>
+                        <p class="username-description">
+                            Nombre personalizado creado por ti
+                        </p>
+                    </div>
+                `;
+                
+                // Actualizar el texto explicativo principal
+                document.getElementById('usernameExplanation').innerHTML = `
+                    🎉 <strong>¡Perfecto!</strong> Has seleccionado <strong>${customValue}</strong> como tu nombre de usuario.
+                `;
+                
+                // Mostrar el contenedor
+                nameAnalysisContainer.style.display = 'block';
             }
             
             // Asignar el nombre personalizado
             selectedUsername = customValue;
             
-            // Mostrar botón de verificar disponibilidad
+            // Mostrar botón de verificar disponibilidad con animación de atención
             const checkBtn = document.getElementById('checkAvailabilityBtn');
             checkBtn.style.display = 'block';
             checkBtn.textContent = `🔍 Verificar Disponibilidad de "${customValue}"`;
+            
+            // Agregar animación de atención al botón
+            checkBtn.classList.add('pulse-attention');
             
             // Limpiar el campo y resetear el botón
             customInput.value = '';

@@ -798,8 +798,20 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
             z-index: -1;
         }
 
+        /* Contenedor de input personalizado */
+        .custom-username-container {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
         /* Responsive para análisis detallado */
         @media (max-width: 768px) {
+            /* Reducir max-width del contenedor del input personalizado */
+            .custom-username-container {
+                max-width: 95% !important;
+                padding: 0 5px;
+            }
+            
             .trait-connection {
                 flex-direction: column;
                 align-items: flex-start;
@@ -894,6 +906,12 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 margin: 20px auto 0;
             }
 
+            /* Ajuste del contenedor del input personalizado en móviles */
+            #customUsernameInput {
+                font-size: 14px;
+                padding: 12px 14px;
+            }
+            
             /* Estilos móviles para el botón verde mejorado */
             .btn-primary {
                 padding: 14px 24px;
@@ -1219,7 +1237,7 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
                 
                 <!-- Opción manual para ingresar nombre de usuario personalizado -->
                 <div style="margin: 30px 0 25px; text-align: center;">
-                    <div style="max-width: 450px; margin: 0 auto;">
+                    <div class="custom-username-container">
                         <p style="color: #666; font-size: 14px; margin-bottom: 15px; font-weight: 500;">
                             ¿Ninguna opción te convenció?<br>Crea tu propio nombre de usuario:
                         </p>

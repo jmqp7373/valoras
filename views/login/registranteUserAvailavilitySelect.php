@@ -808,8 +808,28 @@ if (empty($caracteristicasActuales) || !is_array($caracteristicasActuales)) {
         @media (max-width: 768px) {
             /* Reducir max-width del contenedor del input personalizado */
             .custom-username-container {
-                max-width: 95% !important;
-                padding: 0 5px;
+                max-width: 100% !important;
+                padding: 0;
+            }
+            
+            /* Hacer que el contenedor flex del input se apile verticalmente en móvil */
+            .custom-username-container > div[style*="display: flex"] {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            /* Asegurar que el input ocupe el 100% del ancho disponible */
+            .custom-username-container input#customUsernameInput {
+                width: 100% !important;
+                flex: none !important;
+                box-sizing: border-box;
+                max-width: 100%;
+            }
+            
+            /* Botón "Usar este" también al 100% del ancho en móvil */
+            .custom-username-container button#useCustomBtn {
+                width: 100% !important;
+                max-width: 100%;
             }
             
             .trait-connection {

@@ -76,12 +76,22 @@ foreach ($cuentas_stripchat as $cuenta) {
         'num_modelos' => intval($periodo['num_modelos'] ?? 0)
     ];
     
-    // Actualizar período global
-    if (!$periodo_global || ($periodo['periodo_inicio'] && $periodo['periodo_inicio'] < $periodo_global['inicio'])) {
-        $periodo_global = [
-            'inicio' => $periodo['periodo_inicio'],
-            'fin' => $periodo['periodo_fin']
-        ];
+    // Actualizar período global (tomar el más amplio)
+    if ($periodo['periodo_inicio'] && $periodo['periodo_fin']) {
+        if (!$periodo_global) {
+            $periodo_global = [
+                'inicio' => $periodo['periodo_inicio'],
+                'fin' => $periodo['periodo_fin']
+            ];
+        } else {
+            // Expandir el período global si es necesario
+            if ($periodo['periodo_inicio'] < $periodo_global['inicio']) {
+                $periodo_global['inicio'] = $periodo['periodo_inicio'];
+            }
+            if ($periodo['periodo_fin'] > $periodo_global['fin']) {
+                $periodo_global['fin'] = $periodo['periodo_fin'];
+            }
+        }
     }
 }
 
@@ -431,17 +441,19 @@ ob_start();
     <div class="header-periodo">
         <div class="periodo-info">
             <h3>📊 Período Actual de Pago</h3>
-            <?php if ($periodo_global): ?>
+            <?php if ($periodo_global && $periodo_global['inicio'] && $periodo_global['fin']): ?>
                 <p>
-                    <?= date('d/m/Y H:i', strtotime($periodo_global['inicio'])) ?> 
-                    → 
-                    <?= date('d/m/Y H:i', strtotime($periodo_global['fin'])) ?>
+                    Desde: <?= date('d/m/Y H:i', strtotime($periodo_global['inicio'])) ?> 
+                    hasta: <?= date('d/m/Y H:i', strtotime($periodo_global['fin'])) ?>
                 </p>
+            <?php elseif (!empty($cuentas_stripchat)): ?>
+                <p>⚠️ No hay importaciones recientes. Haz clic en "Importar" para comenzar.</p>
             <?php else: ?>
-                <p>Sin datos de período disponibles</p>
+                <p>⚠️ No hay cuentas de Stripchat configuradas en el sistema.</p>
             <?php endif; ?>
         </div>
-        <button type="button" class="btn-importar-periodo" id="btnImportarPeriodo">
+        <button type="button" class="btn-importar-periodo" id="btnImportarPeriodo" 
+                <?= empty($cuentas_stripchat) ? 'disabled' : '' ?>>
             📥 Importar Período Actual
         </button>
     </div>

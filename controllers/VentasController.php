@@ -560,9 +560,10 @@ class VentasController {
                     error_log("Procesando modelo {$index}/" . count($credenciales));
                 }
                 
-                // Construir URL de la API con filtro de fecha
-                $url = "{$baseUrl}/{$studioUsername}/models/username/{$modelUsername}";
-                $url .= "?periodType=daily&periodDate={$fecha}";
+                // Construir URL de la API con filtro de fecha según documentación oficial
+                // Formato: /api/stats/v2/studios/username/{studioUsername}/models/username/{modelUsername}
+                $url = "{$baseUrl}/username/{$studioUsername}/models/username/{$modelUsername}";
+                $url .= "?periodType=currentPayment";
                 
                 // Llamar a la API
                 $ch = curl_init();

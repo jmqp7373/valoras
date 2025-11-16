@@ -435,6 +435,27 @@ class VentasController {
      */
     public function importarStripchatCuentaDia($fecha, $id_cuenta_estudio) {
         try {
+            // Obtener información de la cuenta estudio
+            $stmt = $this->db->prepare("
+                SELECT 
+                    ce.id_cuenta_estudio,
+                    ce.usuario_cuenta_estudio
+                FROM cuentas_estudios ce
+                WHERE ce.id_cuenta_estudio = :id_cuenta_estudio
+                  AND ce.id_pagina = 3
+                  AND ce.estado = 1
+            ");
+            $stmt->execute(['id_cuenta_estudio' => $id_cuenta_estudio]);
+            $cuentaEstudio = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$cuentaEstudio) {
+                return [
+                    'success' => false,
+                    'message' => 'Cuenta estudio no encontrada o inactiva',
+                    'registros_insertados' => 0
+                ];
+            }
+            
             // Cargar configuración de Stripchat
             $configPath = __DIR__ . '/../config/configStripchat.php';
             if (!file_exists($configPath)) {
@@ -446,8 +467,42 @@ class VentasController {
             }
             
             $config = require $configPath;
-            $apiKey = $config['api_key'];
-            $studioUsername = $config['studio_username'];
+            
+            // Buscar la configuración de esta cuenta estudio
+            $apiKey = null;
+            $studioUsername = null;
+            
+            // Mapeo manual de cuentas estudio a configuraciones
+            // Esto es temporal hasta que se implementen los campos en la BD
+            $nombreCuenta = strtolower(trim($cuentaEstudio['usuario_cuenta_estudio']));
+            
+            // Si el config tiene estructura antigua (compatibilidad)
+            if (isset($config['api_key']) && isset($config['studio_username'])) {
+                $apiKey = $config['api_key'];
+                $studioUsername = $config['studio_username'];
+            } 
+            // Si tiene estructura nueva con múltiples cuentas
+            elseif (isset($config['cuentas'])) {
+                foreach ($config['cuentas'] as $key => $cuenta) {
+                    if (strtolower($key) === $nombreCuenta || 
+                        strtolower($cuenta['studio_username']) === $nombreCuenta) {
+                        if (!empty($cuenta['activo'])) {
+                            $apiKey = $cuenta['api_key'];
+                            $studioUsername = $cuenta['studio_username'];
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (!$apiKey || !$studioUsername) {
+                return [
+                    'success' => false,
+                    'message' => "No se encontró configuración de API para la cuenta '{$cuentaEstudio['usuario_cuenta_estudio']}'. Verifica configStripchat.php",
+                    'registros_insertados' => 0
+                ];
+            }
+            
             $baseUrl = rtrim($config['base_url'], '/');
             
             // Obtener TODAS las credenciales activas de esta cuenta estudio

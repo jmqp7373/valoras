@@ -159,7 +159,7 @@ try {
         $stmt = $dbConnection->prepare("
             SELECT clave, titulo, categoria, ruta_completa, icono 
             FROM modulos 
-            WHERE activo = 1 
+            WHERE activo = 1 AND exento = 0
             ORDER BY categoria, titulo
         ");
         $stmt->execute();

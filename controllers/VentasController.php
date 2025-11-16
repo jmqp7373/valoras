@@ -4,6 +4,10 @@
  * Controlador para gestionar las ventas/ingresos de los modelos
  */
 
+// Suprimir warnings en respuestas AJAX
+error_reporting(E_ERROR | E_PARSE);
+ini_set('display_errors', '0');
+
 class VentasController {
     private $db;
     
@@ -655,7 +659,7 @@ class VentasController {
             if (!empty($errores) && count($errores) <= 5) {
                 $mensaje .= ". Errores: " . implode(', ', array_slice($errores, 0, 5));
             } elseif (count($errores) > 5) {
-                $mensaje .= ". {count($errores)} errores encontrados";
+                $mensaje .= ". " . count($errores) . " errores encontrados";
             }
             
             return [

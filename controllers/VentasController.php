@@ -353,38 +353,306 @@ class VentasController {
             ]
         ];
     }
+    
+    /**
+     * Importar ventas de Stripchat para un rango de fechas completo
+     * Recorre todas las cuentas estudio y todos los días del rango
+     */
+    public function importarStripchatRango($fecha_desde, $fecha_hasta) {
+        try {
+            $total_importados = 0;
+            $errores = [];
+            
+            // Obtener todas las cuentas estudio de Stripchat activas
+            $stmt = $this->db->prepare("
+                SELECT DISTINCT 
+                    c.id_credencial,
+                    c.usuario as model_username,
+                    c.id_usuario,
+                    ce.id_cuenta_estudio
+                FROM credenciales c
+                INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
+                WHERE ce.id_pagina = 3 
+                  AND ce.estado = 1
+                  AND c.eliminado = 0
+            ");
+            $stmt->execute();
+            $credenciales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (empty($credenciales)) {
+                return [
+                    'success' => false,
+                    'message' => 'No hay cuentas de Stripchat configuradas',
+                    'total_importados' => 0
+                ];
+            }
+            
+            // Generar array de días
+            $current = new DateTime($fecha_desde);
+            $end = new DateTime($fecha_hasta);
+            
+            while ($current <= $end) {
+                $fecha = $current->format('Y-m-d');
+                
+                foreach ($credenciales as $cred) {
+                    $resultado = $this->importarStripchatCuentaDia($fecha, $cred['id_credencial']);
+                    if ($resultado['success'] && $resultado['registros_insertados'] > 0) {
+                        $total_importados += $resultado['registros_insertados'];
+                    } elseif (!$resultado['success']) {
+                        $errores[] = $resultado['message'];
+                    }
+                }
+                
+                $current->modify('+1 day');
+            }
+            
+            return [
+                'success' => true,
+                'total_importados' => $total_importados,
+                'errores' => count($errores),
+                'mensaje_errores' => implode('; ', array_slice($errores, 0, 5))
+            ];
+            
+        } catch (Exception $e) {
+            error_log("Error en importarStripchatRango: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'total_importados' => 0
+            ];
+        }
+    }
+    
+    /**
+     * Importar ventas de una cuenta estudio específica en un día específico
+     */
+    public function importarStripchatCuentaDia($fecha, $id_credencial) {
+        try {
+            // Cargar configuración de Stripchat
+            $configPath = __DIR__ . '/../config/configStripchat.php';
+            if (!file_exists($configPath)) {
+                return [
+                    'success' => false,
+                    'message' => 'Archivo de configuración de Stripchat no encontrado',
+                    'registros_insertados' => 0
+                ];
+            }
+            
+            $config = require $configPath;
+            $apiKey = $config['api_key'];
+            $studioUsername = $config['studio_username'];
+            $baseUrl = rtrim($config['base_url'], '/');
+            
+            // Obtener credencial
+            $stmt = $this->db->prepare("
+                SELECT 
+                    c.id_credencial,
+                    c.usuario as model_username,
+                    c.id_usuario,
+                    ce.id_cuenta_estudio
+                FROM credenciales c
+                INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
+                WHERE c.id_credencial = ?
+            ");
+            $stmt->execute([$id_credencial]);
+            $credencial = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$credencial) {
+                return [
+                    'success' => false,
+                    'message' => 'Credencial no encontrada',
+                    'registros_insertados' => 0
+                ];
+            }
+            
+            $modelUsername = $credencial['model_username'];
+            
+            // Construir URL de la API con filtro de fecha
+            $url = "{$baseUrl}{$studioUsername}/models/username/{$modelUsername}";
+            $url .= "?periodType=daily&periodDate={$fecha}";
+            
+            // Llamar a la API
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => $config['timeout'] ?? 30,
+                CURLOPT_HTTPHEADER => [
+                    "API-Key: {$apiKey}",
+                    "Accept: application/json"
+                ],
+                CURLOPT_SSL_VERIFYPEER => true
+            ]);
+            
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+            
+            if ($httpCode !== 200 || !$response) {
+                $errorMsg = $curlError ? $curlError : "HTTP {$httpCode}";
+                return [
+                    'success' => false,
+                    'message' => "Error API: {$errorMsg}",
+                    'registros_insertados' => 0
+                ];
+            }
+            
+            $data = json_decode($response, true);
+            
+            if (!$data || !isset($data['totalEarnings'])) {
+                return [
+                    'success' => false,
+                    'message' => 'Respuesta API inválida',
+                    'registros_insertados' => 0
+                ];
+            }
+            
+            $totalEarnings = floatval($data['totalEarnings']);
+            
+            // Si no hay earnings, no insertar
+            if ($totalEarnings <= 0) {
+                return [
+                    'success' => true,
+                    'message' => 'Sin ventas en esta fecha',
+                    'registros_insertados' => 0
+                ];
+            }
+            
+            // Preparar fechas
+            $periodStart = $fecha . ' 00:00:00';
+            $periodEnd = $fecha . ' 23:59:59';
+            
+            // Verificar si ya existe
+            $stmtCheck = $this->db->prepare("
+                SELECT id FROM ventas_strip
+                WHERE id_credencial = ?
+                  AND period_start = ?
+                  AND period_end = ?
+            ");
+            $stmtCheck->execute([$id_credencial, $periodStart, $periodEnd]);
+            $existe = $stmtCheck->fetch();
+            
+            if ($existe) {
+                // Actualizar
+                $stmtUpdate = $this->db->prepare("
+                    UPDATE ventas_strip
+                    SET total_earnings = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                ");
+                $stmtUpdate->execute([$totalEarnings, $existe['id']]);
+                
+                return [
+                    'success' => true,
+                    'message' => 'Registro actualizado',
+                    'registros_insertados' => 1
+                ];
+            } else {
+                // Insertar nuevo
+                $stmtInsert = $this->db->prepare("
+                    INSERT INTO ventas_strip 
+                    (id_usuario, id_credencial, id_pagina, period_start, period_end, total_earnings)
+                    VALUES (?, ?, 3, ?, ?, ?)
+                ");
+                $stmtInsert->execute([
+                    $credencial['id_usuario'],
+                    $id_credencial,
+                    $periodStart,
+                    $periodEnd,
+                    $totalEarnings
+                ]);
+                
+                return [
+                    'success' => true,
+                    'message' => 'Registro insertado',
+                    'registros_insertados' => 1
+                ];
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error en importarStripchatCuentaDia: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'registros_insertados' => 0
+            ];
+        }
+    }
 }
 
 // Handler para peticiones AJAX
-if (isset($_GET['action']) && $_GET['action'] === 'importarDesdeAPI') {
-    header('Content-Type: application/json');
+if (isset($_GET['action'])) {
+    header('Content-Type: application/json; charset=utf-8');
     
     try {
         require_once __DIR__ . '/../config/database.php';
-        
-        $usuario_id = isset($_GET['usuario_id']) ? intval($_GET['usuario_id']) : 0;
-        
-        if ($usuario_id <= 0) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'ID de usuario inválido',
-                'registros' => 0
-            ]);
-            exit;
-        }
-        
         $db = getDBConnection();
         $controller = new VentasController($db);
-        $resultado = $controller->importarDesdeAPI($usuario_id);
         
-        echo json_encode($resultado);
+        switch ($_GET['action']) {
+            case 'importarDesdeAPI':
+                $usuario_id = isset($_GET['usuario_id']) ? intval($_GET['usuario_id']) : 0;
+                
+                if ($usuario_id <= 0) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'ID de usuario inválido',
+                        'registros' => 0
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                
+                $resultado = $controller->importarDesdeAPI($usuario_id);
+                echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
+                break;
+                
+            case 'importarStripchatRango':
+                $fecha_desde = $_POST['fecha_desde'] ?? null;
+                $fecha_hasta = $_POST['fecha_hasta'] ?? null;
+                
+                if (!$fecha_desde || !$fecha_hasta) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Fechas requeridas',
+                        'total_importados' => 0
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                
+                $resultado = $controller->importarStripchatRango($fecha_desde, $fecha_hasta);
+                echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
+                break;
+                
+            case 'importarStripchatCuentaDia':
+                $fecha = $_POST['fecha'] ?? null;
+                $id_credencial = $_POST['id_credencial'] ?? null;
+                
+                if (!$fecha || !$id_credencial) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Fecha y credencial requeridas',
+                        'registros_insertados' => 0
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                
+                $resultado = $controller->importarStripchatCuentaDia($fecha, $id_credencial);
+                echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
+                break;
+                
+            default:
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Acción no reconocida'
+                ], JSON_UNESCAPED_UNICODE);
+        }
         
     } catch (Exception $e) {
         echo json_encode([
             'success' => false,
-            'message' => 'Error del servidor: ' . $e->getMessage(),
-            'registros' => 0
-        ]);
+            'message' => 'Error del servidor: ' . $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }

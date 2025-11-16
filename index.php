@@ -81,9 +81,9 @@ ob_start();
                        style="background: #17a2b8; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px;">
                         📋 Ver Mis Tickets
                     </a>
-                    <a href="views/ventas/ventasModelo.php" 
+                    <a href="views/ventas/ventasStripchat.php" 
                        style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px; font-weight: 600;">
-                        💵 Ventas por Modelo
+                        💰 Importación Stripchat
                     </a>
                     <a href="views/admin/permissionsPanel.php" 
                        style="background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 10px; font-weight: 600;">

@@ -294,82 +294,119 @@ ob_start();
     opacity: 0.9;
 }
 
-.dia-card {
+/* Separador de día */
+.dia-separator {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    color: white;
+    padding: 12px 20px;
+    margin: 30px 0 15px 0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(106, 27, 27, 0.3);
+}
+
+.dia-separator:first-of-type {
+    margin-top: 0;
+}
+
+.dia-total-separator {
+    font-weight: 400;
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+/* Tarjeta individual por cuenta estudio */
+.cuenta-card {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     overflow: hidden;
+    border-left: 4px solid #882A57;
+    transition: all 0.2s ease;
 }
 
-.dia-header {
+.cuenta-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.cuenta-card-header {
     background: #f8f9fa;
     padding: 15px 20px;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.dia-fecha {
+.cuenta-info {
+    flex: 1;
+}
+
+.cuenta-nombre-titulo {
     font-size: 18px;
     font-weight: 700;
     color: #333;
-}
-
-.dia-total {
-    font-size: 20px;
-    font-weight: 700;
-    color: #6A1B1B;
-}
-
-.dia-sin-datos {
-    color: #999;
-    font-weight: 400;
-}
-
-.cuentas-list {
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-
-.cuenta-item {
-    padding: 15px 20px;
-    border-bottom: 1px solid #f0f0f0;
-    display: grid;
-    grid-template-columns: 2fr 1fr 120px 150px;
-    align-items: center;
-    gap: 15px;
-}
-
-.cuenta-item:last-child {
-    border-bottom: none;
-}
-
-.cuenta-nombre {
-    font-weight: 600;
-    color: #333;
+    margin: 0 0 5px 0;
 }
 
 .cuenta-credencial {
     font-size: 13px;
     color: #666;
-    margin-top: 4px;
 }
 
-.cuenta-total {
-    text-align: right;
+.cuenta-estado-container {
+    margin-left: 15px;
+}
+
+.cuenta-card-body {
+    padding: 20px;
+}
+
+.cuenta-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 24px;
     font-weight: 700;
-    font-size: 16px;
+    color: #333;
 }
 
-.cuenta-total.positivo {
+.stat-value.positivo {
     color: #28a745;
 }
 
-.cuenta-total.cero {
+.stat-value.cero {
     color: #999;
+}
+
+.cuenta-actions {
+    display: flex;
+    justify-content: center;
 }
 
 .estado-badge {
@@ -378,6 +415,7 @@ ob_start();
     font-size: 12px;
     font-weight: 600;
     text-align: center;
+    white-space: nowrap;
 }
 
 .estado-importado {
@@ -390,12 +428,13 @@ ob_start();
     color: #856404;
 }
 
+
 .btn-importar-dia,
 .btn-importar-cuenta {
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
     border: none;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -407,14 +446,16 @@ ob_start();
 }
 
 .btn-importar-cuenta {
-    background: #6A1B1B;
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
     color: white;
+    padding: 12px 30px;
+    font-size: 15px;
 }
 
 .btn-importar-dia:hover,
 .btn-importar-cuenta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
 }
 
 .btn-importar-dia:disabled,
@@ -425,10 +466,15 @@ ob_start();
 }
 
 .sin-cuentas {
-    padding: 40px;
+    padding: 60px;
     text-align: center;
     color: #999;
+    font-size: 18px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
 
 .fecha-personalizada {
     display: none;
@@ -468,14 +514,35 @@ ob_start();
     color: #0c5460;
 }
 
+
 @media (max-width: 768px) {
-    .cuenta-item {
+    .dia-separator {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .cuenta-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .cuenta-estado-container {
+        margin-left: 0;
+    }
+    
+    .cuenta-stats {
         grid-template-columns: 1fr;
         gap: 10px;
     }
     
-    .cuenta-total {
-        text-align: left;
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .resumen-general {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 </style>
@@ -528,58 +595,72 @@ ob_start();
     
     <div id="mensajeImportacion"></div>
     
-    <!-- Listado de días -->
+    <!-- Listado de días y cuentas -->
     <?php if (empty($cuentas_stripchat)): ?>
         <div class="sin-cuentas">
             ⚠️ No hay cuentas de Stripchat configuradas en el sistema.
         </div>
     <?php else: ?>
         <?php foreach ($ventas_resumen as $dia_data): ?>
-            <div class="dia-card">
-                <div class="dia-header">
-                    <div class="dia-fecha">
-                        📅 <?= date('D, d M Y', strtotime($dia_data['fecha'])) ?>
+            <!-- Separador de día -->
+            <div class="dia-separator">
+                📅 <?= date('l, d \d\e F \d\e Y', strtotime($dia_data['fecha'])) ?>
+                <span class="dia-total-separator">
+                    <?php if ($dia_data['tiene_datos']): ?>
+                        Total del día: <strong>$<?= number_format($dia_data['total_dia'], 2) ?> USD</strong>
+                    <?php else: ?>
+                        Sin importaciones este día
+                    <?php endif; ?>
+                </span>
+            </div>
+            
+            <!-- Una tarjeta por cada cuenta estudio -->
+            <?php foreach ($dia_data['cuentas'] as $cuenta): ?>
+                <div class="cuenta-card">
+                    <div class="cuenta-card-header">
+                        <div class="cuenta-info">
+                            <h4 class="cuenta-nombre-titulo">🏢 <?= htmlspecialchars($cuenta['nombre']) ?></h4>
+                            <div class="cuenta-credencial">Credencial: <?= htmlspecialchars($cuenta['credencial_usuario']) ?></div>
+                        </div>
+                        <div class="cuenta-estado-container">
+                            <span class="estado-badge <?= $cuenta['importado'] ? 'estado-importado' : 'estado-pendiente' ?>">
+                                <?= $cuenta['importado'] ? '✓ Importado' : '⏳ Pendiente' ?>
+                            </span>
+                        </div>
                     </div>
-                    <div class="dia-total <?= $dia_data['tiene_datos'] ? '' : 'dia-sin-datos' ?>">
-                        <?php if ($dia_data['tiene_datos']): ?>
-                            $<?= number_format($dia_data['total_dia'], 2) ?> USD
-                        <?php else: ?>
-                            Sin importaciones
-                        <?php endif; ?>
+                    
+                    <div class="cuenta-card-body">
+                        <div class="cuenta-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Total USD</div>
+                                <div class="stat-value <?= $cuenta['total'] > 0 ? 'positivo' : 'cero' ?>">
+                                    <?php if ($cuenta['importado']): ?>
+                                        $<?= number_format($cuenta['total'], 2) ?>
+                                    <?php else: ?>
+                                        $0.00
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Registros</div>
+                                <div class="stat-value">
+                                    <?= $cuenta['num_registros'] ?>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cuenta-actions">
+                            <button class="btn-importar-cuenta" 
+                                    data-fecha="<?= $dia_data['fecha'] ?>"
+                                    data-id-credencial="<?= $cuenta['id_credencial'] ?>"
+                                    data-nombre="<?= htmlspecialchars($cuenta['nombre']) ?>"
+                                    <?= $cuenta['importado'] ? '' : '' ?>>
+                                <?= $cuenta['importado'] ? '🔄 Re-importar' : '📥 Importar ventas' ?>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                
-                <ul class="cuentas-list">
-                    <?php foreach ($dia_data['cuentas'] as $cuenta): ?>
-                        <li class="cuenta-item">
-                            <div>
-                                <div class="cuenta-nombre"><?= htmlspecialchars($cuenta['nombre']) ?></div>
-                                <div class="cuenta-credencial"><?= htmlspecialchars($cuenta['credencial_usuario']) ?></div>
-                            </div>
-                            <div class="cuenta-total <?= $cuenta['total'] > 0 ? 'positivo' : 'cero' ?>">
-                                <?php if ($cuenta['importado']): ?>
-                                    $<?= number_format($cuenta['total'], 2) ?>
-                                <?php else: ?>
-                                    Sin datos
-                                <?php endif; ?>
-                            </div>
-                            <div>
-                                <span class="estado-badge <?= $cuenta['importado'] ? 'estado-importado' : 'estado-pendiente' ?>">
-                                    <?= $cuenta['importado'] ? '✓ Importado' : '⏳ Pendiente' ?>
-                                </span>
-                            </div>
-                            <div>
-                                <button class="btn-importar-cuenta" 
-                                        data-fecha="<?= $dia_data['fecha'] ?>"
-                                        data-id-credencial="<?= $cuenta['id_credencial'] ?>"
-                                        data-nombre="<?= htmlspecialchars($cuenta['nombre']) ?>">
-                                    📥 Importar
-                                </button>
-                            </div>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
+            <?php endforeach; ?>
         <?php endforeach; ?>
     <?php endif; ?>
     

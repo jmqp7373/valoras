@@ -214,58 +214,62 @@ ob_start();
 ?>
 
 <style>
+/* ESTILOS COMPACTOS - SOLO PARA ventasStripchat.php */
 .ventas-stripchat-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 12px;
 }
 
 .controles-superiores {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 25px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
+    max-height: 80px;
 }
 
 .selector-rango {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .selector-rango label {
     font-weight: 600;
     color: #333;
+    font-size: 13px;
 }
 
 .selector-rango select,
 .selector-rango input[type="date"] {
-    padding: 8px 12px;
+    padding: 5px 10px;
     border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 4px;
+    font-size: 13px;
 }
 
 .btn-importar-global {
     background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 6px 14px;
+    border-radius: 6px;
     font-weight: 600;
+    font-size: 13px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .btn-importar-global:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(106, 27, 27, 0.25);
 }
 
 .btn-importar-global:disabled {
@@ -277,12 +281,13 @@ ob_start();
 .resumen-general {
     background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
     color: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 25px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    max-height: 70px;
 }
 
 .resumen-item {
@@ -290,29 +295,31 @@ ob_start();
 }
 
 .resumen-item .valor {
-    font-size: 32px;
+    font-size: 22px;
     font-weight: 700;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
+    line-height: 1;
 }
 
 .resumen-item .label {
-    font-size: 14px;
+    font-size: 11px;
     opacity: 0.9;
 }
 
-/* Separador de día */
+/* Separador de día - COMPACTO */
 .dia-separator {
     background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
     color: white;
-    padding: 12px 20px;
-    margin: 30px 0 15px 0;
-    border-radius: 8px;
-    font-size: 16px;
+    padding: 8px 16px;
+    margin: 20px 0 10px 0;
+    border-radius: 6px;
+    font-size: 14px;
     font-weight: 700;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 6px rgba(106, 27, 27, 0.3);
+    box-shadow: 0 1px 4px rgba(106, 27, 27, 0.2);
+    height: 40px;
 }
 
 .dia-separator:first-of-type {
@@ -321,107 +328,92 @@ ob_start();
 
 .dia-total-separator {
     font-weight: 400;
-    font-size: 14px;
+    font-size: 12px;
     opacity: 0.95;
 }
 
-/* Tarjeta individual por cuenta estudio */
-.cuenta-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 15px;
-    overflow: hidden;
-    border-left: 4px solid #882A57;
-    transition: all 0.2s ease;
-}
-
-.cuenta-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    transform: translateY(-2px);
-}
-
-.cuenta-card-header {
-    background: #f8f9fa;
-    padding: 15px 20px;
-    border-bottom: 1px solid #e9ecef;
+/* TARJETA HORIZONTAL COMPACTA */
+.compact-card {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-}
-
-.cuenta-info {
-    flex: 1;
-}
-
-.cuenta-nombre-titulo {
-    font-size: 18px;
-    font-weight: 700;
-    color: #333;
-    margin: 0 0 5px 0;
-}
-
-.cuenta-credencial {
-    font-size: 13px;
-    color: #666;
-}
-
-.cuenta-estado-container {
-    margin-left: 15px;
-}
-
-.cuenta-card-body {
-    padding: 20px;
-}
-
-.cuenta-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 15px;
-    background: #f8f9fa;
+    justify-content: space-between;
+    background: white;
     border-radius: 8px;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: #666;
+    padding: 8px 12px;
     margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    border-left: 3px solid #882A57;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: all 0.15s ease;
+    min-height: 60px;
+    max-height: 80px;
 }
 
-.stat-value {
-    font-size: 24px;
+.compact-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.compact-card .left {
+    flex: 2;
+    min-width: 200px;
+}
+
+.compact-card .left strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.compact-card .left span {
+    display: block;
+    font-size: 11px;
+    color: #666;
+}
+
+.compact-card .middle {
+    flex: 1;
+    text-align: right;
+    margin-right: 15px;
+    min-width: 90px;
+}
+
+.compact-card .middle span {
+    display: block;
+    font-size: 10px;
+    color: #666;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.compact-card .middle strong {
+    display: block;
+    font-size: 16px;
     font-weight: 700;
     color: #333;
 }
 
-.stat-value.positivo {
+.compact-card .middle strong.positivo {
     color: #28a745;
 }
 
-.stat-value.cero {
+.compact-card .middle strong.cero {
     color: #999;
 }
 
-.cuenta-actions {
-    display: flex;
-    justify-content: center;
+.compact-card .right {
+    flex: 0;
 }
 
-.estado-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+.compact-card .estado-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
     font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
+    margin-right: 8px;
 }
 
 .estado-importado {
@@ -434,37 +426,24 @@ ob_start();
     color: #856404;
 }
 
-
-.btn-importar-dia,
-.btn-importar-cuenta {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-importar-dia {
-    background: #882A57;
-    color: white;
-}
-
 .btn-importar-cuenta {
     background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
     color: white;
-    padding: 12px 30px;
-    font-size: 15px;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
 }
 
-.btn-importar-dia:hover,
 .btn-importar-cuenta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(106, 27, 27, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(106, 27, 27, 0.25);
 }
 
-.btn-importar-dia:disabled,
 .btn-importar-cuenta:disabled {
     background: #ccc;
     cursor: not-allowed;
@@ -472,20 +451,18 @@ ob_start();
 }
 
 .sin-cuentas {
-    padding: 60px;
+    padding: 40px;
     text-align: center;
     color: #999;
-    font-size: 18px;
+    font-size: 14px;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-
 
 .fecha-personalizada {
     display: none;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
 }
 
 .fecha-personalizada.active {
@@ -493,13 +470,14 @@ ob_start();
 }
 
 #mensajeImportacion {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .alert {
-    padding: 15px;
-    border-radius: 8px;
-    margin: 10px 0;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 13px;
 }
 
 .alert-success {
@@ -520,31 +498,18 @@ ob_start();
     color: #0c5460;
 }
 
-
 @media (max-width: 768px) {
-    .dia-separator {
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
+    .compact-card {
+        flex-wrap: wrap;
+        height: auto;
+        max-height: none;
     }
     
-    .cuenta-card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    
-    .cuenta-estado-container {
-        margin-left: 0;
-    }
-    
-    .cuenta-stats {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .stat-value {
-        font-size: 20px;
+    .compact-card .left,
+    .compact-card .middle,
+    .compact-card .right {
+        flex: 1 1 100%;
+        margin: 4px 0;
     }
     
     .resumen-general {
@@ -620,55 +585,47 @@ ob_start();
                 </span>
             </div>
             
-            <!-- Una tarjeta por cada cuenta estudio -->
+            <!-- Una tarjeta COMPACTA por cada cuenta estudio -->
             <?php foreach ($dia_data['cuentas'] as $cuenta): ?>
-                <div class="cuenta-card">
-                    <div class="cuenta-card-header">
-                        <div class="cuenta-info">
-                            <h4 class="cuenta-nombre-titulo">🏢 <?= htmlspecialchars($cuenta['nombre']) ?></h4>
-                            <div class="cuenta-credencial">
-                                <?php if ($cuenta['num_modelos'] > 0): ?>
-                                    <?= $cuenta['num_modelos'] ?> modelo<?= $cuenta['num_modelos'] > 1 ? 's' : '' ?> activo<?= $cuenta['num_modelos'] > 1 ? 's' : '' ?>
-                                <?php else: ?>
-                                    Sin modelos con datos
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="cuenta-estado-container">
-                            <span class="estado-badge <?= $cuenta['importado'] ? 'estado-importado' : 'estado-pendiente' ?>">
-                                <?= $cuenta['importado'] ? '✓ Importado' : '⏳ Pendiente' ?>
-                            </span>
-                        </div>
+                <div class="compact-card">
+                    <div class="left">
+                        <strong>🏢 <?= htmlspecialchars($cuenta['nombre']) ?></strong>
+                        <span>
+                            <?php if ($cuenta['num_modelos'] > 0): ?>
+                                <?= $cuenta['num_modelos'] ?> modelo<?= $cuenta['num_modelos'] > 1 ? 's' : '' ?> 
+                                • <span class="estado-badge <?= $cuenta['importado'] ? 'estado-importado' : 'estado-pendiente' ?>">
+                                    <?= $cuenta['importado'] ? '✓ Importado' : '⏳ Pendiente' ?>
+                                </span>
+                            <?php else: ?>
+                                Sin modelos con datos • 
+                                <span class="estado-badge estado-pendiente">⏳ Pendiente</span>
+                            <?php endif; ?>
+                        </span>
                     </div>
                     
-                    <div class="cuenta-card-body">
-                        <div class="cuenta-stats">
-                            <div class="stat-item">
-                                <div class="stat-label">Total USD</div>
-                                <div class="stat-value <?= $cuenta['total'] > 0 ? 'positivo' : 'cero' ?>">
-                                    <?php if ($cuenta['importado']): ?>
-                                        $<?= number_format($cuenta['total'], 2) ?>
-                                    <?php else: ?>
-                                        $0.00
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Registros</div>
-                                <div class="stat-value">
-                                    <?= $cuenta['num_registros'] ?>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="cuenta-actions">
-                            <button class="btn-importar-cuenta" 
-                                    data-fecha="<?= $dia_data['fecha'] ?>"
-                                    data-id-cuenta="<?= $cuenta['id_cuenta_estudio'] ?>"
-                                    data-nombre="<?= htmlspecialchars($cuenta['nombre']) ?>">
-                                <?= $cuenta['importado'] ? '🔄 Re-importar' : '📥 Importar ventas' ?>
-                            </button>
-                        </div>
+                    <div class="middle">
+                        <span>TOTAL USD</span>
+                        <strong class="<?= $cuenta['total'] > 0 ? 'positivo' : 'cero' ?>">
+                            <?php if ($cuenta['importado']): ?>
+                                $<?= number_format($cuenta['total'], 2) ?>
+                            <?php else: ?>
+                                $0.00
+                            <?php endif; ?>
+                        </strong>
+                    </div>
+                    
+                    <div class="middle">
+                        <span>REGISTROS</span>
+                        <strong><?= $cuenta['num_registros'] ?></strong>
+                    </div>
+                    
+                    <div class="right">
+                        <button class="btn-importar-cuenta" 
+                                data-fecha="<?= $dia_data['fecha'] ?>"
+                                data-id-cuenta="<?= $cuenta['id_cuenta_estudio'] ?>"
+                                data-nombre="<?= htmlspecialchars($cuenta['nombre']) ?>">
+                            <?= $cuenta['importado'] ? '🔄 Re-importar' : '📥 Importar' ?>
+                        </button>
                     </div>
                 </div>
             <?php endforeach; ?>

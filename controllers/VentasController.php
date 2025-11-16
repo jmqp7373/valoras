@@ -16,6 +16,95 @@ class VentasController {
     }
     
     /**
+     * Insertar o actualizar venta usando UPSERT (ON DUPLICATE KEY UPDATE)
+     * Evita duplicados garantizando una sola fila por período/credencial/modelo
+     * 
+     * @param array $data Datos de la venta
+     * @return array ['inserted' => bool, 'updated' => bool]
+     */
+    private function upsertVenta($data) {
+        try {
+            // Usar INSERT ... ON DUPLICATE KEY UPDATE para UPSERT automático
+            $sql = "
+                INSERT INTO ventas_strip (
+                    id_credencial,
+                    id_usuario,
+                    id_pagina,
+                    period_start,
+                    period_end,
+                    total_earnings,
+                    tips,
+                    public_chat_tips,
+                    private_chat_tips,
+                    exclusive_privates,
+                    tokens_earned,
+                    created_at,
+                    updated_at
+                ) VALUES (
+                    :id_credencial,
+                    :id_usuario,
+                    :id_pagina,
+                    :period_start,
+                    :period_end,
+                    :total_earnings,
+                    :tips,
+                    :public_chat_tips,
+                    :private_chat_tips,
+                    :exclusive_privates,
+                    :tokens_earned,
+                    NOW(),
+                    NOW()
+                )
+                ON DUPLICATE KEY UPDATE
+                    total_earnings = VALUES(total_earnings),
+                    tips = VALUES(tips),
+                    public_chat_tips = VALUES(public_chat_tips),
+                    private_chat_tips = VALUES(private_chat_tips),
+                    exclusive_privates = VALUES(exclusive_privates),
+                    tokens_earned = VALUES(tokens_earned),
+                    period_end = VALUES(period_end),
+                    updated_at = NOW()
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':id_credencial' => $data['id_credencial'],
+                ':id_usuario' => $data['id_usuario'],
+                ':id_pagina' => $data['id_pagina'] ?? 3,
+                ':period_start' => $data['period_start'],
+                ':period_end' => $data['period_end'],
+                ':total_earnings' => $data['total_earnings'],
+                ':tips' => $data['tips'] ?? 0,
+                ':public_chat_tips' => $data['public_chat_tips'] ?? 0,
+                ':private_chat_tips' => $data['private_chat_tips'] ?? 0,
+                ':exclusive_privates' => $data['exclusive_privates'] ?? 0,
+                ':tokens_earned' => $data['tokens_earned'] ?? 0
+            ]);
+            
+            // rowCount() retorna:
+            // 1 = INSERT
+            // 2 = UPDATE
+            // 0 = Sin cambios
+            $rowCount = $stmt->rowCount();
+            
+            return [
+                'inserted' => $rowCount === 1,
+                'updated' => $rowCount === 2,
+                'unchanged' => $rowCount === 0
+            ];
+            
+        } catch (PDOException $e) {
+            error_log("Error en upsertVenta: " . $e->getMessage());
+            return [
+                'inserted' => false,
+                'updated' => false,
+                'unchanged' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
      * Obtener todas las ventas de un usuario específico
      * @param int $usuario_id ID del usuario/modelo
      * @return array Array de ventas con información de plataforma
@@ -356,6 +445,363 @@ class VentasController {
                 'total_earnings' => rand(1500, 4000) + (rand(0, 99) / 100)
             ]
         ];
+    }
+    
+    /**
+     * Importar período actual (currentPayment) de Stripchat para todas las cuentas estudio activas
+     * Usa UPSERT para evitar duplicados
+     */
+    public function importarPeriodoActual() {
+        try {
+            set_time_limit(300);
+            
+            $config = require __DIR__ . '/../config/configStripchat.php';
+            
+            // Obtener todas las cuentas estudio de Stripchat activas
+            $stmtCuentas = $this->db->prepare("
+                SELECT DISTINCT 
+                    ce.id_cuenta_estudio,
+                    ce.usuario_cuenta_estudio
+                FROM cuentas_estudios ce
+                WHERE ce.id_pagina = 3
+                AND ce.estado = 1
+                ORDER BY ce.usuario_cuenta_estudio
+            ");
+            $stmtCuentas->execute();
+            $cuentas = $stmtCuentas->fetchAll(PDO::FETCH_ASSOC);
+            
+            $resultados = [];
+            $totales = [
+                'cuentas_procesadas' => 0,
+                'modelos_procesados' => 0,
+                'nuevos' => 0,
+                'actualizados' => 0,
+                'sin_cambios' => 0,
+                'errores' => []
+            ];
+            
+            foreach ($cuentas as $cuenta) {
+                $resultado = $this->importarCuentaEstudioPeriodo($cuenta['id_cuenta_estudio']);
+                $resultados[$cuenta['usuario_cuenta_estudio']] = $resultado;
+                
+                if ($resultado['success']) {
+                    $totales['cuentas_procesadas']++;
+                    $totales['modelos_procesados'] += $resultado['modelos_procesados'];
+                    $totales['nuevos'] += $resultado['nuevos'];
+                    $totales['actualizados'] += $resultado['actualizados'];
+                    $totales['sin_cambios'] += $resultado['sin_cambios'] ?? 0;
+                    $totales['errores'] = array_merge($totales['errores'], $resultado['errores']);
+                }
+            }
+            
+            return [
+                'success' => true,
+                'message' => "Período importado: {$totales['nuevos']} nuevos, {$totales['actualizados']} actualizados de {$totales['modelos_procesados']} modelos",
+                'totales' => $totales,
+                'resultados_por_cuenta' => $resultados
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Importar período actual de una cuenta estudio específica (método privado auxiliar)
+     * Usa UPSERT para prevenir duplicados
+     */
+    private function importarCuentaEstudioPeriodo($id_cuenta_estudio) {
+        try {
+            $config = require __DIR__ . '/../config/configStripchat.php';
+            
+            // Obtener datos de la cuenta estudio
+            $stmtCuenta = $this->db->prepare("
+                SELECT 
+                    ce.id_cuenta_estudio,
+                    ce.usuario_cuenta_estudio
+                FROM cuentas_estudios ce
+                WHERE ce.id_cuenta_estudio = :id_cuenta_estudio
+                AND ce.id_pagina = 3
+                AND ce.estado = 1
+            ");
+            $stmtCuenta->execute([':id_cuenta_estudio' => $id_cuenta_estudio]);
+            $cuentaEstudio = $stmtCuenta->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$cuentaEstudio) {
+                return [
+                    'success' => false,
+                    'message' => 'Cuenta estudio no encontrada',
+                    'modelos_procesados' => 0,
+                    'nuevos' => 0,
+                    'actualizados' => 0,
+                    'sin_cambios' => 0,
+                    'errores' => []
+                ];
+            }
+            
+            // Buscar configuración de API
+            $cuentaNormalizada = strtolower(str_replace(['_', ' ', '-'], '', $cuentaEstudio['usuario_cuenta_estudio']));
+            $apiConfig = null;
+            
+            foreach ($config['cuentas'] as $key => $cuenta) {
+                $keyNormalizado = strtolower(str_replace(['_', ' ', '-'], '', $key));
+                if ($keyNormalizado === $cuentaNormalizada && $cuenta['activo']) {
+                    $apiConfig = $cuenta;
+                    break;
+                }
+            }
+            
+            if (!$apiConfig || empty($apiConfig['api_key'])) {
+                return [
+                    'success' => false,
+                    'message' => 'API key no configurada',
+                    'modelos_procesados' => 0,
+                    'nuevos' => 0,
+                    'actualizados' => 0,
+                    'sin_cambios' => 0,
+                    'errores' => []
+                ];
+            }
+            
+            // Obtener modelos activos (máximo 100)
+            $stmtModelos = $this->db->prepare("
+                SELECT DISTINCT
+                    c.id_credencial,
+                    c.usuario as model_username,
+                    c.id_usuario
+                FROM credenciales c
+                LEFT JOIN (
+                    SELECT id_credencial, MAX(updated_at) as ultima_actualizacion
+                    FROM ventas_strip
+                    GROUP BY id_credencial
+                ) vs ON vs.id_credencial = c.id_credencial
+                WHERE c.id_cuenta_estudio = :id_cuenta_estudio
+                AND c.id_pagina = 3
+                AND c.eliminado = 0
+                AND (
+                    vs.ultima_actualizacion >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+                    OR vs.ultima_actualizacion IS NULL
+                )
+                ORDER BY c.id_credencial
+                LIMIT 100
+            ");
+            $stmtModelos->execute([':id_cuenta_estudio' => $id_cuenta_estudio]);
+            $modelos = $stmtModelos->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (empty($modelos)) {
+                return [
+                    'success' => false,
+                    'message' => 'No hay modelos activos',
+                    'modelos_procesados' => 0,
+                    'nuevos' => 0,
+                    'actualizados' => 0,
+                    'sin_cambios' => 0,
+                    'errores' => []
+                ];
+            }
+            
+            $nuevos = 0;
+            $actualizados = 0;
+            $sinCambios = 0;
+            $errores = [];
+            
+            $baseUrl = rtrim($config['base_url'], '/');
+            $studioUsername = $apiConfig['studio_username'];
+            $apiKey = $apiConfig['api_key'];
+            
+            foreach ($modelos as $modelo) {
+                try {
+                    // Llamar a la API con currentPayment
+                    $url = "{$baseUrl}/username/{$studioUsername}/models/username/{$modelo['model_username']}?periodType=currentPayment";
+                    
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $url);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        "API-Key: {$apiKey}",
+                        'Accept: application/json'
+                    ]);
+                    
+                    $response = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                    
+                    if ($httpCode !== 200) {
+                        $errores[] = "{$modelo['model_username']}: HTTP {$httpCode}";
+                        continue;
+                    }
+                    
+                    $data = json_decode($response, true);
+                    
+                    if (!$data || !isset($data['totalEarnings'])) {
+                        continue;
+                    }
+                    
+                    // Extraer datos del período
+                    $periodStart = isset($data['periodStart']) ? date('Y-m-d H:i:s', strtotime($data['periodStart'])) : date('Y-m-d H:i:s');
+                    $periodEnd = isset($data['periodEnd']) ? date('Y-m-d H:i:s', strtotime($data['periodEnd'])) : date('Y-m-d H:i:s');
+                    
+                    // Usar UPSERT para insertar o actualizar
+                    $result = $this->upsertVenta([
+                        'id_credencial' => $modelo['id_credencial'],
+                        'id_usuario' => $modelo['id_usuario'],
+                        'id_pagina' => 3,
+                        'period_start' => $periodStart,
+                        'period_end' => $periodEnd,
+                        'total_earnings' => $data['totalEarnings'] ?? 0,
+                        'tips' => $data['tips'] ?? 0,
+                        'public_chat_tips' => $data['publicChatTips'] ?? 0,
+                        'private_chat_tips' => $data['privateChatTips'] ?? 0,
+                        'exclusive_privates' => $data['exclusivePrivates'] ?? 0,
+                        'tokens_earned' => $data['tips'] ?? 0
+                    ]);
+                    
+                    if ($result['inserted']) {
+                        $nuevos++;
+                    } elseif ($result['updated']) {
+                        $actualizados++;
+                    } elseif ($result['unchanged']) {
+                        $sinCambios++;
+                    }
+                    
+                } catch (Exception $e) {
+                    $errores[] = "{$modelo['model_username']}: {$e->getMessage()}";
+                }
+            }
+            
+            return [
+                'success' => true,
+                'modelos_procesados' => count($modelos),
+                'nuevos' => $nuevos,
+                'actualizados' => $actualizados,
+                'sin_cambios' => $sinCambios,
+                'errores' => array_slice($errores, 0, 5)
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'modelos_procesados' => 0,
+                'nuevos' => 0,
+                'actualizados' => 0,
+                'sin_cambios' => 0,
+                'errores' => []
+            ];
+        }
+    }
+    
+    /**
+     * Calcular ventas diarias reconstruidas a partir de totales acumulados
+     * Retorna ventas diarias por cuenta estudio usando diferencias de totales
+     */
+    public function calcularVentasDiarias() {
+        try {
+            // Obtener todas las cuentas estudio de Stripchat
+            $stmtCuentas = $this->db->prepare("
+                SELECT DISTINCT 
+                    ce.id_cuenta_estudio,
+                    ce.usuario_cuenta_estudio
+                FROM cuentas_estudios ce
+                WHERE ce.id_pagina = 3
+                AND ce.estado = 1
+                ORDER BY ce.usuario_cuenta_estudio
+            ");
+            $stmtCuentas->execute();
+            $cuentas = $stmtCuentas->fetchAll(PDO::FETCH_ASSOC);
+            
+            $resultado = [];
+            $periodo_global = null;
+            
+            foreach ($cuentas as $cuenta) {
+                // Obtener el período más reciente
+                $stmtPeriodo = $this->db->prepare("
+                    SELECT 
+                        MIN(vs.period_start) as periodo_inicio,
+                        MAX(vs.period_end) as periodo_fin,
+                        SUM(vs.total_earnings) as total_acumulado
+                    FROM ventas_strip vs
+                    INNER JOIN credenciales c ON c.id_credencial = vs.id_credencial
+                    WHERE c.id_cuenta_estudio = :id_cuenta_estudio
+                    AND c.id_pagina = 3
+                    AND vs.period_start >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                ");
+                $stmtPeriodo->execute([':id_cuenta_estudio' => $cuenta['id_cuenta_estudio']]);
+                $periodo = $stmtPeriodo->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$periodo_global || ($periodo['periodo_inicio'] && $periodo['periodo_inicio'] < $periodo_global['inicio'])) {
+                    $periodo_global = [
+                        'inicio' => $periodo['periodo_inicio'],
+                        'fin' => $periodo['periodo_fin']
+                    ];
+                }
+                
+                // Obtener snapshots por modelo ordenados cronológicamente
+                $stmtVentas = $this->db->prepare("
+                    SELECT 
+                        vs.id_credencial,
+                        DATE(vs.updated_at) as fecha_snapshot,
+                        vs.total_earnings,
+                        vs.updated_at
+                    FROM ventas_strip vs
+                    INNER JOIN credenciales c ON c.id_credencial = vs.id_credencial
+                    WHERE c.id_cuenta_estudio = :id_cuenta_estudio
+                    AND c.id_pagina = 3
+                    AND vs.period_start >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                    ORDER BY vs.id_credencial, vs.updated_at ASC
+                ");
+                $stmtVentas->execute([':id_cuenta_estudio' => $cuenta['id_cuenta_estudio']]);
+                $snapshots = $stmtVentas->fetchAll(PDO::FETCH_ASSOC);
+                
+                // Calcular diferencias diarias
+                $ventasDiarias = [];
+                $modeloAnterior = null;
+                $totalAnterior = 0;
+                
+                foreach ($snapshots as $snapshot) {
+                    if ($modeloAnterior !== $snapshot['id_credencial']) {
+                        // Nuevo modelo - resetear
+                        $totalAnterior = 0;
+                        $modeloAnterior = $snapshot['id_credencial'];
+                    }
+                    
+                    $fecha = $snapshot['fecha_snapshot'];
+                    $diferencia = $snapshot['total_earnings'] - $totalAnterior;
+                    
+                    if (!isset($ventasDiarias[$fecha])) {
+                        $ventasDiarias[$fecha] = 0;
+                    }
+                    
+                    $ventasDiarias[$fecha] += $diferencia;
+                    $totalAnterior = $snapshot['total_earnings'];
+                }
+                
+                $resultado[$cuenta['usuario_cuenta_estudio']] = [
+                    'periodo' => [
+                        'inicio' => $periodo['periodo_inicio'],
+                        'fin' => $periodo['periodo_fin']
+                    ],
+                    'total_acumulado' => floatval($periodo['total_acumulado'] ?? 0),
+                    'ventas_diarias' => $ventasDiarias
+                ];
+            }
+            
+            return [
+                'success' => true,
+                'periodo_global' => $periodo_global,
+                'data' => $resultado
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ];
+        }
     }
     
     /**

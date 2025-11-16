@@ -431,9 +431,10 @@ class VentasController {
      * Importar ventas de una cuenta estudio específica en un día específico
      */
     /**
-     * Importar ventas de Stripchat para una cuenta estudio específica en un día específico
+     * Importar ventas de Stripchat para una cuenta estudio específica
      * Recorre TODAS las credenciales (modelos) de esa cuenta estudio
-     * @param string $fecha Fecha en formato Y-m-d
+     * Importa el período de pago actual (currentPayment) de Stripchat
+     * @param string $fecha Fecha (ignorada - la API solo soporta períodos, no fechas específicas)
      * @param int $id_cuenta_estudio ID de la cuenta estudio
      * @return array Resultado de la importación
      */
@@ -603,11 +604,11 @@ class VentasController {
                     continue;
                 }
                 
-                // Preparar fechas
-                $periodStart = $fecha . ' 00:00:00';
-                $periodEnd = $fecha . ' 23:59:59';
+                // La API de Stripchat devuelve periodStart y periodEnd
+                $periodStart = isset($data['periodStart']) ? date('Y-m-d H:i:s', strtotime($data['periodStart'])) : date('Y-m-d H:i:s');
+                $periodEnd = isset($data['periodEnd']) ? date('Y-m-d H:i:s', strtotime($data['periodEnd'])) : date('Y-m-d H:i:s');
                 
-                // Verificar si ya existe este registro
+                // Verificar si ya existe este registro para este período
                 $stmtCheck = $this->db->prepare("
                     SELECT id FROM ventas_strip
                     WHERE id_credencial = :id_credencial
@@ -654,8 +655,8 @@ class VentasController {
             
             // Preparar mensaje final
             $mensaje = ($total_insertados + $total_actualizados) > 0 
-                ? "Importados: {$total_insertados} nuevos, {$total_actualizados} actualizados (de " . count($credenciales) . " modelos procesados)"
-                : "No se encontraron ventas para esta cuenta en la fecha {$fecha}";
+                ? "Importados: {$total_insertados} nuevos, {$total_actualizados} actualizados (de " . count($credenciales) . " modelos procesados) - Período actual de pago"
+                : "No se encontraron ventas para esta cuenta en el período actual";
             
             if (!empty($errores) && count($errores) <= 5) {
                 $mensaje .= ". Errores: " . implode(', ', array_slice($errores, 0, 5));

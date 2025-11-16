@@ -1,9 +1,9 @@
 <?php
 /**
- * Vista: Importación y Control de Ventas Stripchat
+ * Vista: Importación y Control de Ventas Stripchat - Basado en Períodos
  * 
- * Muestra resumen diario de ventas importadas desde Stripchat,
- * agrupadas por día y cuenta estudio, con importación automática desde API.
+ * Importa períodos completos de Stripchat (currentPayment)
+ * y reconstruye ventas diarias internamente usando deltas de totales acumulados
  */
 
 error_reporting(E_ALL);
@@ -30,147 +30,109 @@ try {
     die('Error al conectar con la base de datos: ' . $e->getMessage());
 }
 
-// Determinar rango de fechas
-$rango = $_GET['rango'] ?? '15';
-$fecha_desde = null;
-$fecha_hasta = null;
-
-if ($rango === 'personalizado') {
-    $fecha_desde = $_GET['fecha_desde'] ?? null;
-    $fecha_hasta = $_GET['fecha_hasta'] ?? null;
-    if (!$fecha_desde || !$fecha_hasta) {
-        $rango = '15'; // Fallback
-    }
-}
-
-// Calcular fechas según rango
-switch ($rango) {
-    case '7':
-        $dias = 7;
-        break;
-    case '30':
-        $dias = 30;
-        break;
-    case 'personalizado':
-        $dias = null;
-        break;
-    default:
-        $dias = 15;
-        $rango = '15';
-}
-
-if ($dias) {
-    $fecha_hasta = date('Y-m-d');
-    $fecha_desde = date('Y-m-d', strtotime("-{$dias} days"));
-}
-
-// Obtener SOLO cuentas estudio únicas de Stripchat (sin duplicados por credencial)
+// Obtener cuentas estudio activas de Stripchat
 $stmt = $db->prepare("
     SELECT DISTINCT 
         ce.id_cuenta_estudio,
         ce.usuario_cuenta_estudio
     FROM cuentas_estudios ce
     WHERE ce.id_pagina = 3 
-      AND ce.estado = 1
-      AND EXISTS (
-          SELECT 1 FROM credenciales c 
-          WHERE c.id_cuenta_estudio = ce.id_cuenta_estudio 
-          AND c.eliminado = 0
-      )
+    AND ce.estado = 1
     ORDER BY ce.usuario_cuenta_estudio
 ");
 $stmt->execute();
 $cuentas_stripchat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Generar array de días en el rango
-$dias_array = [];
-$current_date = new DateTime($fecha_desde);
-$end_date = new DateTime($fecha_hasta);
+// Obtener período actual y totales por cuenta estudio
+$datos_periodo = [];
+$periodo_global = null;
+$total_general = 0;
 
-while ($current_date <= $end_date) {
-    $dias_array[] = $current_date->format('Y-m-d');
-    $current_date->modify('+1 day');
-}
-$dias_array = array_reverse($dias_array); // Mostrar más reciente primero
-
-// Obtener resumen de ventas por día y cuenta estudio
-$ventas_resumen = [];
-$totales_generales = [
-    'dias_con_datos' => 0,
-    'total_usd' => 0,
-    'total_registros' => 0
-];
-
-foreach ($dias_array as $dia) {
-    $fecha_inicio = $dia . ' 00:00:00';
-    $fecha_fin = $dia . ' 23:59:59';
+foreach ($cuentas_stripchat as $cuenta) {
+    // Obtener período más reciente
+    $stmt = $db->prepare("
+        SELECT 
+            MIN(vs.period_start) as periodo_inicio,
+            MAX(vs.period_end) as periodo_fin,
+            SUM(vs.total_earnings) as total_acumulado,
+            COUNT(DISTINCT vs.id_credencial) as num_modelos
+        FROM ventas_strip vs
+        INNER JOIN credenciales c ON c.id_credencial = vs.id_credencial
+        WHERE c.id_cuenta_estudio = :id_cuenta_estudio
+        AND c.id_pagina = 3
+        AND vs.period_start >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    ");
+    $stmt->execute([':id_cuenta_estudio' => $cuenta['id_cuenta_estudio']]);
+    $periodo = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    $ventas_resumen[$dia] = [
-        'fecha' => $dia,
-        'cuentas' => [],
-        'total_dia' => 0,
-        'tiene_datos' => false
+    $total_cuenta = floatval($periodo['total_acumulado'] ?? 0);
+    $total_general += $total_cuenta;
+    
+    $datos_periodo[$cuenta['usuario_cuenta_estudio']] = [
+        'id' => $cuenta['id_cuenta_estudio'],
+        'periodo_inicio' => $periodo['periodo_inicio'],
+        'periodo_fin' => $periodo['periodo_fin'],
+        'total_acumulado' => $total_cuenta,
+        'num_modelos' => intval($periodo['num_modelos'] ?? 0)
     ];
     
-    foreach ($cuentas_stripchat as $cuenta) {
-        // Buscar ventas para TODAS las credenciales de esta cuenta estudio en este día
-        // Esto suma automáticamente todos los modelos asociados a esta cuenta
-        $stmt = $db->prepare("
-            SELECT 
-                SUM(vs.total_earnings) as total,
-                COUNT(*) as num_registros,
-                COUNT(DISTINCT vs.id_credencial) as num_modelos
-            FROM ventas_strip vs
-            INNER JOIN credenciales c ON c.id_credencial = vs.id_credencial
-            WHERE c.id_cuenta_estudio = :id_cuenta_estudio
-              AND c.eliminado = 0
-              AND vs.period_start >= :fecha_inicio
-              AND vs.period_start <= :fecha_fin
-        ");
-        $stmt->execute([
-            'id_cuenta_estudio' => $cuenta['id_cuenta_estudio'],
-            'fecha_inicio' => $fecha_inicio,
-            'fecha_fin' => $fecha_fin
-        ]);
-        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        $total = $resultado['total'] ?? 0;
-        $num_registros = $resultado['num_registros'] ?? 0;
-        $num_modelos = $resultado['num_modelos'] ?? 0;
-        
-        $ventas_resumen[$dia]['cuentas'][] = [
-            'id_cuenta_estudio' => $cuenta['id_cuenta_estudio'],
-            'nombre' => $cuenta['usuario_cuenta_estudio'],
-            'total' => floatval($total),
-            'num_registros' => intval($num_registros),
-            'num_modelos' => intval($num_modelos),
-            'importado' => $num_registros > 0
+    // Actualizar período global
+    if (!$periodo_global || ($periodo['periodo_inicio'] && $periodo['periodo_inicio'] < $periodo_global['inicio'])) {
+        $periodo_global = [
+            'inicio' => $periodo['periodo_inicio'],
+            'fin' => $periodo['periodo_fin']
         ];
-        
-        $ventas_resumen[$dia]['total_dia'] += floatval($total);
-        if ($num_registros > 0) {
-            $ventas_resumen[$dia]['tiene_datos'] = true;
-        }
-    }
-    
-    if ($ventas_resumen[$dia]['tiene_datos']) {
-        $totales_generales['dias_con_datos']++;
-        $totales_generales['total_usd'] += $ventas_resumen[$dia]['total_dia'];
     }
 }
 
-// Calcular total de registros
-$stmt = $db->prepare("
-    SELECT COUNT(*) as total
-    FROM ventas_strip
-    WHERE period_start >= :fecha_desde
-      AND period_start <= :fecha_hasta
-");
-$stmt->execute([
-    'fecha_desde' => $fecha_desde . ' 00:00:00',
-    'fecha_hasta' => $fecha_hasta . ' 23:59:59'
-]);
-$totales_generales['total_registros'] = $stmt->fetchColumn();
+// Obtener ventas diarias reconstruidas
+$ventas_diarias_total = [];
+
+foreach ($cuentas_stripchat as $cuenta) {
+    // Obtener snapshots cronológicos por modelo
+    $stmt = $db->prepare("
+        SELECT 
+            vs.id_credencial,
+            DATE(vs.updated_at) as fecha_snapshot,
+            vs.total_earnings,
+            vs.updated_at
+        FROM ventas_strip vs
+        INNER JOIN credenciales c ON c.id_credencial = vs.id_credencial
+        WHERE c.id_cuenta_estudio = :id_cuenta_estudio
+        AND c.id_pagina = 3
+        AND vs.period_start >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        ORDER BY vs.id_credencial, vs.updated_at ASC
+    ");
+    $stmt->execute([':id_cuenta_estudio' => $cuenta['id_cuenta_estudio']]);
+    $snapshots = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Calcular diferencias diarias
+    $modeloAnterior = null;
+    $totalAnterior = 0;
+    
+    foreach ($snapshots as $snapshot) {
+        if ($modeloAnterior !== $snapshot['id_credencial']) {
+            $totalAnterior = 0;
+            $modeloAnterior = $snapshot['id_credencial'];
+        }
+        
+        $fecha = $snapshot['fecha_snapshot'];
+        $diferencia = $snapshot['total_earnings'] - $totalAnterior;
+        
+        if (!isset($ventas_diarias_total[$fecha])) {
+            $ventas_diarias_total[$fecha] = [];
+            foreach ($cuentas_stripchat as $c) {
+                $ventas_diarias_total[$fecha][$c['usuario_cuenta_estudio']] = 0;
+            }
+        }
+        
+        $ventas_diarias_total[$fecha][$cuenta['usuario_cuenta_estudio']] += $diferencia;
+        $totalAnterior = $snapshot['total_earnings'];
+    }
+}
+
+// Ordenar fechas descendentes
+krsort($ventas_diarias_total);
 
 // Variables para header
 $logo_path = '../../assets/images/logos/logoValoraHorizontal.png';
@@ -193,9 +155,9 @@ try {
 }
 
 // Variables para master.php
-$page_title = $modulo['titulo'] ?? 'Importación Stripchat';
+$page_title = $modulo['titulo'] ?? 'Ventas Stripchat';
 $titulo_pagina = $modulo['titulo'] ?? 'Importación y Control de Ventas Stripchat';
-$subtitulo_pagina = $modulo['subtitulo'] ?? 'Resumen diario de ventas importadas desde Stripchat';
+$subtitulo_pagina = $modulo['subtitulo'] ?? 'Sistema basado en períodos de pago con reconstrucción diaria interna';
 $icono_pagina = $modulo['icono'] ?? '💰';
 
 // Breadcrumbs
@@ -204,269 +166,212 @@ $breadcrumbs = [
     ['label' => 'Ventas Stripchat', 'url' => '']
 ];
 
-// CSS adicional
 $additional_css = [];
-
-// JavaScript adicional
 $additional_js = [];
 
 ob_start();
 ?>
 
 <style>
-/* ESTILOS COMPACTOS - SOLO PARA ventasStripchat.php */
+/* ESTILOS COMPACTOS - DASHBOARD FINANCIERO */
 .ventas-stripchat-container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 12px;
+    padding: 10px;
 }
 
-.controles-superiores {
-    background: white;
-    padding: 10px 16px;
+.header-periodo {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    color: white;
+    padding: 12px 20px;
     border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    max-height: 80px;
+    min-height: 60px;
 }
 
-.selector-rango {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.periodo-info h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
 }
 
-.selector-rango label {
-    font-weight: 600;
-    color: #333;
-    font-size: 13px;
+.periodo-info p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.9;
 }
 
-.selector-rango select,
-.selector-rango input[type="date"] {
-    padding: 5px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 13px;
-}
-
-.btn-importar-global {
-    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
-    color: white;
+.btn-importar-periodo {
+    background: white;
+    color: #6A1B1B;
     border: none;
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
-    font-weight: 600;
     font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.btn-importar-global:hover {
+.btn-importar-periodo:hover {
     transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(106, 27, 27, 0.25);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
 
-.btn-importar-global:disabled {
+.btn-importar-periodo:disabled {
     background: #ccc;
     cursor: not-allowed;
     transform: none;
 }
 
-.resumen-general {
-    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
-    color: white;
-    padding: 10px 16px;
+.totales-cuentas {
+    background: white;
+    padding: 10px;
     border-radius: 8px;
     margin-bottom: 12px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    max-height: 70px;
-}
-
-.resumen-item {
-    text-align: center;
-}
-
-.resumen-item .valor {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 2px;
-    line-height: 1;
-}
-
-.resumen-item .label {
-    font-size: 11px;
-    opacity: 0.9;
-}
-
-/* Separador de día - COMPACTO */
-.dia-separator {
-    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
-    color: white;
-    padding: 8px 16px;
-    margin: 20px 0 10px 0;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 4px rgba(106, 27, 27, 0.2);
-    height: 40px;
-}
-
-.dia-separator:first-of-type {
-    margin-top: 0;
-}
-
-.dia-total-separator {
-    font-weight: 400;
-    font-size: 12px;
-    opacity: 0.95;
-}
-
-/* TARJETA HORIZONTAL COMPACTA */
-.compact-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: white;
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-left: 3px solid #882A57;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    transition: all 0.15s ease;
-    min-height: 60px;
-    max-height: 80px;
 }
 
-.compact-card:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transform: translateY(-1px);
+.totales-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
 }
 
-.compact-card .left {
-    flex: 2;
-    min-width: 200px;
+.cuenta-total-card {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #882A57;
 }
 
-.compact-card .left strong {
-    display: block;
+.cuenta-total-card .nombre {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.cuenta-total-card .total {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.cuenta-total-card .modelos {
+    font-size: 10px;
+    color: #999;
+    margin-top: 2px;
+}
+
+.ventas-diarias-section {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.ventas-diarias-section h4 {
+    margin: 0 0 10px 0;
     font-size: 14px;
     font-weight: 700;
     color: #333;
-    margin-bottom: 2px;
 }
 
-.compact-card .left span {
-    display: block;
-    font-size: 11px;
-    color: #666;
+.tabla-ventas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
 }
 
-.compact-card .middle {
-    flex: 1;
-    text-align: right;
-    margin-right: 15px;
-    min-width: 90px;
+.tabla-ventas thead {
+    background: #f8f9fa;
+    border-bottom: 2px solid #882A57;
 }
 
-.compact-card .middle span {
-    display: block;
-    font-size: 10px;
-    color: #666;
-    margin-bottom: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.compact-card .middle strong {
-    display: block;
-    font-size: 16px;
+.tabla-ventas thead th {
+    padding: 8px 10px;
+    text-align: left;
     font-weight: 700;
+    color: #333;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabla-ventas thead th:first-child {
+    border-radius: 6px 0 0 0;
+}
+
+.tabla-ventas thead th:last-child {
+    border-radius: 0 6px 0 0;
+    text-align: right;
+}
+
+.tabla-ventas thead th.text-right {
+    text-align: right;
+}
+
+.tabla-ventas tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: background 0.15s ease;
+}
+
+.tabla-ventas tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.tabla-ventas tbody tr:last-child {
+    border-bottom: none;
+}
+
+.tabla-ventas tbody td {
+    padding: 10px;
     color: #333;
 }
 
-.compact-card .middle strong.positivo {
+.tabla-ventas tbody td:first-child {
+    font-weight: 600;
+    color: #666;
+}
+
+.tabla-ventas tbody td.text-right {
+    text-align: right;
+}
+
+.tabla-ventas tbody td.positivo {
     color: #28a745;
+    font-weight: 700;
 }
 
-.compact-card .middle strong.cero {
-    color: #999;
+.tabla-ventas tbody td.cero {
+    color: #ccc;
 }
 
-.compact-card .right {
-    flex: 0;
+.tabla-ventas tfoot {
+    background: #f8f9fa;
+    border-top: 2px solid #882A57;
 }
 
-.compact-card .estado-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 600;
-    margin-right: 8px;
-}
-
-.estado-importado {
-    background: #d4edda;
-    color: #155724;
-}
-
-.estado-pendiente {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.btn-importar-cuenta {
-    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 6px;
+.tabla-ventas tfoot td {
+    padding: 10px;
+    font-weight: 700;
+    color: #333;
     font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    white-space: nowrap;
 }
 
-.btn-importar-cuenta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(106, 27, 27, 0.25);
+.tabla-ventas tfoot td:last-child {
+    text-align: right;
+    color: #6A1B1B;
 }
 
-.btn-importar-cuenta:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.sin-cuentas {
+.sin-datos {
     padding: 40px;
     text-align: center;
     color: #999;
-    font-size: 14px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-
-.fecha-personalizada {
-    display: none;
-    gap: 8px;
-}
-
-.fecha-personalizada.active {
-    display: flex;
+    font-size: 13px;
 }
 
 #mensajeImportacion {
@@ -477,7 +382,7 @@ ob_start();
     padding: 10px 14px;
     border-radius: 6px;
     margin: 8px 0;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .alert-success {
@@ -499,155 +404,134 @@ ob_start();
 }
 
 @media (max-width: 768px) {
-    .compact-card {
-        flex-wrap: wrap;
-        height: auto;
-        max-height: none;
+    .header-periodo {
+        flex-direction: column;
+        gap: 10px;
+        min-height: auto;
     }
     
-    .compact-card .left,
-    .compact-card .middle,
-    .compact-card .right {
-        flex: 1 1 100%;
-        margin: 4px 0;
+    .totales-grid {
+        grid-template-columns: 1fr;
     }
     
-    .resumen-general {
-        grid-template-columns: repeat(2, 1fr);
+    .tabla-ventas {
+        font-size: 11px;
+    }
+    
+    .tabla-ventas thead th,
+    .tabla-ventas tbody td {
+        padding: 6px 8px;
     }
 }
 </style>
 
 <div class="ventas-stripchat-container">
     
-    <!-- Controles superiores -->
-    <div class="controles-superiores">
-        <form method="GET" class="selector-rango" id="formRango">
-            <label for="rango">📅 Rango:</label>
-            <select name="rango" id="rango" onchange="toggleFechaPersonalizada()">
-                <option value="7" <?= $rango === '7' ? 'selected' : '' ?>>Últimos 7 días</option>
-                <option value="15" <?= $rango === '15' ? 'selected' : '' ?>>Últimos 15 días</option>
-                <option value="30" <?= $rango === '30' ? 'selected' : '' ?>>Últimos 30 días</option>
-                <option value="personalizado" <?= $rango === 'personalizado' ? 'selected' : '' ?>>Rango personalizado</option>
-            </select>
-            
-            <div class="fecha-personalizada <?= $rango === 'personalizado' ? 'active' : '' ?>" id="fechaPersonalizada">
-                <input type="date" name="fecha_desde" value="<?= $fecha_desde ?>" max="<?= date('Y-m-d') ?>">
-                <input type="date" name="fecha_hasta" value="<?= $fecha_hasta ?>" max="<?= date('Y-m-d') ?>">
-            </div>
-            
-            <button type="submit" class="btn-importar-global">🔍 Aplicar</button>
-        </form>
-        
-        <button type="button" class="btn-importar-global" id="btnImportarPendientes">
-            📥 Importar ventas pendientes de los últimos <?= $dias ?? 15 ?> días
+    <!-- Header con período actual -->
+    <div class="header-periodo">
+        <div class="periodo-info">
+            <h3>📊 Período Actual de Pago</h3>
+            <?php if ($periodo_global): ?>
+                <p>
+                    <?= date('d/m/Y H:i', strtotime($periodo_global['inicio'])) ?> 
+                    → 
+                    <?= date('d/m/Y H:i', strtotime($periodo_global['fin'])) ?>
+                </p>
+            <?php else: ?>
+                <p>Sin datos de período disponibles</p>
+            <?php endif; ?>
+        </div>
+        <button type="button" class="btn-importar-periodo" id="btnImportarPeriodo">
+            📥 Importar Período Actual
         </button>
-    </div>
-    
-    <!-- Resumen general -->
-    <div class="resumen-general">
-        <div class="resumen-item">
-            <div class="valor"><?= count($dias_array) ?></div>
-            <div class="label">Días consultados</div>
-        </div>
-        <div class="resumen-item">
-            <div class="valor"><?= $totales_generales['dias_con_datos'] ?></div>
-            <div class="label">Días con datos</div>
-        </div>
-        <div class="resumen-item">
-            <div class="valor">$<?= number_format($totales_generales['total_usd'], 2) ?></div>
-            <div class="label">Total USD</div>
-        </div>
-        <div class="resumen-item">
-            <div class="valor"><?= $totales_generales['total_registros'] ?></div>
-            <div class="label">Registros importados</div>
-        </div>
     </div>
     
     <div id="mensajeImportacion"></div>
     
-    <!-- Listado de días y cuentas -->
-    <?php if (empty($cuentas_stripchat)): ?>
-        <div class="sin-cuentas">
-            ⚠️ No hay cuentas de Stripchat configuradas en el sistema.
-        </div>
-    <?php else: ?>
-        <?php foreach ($ventas_resumen as $dia_data): ?>
-            <!-- Separador de día -->
-            <div class="dia-separator">
-                📅 <?= date('l, d \d\e F \d\e Y', strtotime($dia_data['fecha'])) ?>
-                <span class="dia-total-separator">
-                    <?php if ($dia_data['tiene_datos']): ?>
-                        Total del día: <strong>$<?= number_format($dia_data['total_dia'], 2) ?> USD</strong>
-                    <?php else: ?>
-                        Sin importaciones este día
-                    <?php endif; ?>
-                </span>
+    <!-- Totales por cuenta estudio -->
+    <?php if (!empty($datos_periodo)): ?>
+    <div class="totales-cuentas">
+        <div class="totales-grid">
+            <?php foreach ($datos_periodo as $nombre_cuenta => $datos): ?>
+            <div class="cuenta-total-card">
+                <div class="nombre">🏢 <?= htmlspecialchars($nombre_cuenta) ?></div>
+                <div class="total">$<?= number_format($datos['total_acumulado'], 2) ?></div>
+                <div class="modelos"><?= $datos['num_modelos'] ?> modelo<?= $datos['num_modelos'] != 1 ? 's' : '' ?></div>
             </div>
-            
-            <!-- Una tarjeta COMPACTA por cada cuenta estudio -->
-            <?php foreach ($dia_data['cuentas'] as $cuenta): ?>
-                <div class="compact-card">
-                    <div class="left">
-                        <strong>🏢 <?= htmlspecialchars($cuenta['nombre']) ?></strong>
-                        <span>
-                            <?php if ($cuenta['num_modelos'] > 0): ?>
-                                <?= $cuenta['num_modelos'] ?> modelo<?= $cuenta['num_modelos'] > 1 ? 's' : '' ?> 
-                                • <span class="estado-badge <?= $cuenta['importado'] ? 'estado-importado' : 'estado-pendiente' ?>">
-                                    <?= $cuenta['importado'] ? '✓ Importado' : '⏳ Pendiente' ?>
-                                </span>
-                            <?php else: ?>
-                                Sin modelos con datos • 
-                                <span class="estado-badge estado-pendiente">⏳ Pendiente</span>
-                            <?php endif; ?>
-                        </span>
-                    </div>
-                    
-                    <div class="middle">
-                        <span>TOTAL USD</span>
-                        <strong class="<?= $cuenta['total'] > 0 ? 'positivo' : 'cero' ?>">
-                            <?php if ($cuenta['importado']): ?>
-                                $<?= number_format($cuenta['total'], 2) ?>
-                            <?php else: ?>
-                                $0.00
-                            <?php endif; ?>
-                        </strong>
-                    </div>
-                    
-                    <div class="middle">
-                        <span>REGISTROS</span>
-                        <strong><?= $cuenta['num_registros'] ?></strong>
-                    </div>
-                    
-                    <div class="right">
-                        <button class="btn-importar-cuenta" 
-                                data-fecha="<?= $dia_data['fecha'] ?>"
-                                data-id-cuenta="<?= $cuenta['id_cuenta_estudio'] ?>"
-                                data-nombre="<?= htmlspecialchars($cuenta['nombre']) ?>">
-                            <?= $cuenta['importado'] ? '🔄 Re-importar' : '📥 Importar' ?>
-                        </button>
-                    </div>
-                </div>
             <?php endforeach; ?>
-        <?php endforeach; ?>
+            
+            <div class="cuenta-total-card" style="border-left-color: #6A1B1B;">
+                <div class="nombre">💰 TOTAL GENERAL</div>
+                <div class="total" style="color: #6A1B1B;">$<?= number_format($total_general, 2) ?></div>
+                <div class="modelos"><?= count($cuentas_stripchat) ?> cuenta<?= count($cuentas_stripchat) != 1 ? 's' : '' ?></div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Tabla de ventas diarias reconstruidas -->
+    <?php if (!empty($ventas_diarias_total)): ?>
+    <div class="ventas-diarias-section">
+        <h4>📅 Ventas Diarias del Período (Reconstruidas Internamente)</h4>
+        <table class="tabla-ventas">
+            <thead>
+                <tr>
+                    <th>Día</th>
+                    <?php foreach ($cuentas_stripchat as $cuenta): ?>
+                    <th class="text-right"><?= htmlspecialchars($cuenta['usuario_cuenta_estudio']) ?></th>
+                    <?php endforeach; ?>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($ventas_diarias_total as $fecha => $ventas_dia): ?>
+                <?php 
+                    $total_dia = array_sum($ventas_dia);
+                    if ($total_dia == 0) continue; // Saltar días sin ventas
+                ?>
+                <tr>
+                    <td><?= date('D, d/m/Y', strtotime($fecha)) ?></td>
+                    <?php foreach ($cuentas_stripchat as $cuenta): ?>
+                    <?php $valor = $ventas_dia[$cuenta['usuario_cuenta_estudio']] ?? 0; ?>
+                    <td class="text-right <?= $valor > 0 ? 'positivo' : 'cero' ?>">
+                        $<?= number_format($valor, 2) ?>
+                    </td>
+                    <?php endforeach; ?>
+                    <td class="text-right" style="font-weight: 700; color: #6A1B1B;">
+                        $<?= number_format($total_dia, 2) ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>TOTAL ACUMULADO</td>
+                    <?php foreach ($cuentas_stripchat as $cuenta): ?>
+                    <td class="text-right">
+                        $<?= number_format($datos_periodo[$cuenta['usuario_cuenta_estudio']]['total_acumulado'] ?? 0, 2) ?>
+                    </td>
+                    <?php endforeach; ?>
+                    <td class="text-right">
+                        $<?= number_format($total_general, 2) ?>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <?php else: ?>
+    <div class="ventas-diarias-section">
+        <div class="sin-datos">
+            ⚠️ No hay datos de ventas disponibles.<br>
+            Haz clic en "Importar Período Actual" para comenzar.
+        </div>
+    </div>
     <?php endif; ?>
     
 </div>
 
 <script>
-function toggleFechaPersonalizada() {
-    const select = document.getElementById('rango');
-    const divPersonalizado = document.getElementById('fechaPersonalizada');
-    
-    if (select.value === 'personalizado') {
-        divPersonalizado.classList.add('active');
-    } else {
-        divPersonalizado.classList.remove('active');
-    }
-}
-
-// Importar ventas pendientes globalmente
-document.getElementById('btnImportarPendientes')?.addEventListener('click', async function() {
+// Importar período actual
+document.getElementById('btnImportarPeriodo')?.addEventListener('click', async function() {
     const btn = this;
     const mensajeDiv = document.getElementById('mensajeImportacion');
     
@@ -657,10 +541,8 @@ document.getElementById('btnImportarPendientes')?.addEventListener('click', asyn
     mensajeDiv.innerHTML = '<div class="alert alert-info">⏳ Conectando con API de Stripchat...</div>';
     
     try {
-        const response = await fetch('../../controllers/VentasController.php?action=importarStripchatRango', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `fecha_desde=<?= $fecha_desde ?>&fecha_hasta=<?= $fecha_hasta ?>`
+        const response = await fetch('../../controllers/VentasController.php?action=importarPeriodoActual', {
+            method: 'GET'
         });
         
         const data = await response.json();
@@ -668,7 +550,7 @@ document.getElementById('btnImportarPendientes')?.addEventListener('click', asyn
         if (data.success) {
             mensajeDiv.innerHTML = `
                 <div class="alert alert-success">
-                    ✅ Importación completada: ${data.total_importados} registro(s) importado(s).
+                    ✅ ${data.message}
                     <br><small>Recargando en 2 segundos...</small>
                 </div>
             `;
@@ -676,56 +558,13 @@ document.getElementById('btnImportarPendientes')?.addEventListener('click', asyn
         } else {
             mensajeDiv.innerHTML = `<div class="alert alert-error">❌ ${data.message}</div>`;
             btn.disabled = false;
-            btn.textContent = '📥 Importar ventas pendientes de los últimos <?= $dias ?? 15 ?> días';
+            btn.textContent = '📥 Importar Período Actual';
         }
     } catch (error) {
         mensajeDiv.innerHTML = `<div class="alert alert-error">❌ Error: ${error.message}</div>`;
         btn.disabled = false;
-        btn.textContent = '📥 Importar ventas pendientes de los últimos <?= $dias ?? 15 ?> días';
+        btn.textContent = '📥 Importar Período Actual';
     }
-});
-
-// Importar ventas de una cuenta estudio específica en un día específico
-document.querySelectorAll('.btn-importar-cuenta').forEach(btn => {
-    btn.addEventListener('click', async function() {
-        const fecha = this.dataset.fecha;
-        const idCuenta = this.dataset.idCuenta;
-        const nombre = this.dataset.nombre;
-        const mensajeDiv = document.getElementById('mensajeImportacion');
-        
-        this.disabled = true;
-        this.textContent = '⏳...';
-        
-        mensajeDiv.innerHTML = `<div class="alert alert-info">⏳ Importando ${nombre} del ${fecha}...</div>`;
-        
-        try {
-            const response = await fetch('../../controllers/VentasController.php?action=importarStripchatCuentaDia', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `fecha=${fecha}&id_cuenta_estudio=${idCuenta}`
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                mensajeDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        ✅ ${data.message || 'Importación exitosa'}
-                        <br><small>Recargando...</small>
-                    </div>
-                `;
-                setTimeout(() => window.location.reload(), 1500);
-            } else {
-                mensajeDiv.innerHTML = `<div class="alert alert-error">❌ ${data.message}</div>`;
-                this.disabled = false;
-                this.textContent = '📥 Importar';
-            }
-        } catch (error) {
-            mensajeDiv.innerHTML = `<div class="alert alert-error">❌ Error: ${error.message}</div>`;
-            this.disabled = false;
-            this.textContent = '📥 Importar';
-        }
-    });
 });
 </script>
 

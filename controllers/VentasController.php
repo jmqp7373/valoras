@@ -691,6 +691,16 @@ if (isset($_GET['action'])) {
         $controller = new VentasController($db);
         
         switch ($_GET['action']) {
+            case 'importarPeriodoActual':
+                $resultado = $controller->importarPeriodoActual();
+                echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
+                break;
+                
+            case 'calcularVentasDiarias':
+                $resultado = $controller->calcularVentasDiarias();
+                echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
+                break;
+                
             case 'importarDesdeAPI':
                 $usuario_id = isset($_GET['usuario_id']) ? intval($_GET['usuario_id']) : 0;
                 

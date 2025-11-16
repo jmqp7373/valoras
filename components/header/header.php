@@ -228,8 +228,18 @@ try {
                                 $ruta_modulo = $modulo['ruta_completa'];
                                 // Si la ruta ya empieza con /, es absoluta desde el dominio
                                 if (strpos($ruta_modulo, '/') !== 0 && strpos($ruta_modulo, 'http') !== 0) {
-                                    // Es una ruta relativa desde la raíz del proyecto
-                                    $ruta_modulo = '../../' . $ruta_modulo;
+                                    // Convertir formato Windows a formato web
+                                    $ruta_modulo = str_replace('\\', '/', $ruta_modulo);
+                                    
+                                    // Calcular profundidad basándose en $logo_path
+                                    if (strpos($logo_path, '../../') === 0) {
+                                        // Estamos a 2 niveles de profundidad (ej: views/admin/file.php)
+                                        $ruta_modulo = '../../' . $ruta_modulo;
+                                    } elseif (strpos($logo_path, '../') === 0) {
+                                        // Estamos a 1 nivel de profundidad (ej: views/file.php)
+                                        $ruta_modulo = '../' . $ruta_modulo;
+                                    }
+                                    // Si $logo_path no tiene ../, estamos en la raíz, no agregar nada
                                 }
                                 ?>
                                 <li>

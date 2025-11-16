@@ -505,9 +505,13 @@ class VentasController {
             
             $baseUrl = rtrim($config['base_url'], '/');
             
-            // Obtener TODAS las credenciales activas de esta cuenta estudio
+            // Aumentar tiempo de ejecución para cuentas con muchos modelos
+            set_time_limit(300); // 5 minutos máximo
+            
+            // Obtener credenciales activas de esta cuenta estudio
+            // OPTIMIZACIÓN: Solo traer modelos que tienen ventas recientes o fueron creados recientemente
             $stmt = $this->db->prepare("
-                SELECT 
+                SELECT DISTINCT
                     c.id_credencial,
                     c.usuario as model_username,
                     c.id_usuario,
@@ -515,9 +519,17 @@ class VentasController {
                     ce.usuario_cuenta_estudio
                 FROM credenciales c
                 INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
+                LEFT JOIN ventas_strip vs ON vs.id_credencial = c.id_credencial 
+                    AND vs.period_start >= DATE_SUB(NOW(), INTERVAL 60 DAY)
                 WHERE c.id_cuenta_estudio = :id_cuenta_estudio
                   AND c.eliminado = 0
                   AND ce.estado = 1
+                  AND (
+                      vs.id IS NOT NULL  -- Tiene ventas recientes
+                      OR c.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)  -- O es credencial nueva
+                  )
+                ORDER BY vs.period_start DESC
+                LIMIT 100
             ");
             $stmt->execute(['id_cuenta_estudio' => $id_cuenta_estudio]);
             $credenciales = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -531,11 +543,20 @@ class VentasController {
             }
             
             $total_insertados = 0;
+            $total_actualizados = 0;
             $errores = [];
             
+            // Log de inicio
+            error_log("Iniciando importación para {$cuentaEstudio['usuario_cuenta_estudio']}: " . count($credenciales) . " modelos");
+            
             // Recorrer cada credencial (modelo) de la cuenta
-            foreach ($credenciales as $credencial) {
+            foreach ($credenciales as $index => $credencial) {
                 $modelUsername = $credencial['model_username'];
+                
+                // Log cada 10 modelos
+                if ($index % 10 === 0) {
+                    error_log("Procesando modelo {$index}/" . count($credenciales));
+                }
                 
                 // Construir URL de la API con filtro de fecha
                 $url = "{$baseUrl}{$studioUsername}/models/username/{$modelUsername}";
@@ -609,7 +630,7 @@ class VentasController {
                         'total_earnings' => $totalEarnings,
                         'id' => $existe['id']
                     ]);
-                    $total_insertados++;
+                    $total_actualizados++;
                 } else {
                     // Insertar nuevo registro
                     $stmtInsert = $this->db->prepare("
@@ -629,18 +650,20 @@ class VentasController {
             } // Fin del foreach de credenciales
             
             // Preparar mensaje final
-            $mensaje = $total_insertados > 0 
-                ? "Importados {$total_insertados} registro(s) para {$credenciales[0]['usuario_cuenta_estudio']}"
+            $mensaje = ($total_insertados + $total_actualizados) > 0 
+                ? "Importados: {$total_insertados} nuevos, {$total_actualizados} actualizados (de " . count($credenciales) . " modelos procesados)"
                 : "No se encontraron ventas para esta cuenta en la fecha {$fecha}";
             
-            if (!empty($errores)) {
-                $mensaje .= ". Errores: " . implode(', ', $errores);
+            if (!empty($errores) && count($errores) <= 5) {
+                $mensaje .= ". Errores: " . implode(', ', array_slice($errores, 0, 5));
+            } elseif (count($errores) > 5) {
+                $mensaje .= ". {count($errores)} errores encontrados";
             }
             
             return [
-                'success' => $total_insertados > 0 || empty($errores),
+                'success' => ($total_insertados + $total_actualizados) > 0,
                 'message' => $mensaje,
-                'registros_insertados' => $total_insertados
+                'registros_insertados' => $total_insertados + $total_actualizados
             ];
             
         } catch (Exception $e) {

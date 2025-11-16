@@ -14,12 +14,17 @@ SELECT
     'Gestiona las credenciales de modelos en todas las plataformas',
     'admin',
     'views\\credenciales\\credenciales_index.php',
-    '🔑',
+    '🔐',
     1,
     0
 WHERE NOT EXISTS (
     SELECT 1 FROM modulos WHERE clave = 'credenciales_admin'
 );
+
+-- Si el módulo ya existe, actualizar solo el icono
+UPDATE modulos 
+SET icono = '🔐'
+WHERE clave = 'credenciales_admin';
 
 -- Verificar inserción
 SELECT 

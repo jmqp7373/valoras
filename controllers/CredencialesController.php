@@ -139,11 +139,8 @@ class CredencialesController {
                     ec.nombre_estudio_casa
                 " . $sqlBase . "
                 ORDER BY c.id_credencial DESC
-                LIMIT ? OFFSET ?
+                LIMIT {$porPagina} OFFSET {$offset}
             ";
-
-            $params[] = $porPagina;
-            $params[] = $offset;
 
             $stmtData = $this->conn->prepare($sqlData);
             $stmtData->execute($params);

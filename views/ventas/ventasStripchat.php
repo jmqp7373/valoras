@@ -133,10 +133,9 @@ foreach ($dias_array as $dia) {
         $num_registros = $resultado['num_registros'] ?? 0;
         
         $ventas_resumen[$dia]['cuentas'][] = [
-            'id_cuenta_estudio' => $cuenta['id_cuenta_estudio'],
+            'id_credencial' => $cuenta['id_credencial'],
             'nombre' => $cuenta['usuario_cuenta_estudio'],
             'credencial_usuario' => $cuenta['credencial_usuario'],
-            'id_credencial' => $cuenta['id_credencial'],
             'total' => floatval($total),
             'num_registros' => intval($num_registros),
             'importado' => $num_registros > 0

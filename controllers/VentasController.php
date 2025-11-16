@@ -561,7 +561,7 @@ class VentasController {
                 }
                 
                 // Construir URL de la API con filtro de fecha
-                $url = "{$baseUrl}{$studioUsername}/models/username/{$modelUsername}";
+                $url = "{$baseUrl}/{$studioUsername}/models/username/{$modelUsername}";
                 $url .= "?periodType=daily&periodDate={$fecha}";
                 
                 // Llamar a la API

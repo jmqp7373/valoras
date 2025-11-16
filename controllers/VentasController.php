@@ -509,26 +509,24 @@ class VentasController {
             set_time_limit(300); // 5 minutos máximo
             
             // Obtener credenciales activas de esta cuenta estudio
-            // OPTIMIZACIÓN: Solo traer modelos que tienen ventas recientes o fueron creados recientemente
+            // OPTIMIZACIÓN: Solo traer modelos que tienen ventas recientes
             $stmt = $this->db->prepare("
                 SELECT DISTINCT
                     c.id_credencial,
                     c.usuario as model_username,
                     c.id_usuario,
                     ce.id_cuenta_estudio,
-                    ce.usuario_cuenta_estudio
+                    ce.usuario_cuenta_estudio,
+                    MAX(vs.period_start) as ultima_venta
                 FROM credenciales c
                 INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
-                LEFT JOIN ventas_strip vs ON vs.id_credencial = c.id_credencial 
-                    AND vs.period_start >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+                LEFT JOIN ventas_strip vs ON vs.id_credencial = c.id_credencial
                 WHERE c.id_cuenta_estudio = :id_cuenta_estudio
                   AND c.eliminado = 0
                   AND ce.estado = 1
-                  AND (
-                      vs.id IS NOT NULL  -- Tiene ventas recientes
-                      OR c.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)  -- O es credencial nueva
-                  )
-                ORDER BY vs.period_start DESC
+                GROUP BY c.id_credencial, c.usuario, c.id_usuario, ce.id_cuenta_estudio, ce.usuario_cuenta_estudio
+                HAVING ultima_venta IS NULL OR ultima_venta >= DATE_SUB(NOW(), INTERVAL 60 DAY)
+                ORDER BY ultima_venta DESC
                 LIMIT 100
             ");
             $stmt->execute(['id_cuenta_estudio' => $id_cuenta_estudio]);

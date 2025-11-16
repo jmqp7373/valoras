@@ -42,7 +42,7 @@ try {
         $stmt = $db_conn->prepare("
             SELECT clave, ruta_completa, titulo, categoria, icono 
             FROM modulos 
-            WHERE activo = 1 AND categoria != 'login'
+            WHERE activo = 1 AND exento = 0 AND categoria != 'login'
             ORDER BY categoria, titulo
         ");
         $stmt->execute();
@@ -85,7 +85,7 @@ foreach ($modulos_footer as $modulo) {
                 <?php foreach ($modulos as $modulo): ?>
                 <li>
                     <a href="<?php echo $base_path . htmlspecialchars($modulo['ruta_completa']); ?>">
-                        <?php echo htmlspecialchars($modulo['icono'] ?? ''); ?> 
+                        <?php echo $modulo['icono'] ?? ''; ?> 
                         <?php echo htmlspecialchars($modulo['titulo']); ?>
                     </a>
                 </li>

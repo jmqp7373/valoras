@@ -118,12 +118,12 @@ foreach ($dias_array as $dia) {
                 SUM(total_earnings) as total,
                 COUNT(*) as num_registros
             FROM ventas_strip
-            WHERE id_cuenta_estudio = :id_cuenta_estudio
+            WHERE id_credencial = :id_credencial
               AND period_start >= :fecha_inicio
               AND period_start <= :fecha_fin
         ");
         $stmt->execute([
-            'id_cuenta_estudio' => $cuenta['id_cuenta_estudio'],
+            'id_credencial' => $cuenta['id_credencial'],
             'fecha_inicio' => $fecha_inicio,
             'fecha_fin' => $fecha_fin
         ]);

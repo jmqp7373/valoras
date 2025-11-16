@@ -426,7 +426,14 @@ class VentasController {
     /**
      * Importar ventas de una cuenta estudio específica en un día específico
      */
-    public function importarStripchatCuentaDia($fecha, $id_credencial) {
+    /**
+     * Importar ventas de Stripchat para una cuenta estudio específica en un día específico
+     * Recorre TODAS las credenciales (modelos) de esa cuenta estudio
+     * @param string $fecha Fecha en formato Y-m-d
+     * @param int $id_cuenta_estudio ID de la cuenta estudio
+     * @return array Resultado de la importación
+     */
+    public function importarStripchatCuentaDia($fecha, $id_cuenta_estudio) {
         try {
             // Cargar configuración de Stripchat
             $configPath = __DIR__ . '/../config/configStripchat.php';
@@ -443,132 +450,143 @@ class VentasController {
             $studioUsername = $config['studio_username'];
             $baseUrl = rtrim($config['base_url'], '/');
             
-            // Obtener credencial
+            // Obtener TODAS las credenciales activas de esta cuenta estudio
             $stmt = $this->db->prepare("
                 SELECT 
                     c.id_credencial,
                     c.usuario as model_username,
                     c.id_usuario,
-                    ce.id_cuenta_estudio
+                    ce.id_cuenta_estudio,
+                    ce.usuario_cuenta_estudio
                 FROM credenciales c
                 INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
-                WHERE c.id_credencial = ?
+                WHERE c.id_cuenta_estudio = :id_cuenta_estudio
+                  AND c.eliminado = 0
+                  AND ce.estado = 1
             ");
-            $stmt->execute([$id_credencial]);
-            $credencial = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute(['id_cuenta_estudio' => $id_cuenta_estudio]);
+            $credenciales = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            if (!$credencial) {
+            if (empty($credenciales)) {
                 return [
                     'success' => false,
-                    'message' => 'Credencial no encontrada',
+                    'message' => 'No se encontraron credenciales activas para esta cuenta estudio',
                     'registros_insertados' => 0
                 ];
             }
             
-            $modelUsername = $credencial['model_username'];
+            $total_insertados = 0;
+            $errores = [];
             
-            // Construir URL de la API con filtro de fecha
-            $url = "{$baseUrl}{$studioUsername}/models/username/{$modelUsername}";
-            $url .= "?periodType=daily&periodDate={$fecha}";
-            
-            // Llamar a la API
-            $ch = curl_init();
-            curl_setopt_array($ch, [
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => $config['timeout'] ?? 30,
-                CURLOPT_HTTPHEADER => [
-                    "API-Key: {$apiKey}",
-                    "Accept: application/json"
-                ],
-                CURLOPT_SSL_VERIFYPEER => true
-            ]);
-            
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($ch);
-            curl_close($ch);
-            
-            if ($httpCode !== 200 || !$response) {
-                $errorMsg = $curlError ? $curlError : "HTTP {$httpCode}";
-                return [
-                    'success' => false,
-                    'message' => "Error API: {$errorMsg}",
-                    'registros_insertados' => 0
-                ];
-            }
-            
-            $data = json_decode($response, true);
-            
-            if (!$data || !isset($data['totalEarnings'])) {
-                return [
-                    'success' => false,
-                    'message' => 'Respuesta API inválida',
-                    'registros_insertados' => 0
-                ];
-            }
-            
-            $totalEarnings = floatval($data['totalEarnings']);
-            
-            // Si no hay earnings, no insertar
-            if ($totalEarnings <= 0) {
-                return [
-                    'success' => true,
-                    'message' => 'Sin ventas en esta fecha',
-                    'registros_insertados' => 0
-                ];
-            }
-            
-            // Preparar fechas
-            $periodStart = $fecha . ' 00:00:00';
-            $periodEnd = $fecha . ' 23:59:59';
-            
-            // Verificar si ya existe
-            $stmtCheck = $this->db->prepare("
-                SELECT id FROM ventas_strip
-                WHERE id_credencial = ?
-                  AND period_start = ?
-                  AND period_end = ?
-            ");
-            $stmtCheck->execute([$id_credencial, $periodStart, $periodEnd]);
-            $existe = $stmtCheck->fetch();
-            
-            if ($existe) {
-                // Actualizar
-                $stmtUpdate = $this->db->prepare("
-                    UPDATE ventas_strip
-                    SET total_earnings = ?,
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE id = ?
-                ");
-                $stmtUpdate->execute([$totalEarnings, $existe['id']]);
+            // Recorrer cada credencial (modelo) de la cuenta
+            foreach ($credenciales as $credencial) {
+                $modelUsername = $credencial['model_username'];
                 
-                return [
-                    'success' => true,
-                    'message' => 'Registro actualizado',
-                    'registros_insertados' => 1
-                ];
-            } else {
-                // Insertar nuevo
-                $stmtInsert = $this->db->prepare("
-                    INSERT INTO ventas_strip 
-                    (id_usuario, id_credencial, id_pagina, period_start, period_end, total_earnings)
-                    VALUES (?, ?, 3, ?, ?, ?)
-                ");
-                $stmtInsert->execute([
-                    $credencial['id_usuario'],
-                    $id_credencial,
-                    $periodStart,
-                    $periodEnd,
-                    $totalEarnings
+                // Construir URL de la API con filtro de fecha
+                $url = "{$baseUrl}{$studioUsername}/models/username/{$modelUsername}";
+                $url .= "?periodType=daily&periodDate={$fecha}";
+                
+                // Llamar a la API
+                $ch = curl_init();
+                curl_setopt_array($ch, [
+                    CURLOPT_URL => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT => $config['timeout'] ?? 30,
+                    CURLOPT_HTTPHEADER => [
+                        "API-Key: {$apiKey}",
+                        "Accept: application/json"
+                    ],
+                    CURLOPT_SSL_VERIFYPEER => true
                 ]);
                 
-                return [
-                    'success' => true,
-                    'message' => 'Registro insertado',
-                    'registros_insertados' => 1
-                ];
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($ch);
+                curl_close($ch);
+                
+                // Validar respuesta
+                if ($httpCode !== 200 || !$response) {
+                    $errores[] = "Modelo {$modelUsername}: " . ($curlError ?: "HTTP {$httpCode}");
+                    continue; // Continuar con el siguiente modelo
+                }
+                
+                $data = json_decode($response, true);
+                
+                if (!$data || !isset($data['totalEarnings'])) {
+                    $errores[] = "Modelo {$modelUsername}: Respuesta inválida";
+                    continue;
+                }
+                
+                $totalEarnings = floatval($data['totalEarnings']);
+                
+                // Si no hay earnings, continuar con el siguiente
+                if ($totalEarnings <= 0) {
+                    continue;
+                }
+                
+                // Preparar fechas
+                $periodStart = $fecha . ' 00:00:00';
+                $periodEnd = $fecha . ' 23:59:59';
+                
+                // Verificar si ya existe este registro
+                $stmtCheck = $this->db->prepare("
+                    SELECT id FROM ventas_strip
+                    WHERE id_credencial = :id_credencial
+                      AND period_start = :period_start
+                      AND period_end = :period_end
+                ");
+                $stmtCheck->execute([
+                    'id_credencial' => $credencial['id_credencial'],
+                    'period_start' => $periodStart,
+                    'period_end' => $periodEnd
+                ]);
+                $existe = $stmtCheck->fetch();
+                
+                if ($existe) {
+                    // Actualizar registro existente
+                    $stmtUpdate = $this->db->prepare("
+                        UPDATE ventas_strip
+                        SET total_earnings = :total_earnings,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE id = :id
+                    ");
+                    $stmtUpdate->execute([
+                        'total_earnings' => $totalEarnings,
+                        'id' => $existe['id']
+                    ]);
+                    $total_insertados++;
+                } else {
+                    // Insertar nuevo registro
+                    $stmtInsert = $this->db->prepare("
+                        INSERT INTO ventas_strip 
+                        (id_usuario, id_credencial, id_pagina, period_start, period_end, total_earnings)
+                        VALUES (:id_usuario, :id_credencial, 3, :period_start, :period_end, :total_earnings)
+                    ");
+                    $stmtInsert->execute([
+                        'id_usuario' => $credencial['id_usuario'],
+                        'id_credencial' => $credencial['id_credencial'],
+                        'period_start' => $periodStart,
+                        'period_end' => $periodEnd,
+                        'total_earnings' => $totalEarnings
+                    ]);
+                    $total_insertados++;
+                }
+            } // Fin del foreach de credenciales
+            
+            // Preparar mensaje final
+            $mensaje = $total_insertados > 0 
+                ? "Importados {$total_insertados} registro(s) para {$credenciales[0]['usuario_cuenta_estudio']}"
+                : "No se encontraron ventas para esta cuenta en la fecha {$fecha}";
+            
+            if (!empty($errores)) {
+                $mensaje .= ". Errores: " . implode(', ', $errores);
             }
+            
+            return [
+                'success' => $total_insertados > 0 || empty($errores),
+                'message' => $mensaje,
+                'registros_insertados' => $total_insertados
+            ];
             
         } catch (Exception $e) {
             error_log("Error en importarStripchatCuentaDia: " . $e->getMessage());
@@ -626,18 +644,18 @@ if (isset($_GET['action'])) {
                 
             case 'importarStripchatCuentaDia':
                 $fecha = $_POST['fecha'] ?? null;
-                $id_credencial = $_POST['id_credencial'] ?? null;
+                $id_cuenta_estudio = $_POST['id_cuenta_estudio'] ?? null;
                 
-                if (!$fecha || !$id_credencial) {
+                if (!$fecha || !$id_cuenta_estudio) {
                     echo json_encode([
                         'success' => false,
-                        'message' => 'Fecha y credencial requeridas',
+                        'message' => 'Fecha y cuenta estudio requeridas',
                         'registros_insertados' => 0
                     ], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
                 
-                $resultado = $controller->importarStripchatCuentaDia($fecha, $id_credencial);
+                $resultado = $controller->importarStripchatCuentaDia($fecha, $id_cuenta_estudio);
                 echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
                 break;
                 

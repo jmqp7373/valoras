@@ -64,18 +64,19 @@ if ($dias) {
     $fecha_desde = date('Y-m-d', strtotime("-{$dias} days"));
 }
 
-// Obtener cuentas estudio de Stripchat (id_pagina = 3)
+// Obtener SOLO cuentas estudio únicas de Stripchat (sin duplicados por credencial)
 $stmt = $db->prepare("
     SELECT DISTINCT 
         ce.id_cuenta_estudio,
-        ce.usuario_cuenta_estudio,
-        c.usuario as credencial_usuario,
-        c.id_credencial
+        ce.usuario_cuenta_estudio
     FROM cuentas_estudios ce
-    INNER JOIN credenciales c ON c.id_cuenta_estudio = ce.id_cuenta_estudio
     WHERE ce.id_pagina = 3 
       AND ce.estado = 1
-      AND c.eliminado = 0
+      AND EXISTS (
+          SELECT 1 FROM credenciales c 
+          WHERE c.id_cuenta_estudio = ce.id_cuenta_estudio 
+          AND c.eliminado = 0
+      )
     ORDER BY ce.usuario_cuenta_estudio
 ");
 $stmt->execute();
@@ -112,18 +113,22 @@ foreach ($dias_array as $dia) {
     ];
     
     foreach ($cuentas_stripchat as $cuenta) {
-        // Buscar ventas para esta cuenta en este día
+        // Buscar ventas para TODAS las credenciales de esta cuenta estudio en este día
+        // Esto suma automáticamente todos los modelos asociados a esta cuenta
         $stmt = $db->prepare("
             SELECT 
-                SUM(total_earnings) as total,
-                COUNT(*) as num_registros
-            FROM ventas_strip
-            WHERE id_credencial = :id_credencial
-              AND period_start >= :fecha_inicio
-              AND period_start <= :fecha_fin
+                SUM(vs.total_earnings) as total,
+                COUNT(*) as num_registros,
+                COUNT(DISTINCT vs.id_credencial) as num_modelos
+            FROM ventas_strip vs
+            INNER JOIN credenciales c ON c.id_credencial = vs.id_credencial
+            WHERE c.id_cuenta_estudio = :id_cuenta_estudio
+              AND c.eliminado = 0
+              AND vs.period_start >= :fecha_inicio
+              AND vs.period_start <= :fecha_fin
         ");
         $stmt->execute([
-            'id_credencial' => $cuenta['id_credencial'],
+            'id_cuenta_estudio' => $cuenta['id_cuenta_estudio'],
             'fecha_inicio' => $fecha_inicio,
             'fecha_fin' => $fecha_fin
         ]);
@@ -131,13 +136,14 @@ foreach ($dias_array as $dia) {
         
         $total = $resultado['total'] ?? 0;
         $num_registros = $resultado['num_registros'] ?? 0;
+        $num_modelos = $resultado['num_modelos'] ?? 0;
         
         $ventas_resumen[$dia]['cuentas'][] = [
-            'id_credencial' => $cuenta['id_credencial'],
+            'id_cuenta_estudio' => $cuenta['id_cuenta_estudio'],
             'nombre' => $cuenta['usuario_cuenta_estudio'],
-            'credencial_usuario' => $cuenta['credencial_usuario'],
             'total' => floatval($total),
             'num_registros' => intval($num_registros),
+            'num_modelos' => intval($num_modelos),
             'importado' => $num_registros > 0
         ];
         
@@ -620,7 +626,13 @@ ob_start();
                     <div class="cuenta-card-header">
                         <div class="cuenta-info">
                             <h4 class="cuenta-nombre-titulo">🏢 <?= htmlspecialchars($cuenta['nombre']) ?></h4>
-                            <div class="cuenta-credencial">Credencial: <?= htmlspecialchars($cuenta['credencial_usuario']) ?></div>
+                            <div class="cuenta-credencial">
+                                <?php if ($cuenta['num_modelos'] > 0): ?>
+                                    <?= $cuenta['num_modelos'] ?> modelo<?= $cuenta['num_modelos'] > 1 ? 's' : '' ?> activo<?= $cuenta['num_modelos'] > 1 ? 's' : '' ?>
+                                <?php else: ?>
+                                    Sin modelos con datos
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="cuenta-estado-container">
                             <span class="estado-badge <?= $cuenta['importado'] ? 'estado-importado' : 'estado-pendiente' ?>">
@@ -652,9 +664,8 @@ ob_start();
                         <div class="cuenta-actions">
                             <button class="btn-importar-cuenta" 
                                     data-fecha="<?= $dia_data['fecha'] ?>"
-                                    data-id-credencial="<?= $cuenta['id_credencial'] ?>"
-                                    data-nombre="<?= htmlspecialchars($cuenta['nombre']) ?>"
-                                    <?= $cuenta['importado'] ? '' : '' ?>>
+                                    data-id-cuenta="<?= $cuenta['id_cuenta_estudio'] ?>"
+                                    data-nombre="<?= htmlspecialchars($cuenta['nombre']) ?>">
                                 <?= $cuenta['importado'] ? '🔄 Re-importar' : '📥 Importar ventas' ?>
                             </button>
                         </div>
@@ -717,11 +728,11 @@ document.getElementById('btnImportarPendientes')?.addEventListener('click', asyn
     }
 });
 
-// Importar ventas de una cuenta específica en un día específico
+// Importar ventas de una cuenta estudio específica en un día específico
 document.querySelectorAll('.btn-importar-cuenta').forEach(btn => {
     btn.addEventListener('click', async function() {
         const fecha = this.dataset.fecha;
-        const idCredencial = this.dataset.idCredencial;
+        const idCuenta = this.dataset.idCuenta;
         const nombre = this.dataset.nombre;
         const mensajeDiv = document.getElementById('mensajeImportacion');
         
@@ -734,7 +745,7 @@ document.querySelectorAll('.btn-importar-cuenta').forEach(btn => {
             const response = await fetch('../../controllers/VentasController.php?action=importarStripchatCuentaDia', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `fecha=${fecha}&id_credencial=${idCredencial}`
+                body: `fecha=${fecha}&id_cuenta_estudio=${idCuenta}`
             });
             
             const data = await response.json();

@@ -245,7 +245,7 @@ try {
                                 <li>
                                     <a class="dropdown-item" href="<?php echo htmlspecialchars($ruta_modulo); ?>">
                                         <?php if (!empty($modulo['icono'])): ?>
-                                            <span style="margin-right: 8px;"><?php echo htmlspecialchars($modulo['icono']); ?></span>
+                                            <span style="margin-right: 8px;"><?php echo $modulo['icono']; ?></span>
                                         <?php endif; ?>
                                         <?php echo htmlspecialchars($modulo['titulo']); ?>
                                     </a>

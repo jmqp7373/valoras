@@ -73,7 +73,7 @@ class CredencialesController {
                 INNER JOIN paginas p ON p.id_pagina = c.id_pagina
                 INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
                 INNER JOIN estudios e ON e.id_estudio = ce.id_estudio
-                INNER JOIN estudio_casas ec ON ec.id_estudio_casa = e.id_estudio_casa
+                INNER JOIN estudios_casas ec ON ec.id_estudio_casa = e.id_estudio_casa
                 WHERE 1=1
             ";
 
@@ -187,7 +187,7 @@ class CredencialesController {
      * Obtener todas las casas de estudio
      */
     private function obtenerEstudioCasas() {
-        $stmt = $this->conn->query("SELECT id_estudio_casa, nombre_estudio_casa FROM estudio_casas ORDER BY nombre_estudio_casa");
+        $stmt = $this->conn->query("SELECT id_estudio_casa, nombre_estudio_casa FROM estudios_casas ORDER BY nombre_estudio_casa");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

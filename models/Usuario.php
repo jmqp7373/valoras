@@ -124,10 +124,10 @@ class Usuario {
 
         $query = "INSERT INTO " . $this->table_name . " 
                  (cedula, nombres, apellidos, usuario, password, codigo_pais, celular, email, 
-                  id_estudio, id_referente, estado, inmune_asistencia, nivel) 
+                  id_estudio, id_referente, estado, inmune_asistencia, nivel_orden) 
                  VALUES 
                  (:cedula, :nombres, :apellidos, :usuario, :password, :codigo_pais, :celular, :email,
-                  :id_estudio, :id_referente, :estado, :inmune_asistencia, :nivel)";
+                  :id_estudio, :id_referente, :estado, :inmune_asistencia, :nivel_orden)";
 
         $stmt = $this->conn->prepare($query);
 
@@ -149,7 +149,7 @@ class Usuario {
         $id_referente = 0; // Sin referente por defecto  
         $estado = 1; // Usuario activo
         $inmune_asistencia = 0; // Sin inmunidad por defecto
-        $nivel = 1; // Nivel básico por defecto
+        $nivel_orden = 1; // Nivel básico por defecto
 
         // Bind valores
         $stmt->bindParam(':cedula', $this->cedula);
@@ -164,7 +164,7 @@ class Usuario {
         $stmt->bindParam(':id_referente', $id_referente);
         $stmt->bindParam(':estado', $estado);
         $stmt->bindParam(':inmune_asistencia', $inmune_asistencia);
-        $stmt->bindParam(':nivel', $nivel);
+        $stmt->bindParam(':nivel_orden', $nivel_orden);
 
         try {
             if($stmt->execute()) {

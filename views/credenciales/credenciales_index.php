@@ -60,7 +60,7 @@ if (!isset($estudios)) {
 
 if (!isset($casas)) {
     try {
-        $stmt = $db->query("SELECT id_estudio_casa, nombre_estudio_casa FROM estudio_casas ORDER BY nombre_estudio_casa");
+        $stmt = $db->query("SELECT id_estudio_casa, nombre_estudio_casa FROM estudios_casas ORDER BY nombre_estudio_casa");
         $casas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error cargando casas: " . $e->getMessage());

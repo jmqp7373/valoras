@@ -72,7 +72,7 @@ class CredencialesController {
                 INNER JOIN usuarios u ON u.id_usuario = c.id_usuario
                 INNER JOIN paginas p ON p.id_pagina = c.id_pagina
                 INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
-                INNER JOIN estudios e ON e.id_estudio = ce.id_estudio
+                INNER JOIN estudios e ON e.id_estudio = u.id_estudio
                 INNER JOIN estudios_casas ec ON ec.id_estudio_casa = e.id_estudio_casa
                 WHERE 1=1
             ";

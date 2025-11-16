@@ -52,7 +52,7 @@ class CredencialesController {
      * Endpoint AJAX para listar credenciales con filtros y paginación
      */
     public function listarAjax() {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
         
         try {
             // Leer parámetros
@@ -153,14 +153,14 @@ class CredencialesController {
                 'pagina_actual' => $pagina,
                 'total_paginas' => $totalPaginas,
                 'total_registros' => $totalRegistros
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
 
         } catch (Exception $e) {
             error_log("Error en listarAjax: " . $e->getMessage());
             echo json_encode([
                 'success' => false,
                 'message' => 'Error al cargar credenciales: ' . $e->getMessage()
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
         }
     }
 

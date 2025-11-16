@@ -6,6 +6,13 @@
  * Fecha: 2025-11-15
  */
 
+// Activar errores para debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__ . '/../../config/database.php';
+startSessionSafely();
+
 // Verificar autenticación
 if(!isLoggedIn()) {
     header('Location: ../login/login.php');
@@ -19,12 +26,62 @@ $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 // OBTENER INFORMACIÓN DEL MÓDULO DESDE LA BD
 // ============================================
 try {
-    $stmt = $this->conn->prepare("SELECT titulo, subtitulo, icono FROM modulos WHERE ruta_completa = ? AND activo = 1 LIMIT 1");
+    $db = getDBConnection();
+    $stmt = $db->prepare("SELECT titulo, subtitulo, icono FROM modulos WHERE ruta_completa = ? AND activo = 1 LIMIT 1");
     $stmt->execute(['views\credenciales\credenciales_index.php']);
     $modulo = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Error obteniendo módulo: " . $e->getMessage());
     $modulo = null;
+}
+
+// ============================================
+// CARGAR DATOS PARA FILTROS SI NO VIENEN DEL CONTROLADOR
+// ============================================
+if (!isset($paginas)) {
+    try {
+        $stmt = $db->query("SELECT id_pagina, nombre_pagina, color_pagina FROM paginas ORDER BY nombre_pagina");
+        $paginas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error cargando paginas: " . $e->getMessage());
+        $paginas = [];
+    }
+}
+
+if (!isset($estudios)) {
+    try {
+        $stmt = $db->query("SELECT id_estudio, nombre_estudio FROM estudios ORDER BY nombre_estudio");
+        $estudios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error cargando estudios: " . $e->getMessage());
+        $estudios = [];
+    }
+}
+
+if (!isset($casas)) {
+    try {
+        $stmt = $db->query("SELECT id_estudio_casa, nombre_estudio_casa FROM estudio_casas ORDER BY nombre_estudio_casa");
+        $casas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error cargando casas: " . $e->getMessage());
+        $casas = [];
+    }
+}
+
+if (!isset($cuentasEstudios)) {
+    try {
+        $stmt = $db->query("
+            SELECT DISTINCT ce.id_cuenta_estudio, ce.usuario_cuenta_estudio, p.nombre_pagina
+            FROM cuentas_estudios ce
+            INNER JOIN paginas p ON p.id_pagina = ce.id_pagina
+            WHERE ce.estado = 1
+            ORDER BY p.nombre_pagina, ce.usuario_cuenta_estudio
+        ");
+        $cuentasEstudios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error cargando cuentas estudios: " . $e->getMessage());
+        $cuentasEstudios = [];
+    }
 }
 
 // ============================================

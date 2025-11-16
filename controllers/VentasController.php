@@ -453,7 +453,7 @@ class VentasController {
      */
     public function importarPeriodoActual() {
         try {
-            set_time_limit(300);
+            set_time_limit(3600); // 1 hora para procesar todos los modelos
             
             $config = require __DIR__ . '/../config/configStripchat.php';
             
@@ -566,27 +566,25 @@ class VentasController {
                 ];
             }
             
-            // Obtener modelos activos (máximo 100)
+            // Obtener TODAS las credenciales activas de la cuenta estudio
+            // Solo filtrar por usuarios activos según tabla usuarios y usuarios_estados
             $stmtModelos = $this->db->prepare("
                 SELECT DISTINCT
                     c.id_credencial,
                     c.usuario as model_username,
-                    c.id_usuario
+                    c.id_usuario,
+                    u.nombre,
+                    u.apellidos,
+                    ue.nombre_estado
                 FROM credenciales c
-                LEFT JOIN (
-                    SELECT id_credencial, MAX(updated_at) as ultima_actualizacion
-                    FROM ventas_strip
-                    GROUP BY id_credencial
-                ) vs ON vs.id_credencial = c.id_credencial
+                INNER JOIN usuarios u ON u.id_usuario = c.id_usuario
+                INNER JOIN usuarios_estados ue ON ue.id_usuario_estado = u.id_usuario_estado
                 WHERE c.id_cuenta_estudio = :id_cuenta_estudio
                 AND c.id_pagina = 3
                 AND c.eliminado = 0
-                AND (
-                    vs.ultima_actualizacion >= DATE_SUB(NOW(), INTERVAL 60 DAY)
-                    OR vs.ultima_actualizacion IS NULL
-                )
+                AND u.eliminado = 0
+                AND ue.nombre_estado = 'Activo'
                 ORDER BY c.id_credencial
-                LIMIT 100
             ");
             $stmtModelos->execute([':id_cuenta_estudio' => $id_cuenta_estudio]);
             $modelos = $stmtModelos->fetchAll(PDO::FETCH_ASSOC);
@@ -612,8 +610,16 @@ class VentasController {
             $studioUsername = $apiConfig['studio_username'];
             $apiKey = $apiConfig['api_key'];
             
-            foreach ($modelos as $modelo) {
+            $totalModelos = count($modelos);
+            error_log("Iniciando importación de {$totalModelos} modelos activos para {$cuentaEstudio['usuario_cuenta_estudio']}");
+            
+            foreach ($modelos as $index => $modelo) {
                 try {
+                    // Log de progreso cada 50 modelos
+                    if ($index % 50 === 0) {
+                        error_log("Procesando modelo " . ($index + 1) . "/{$totalModelos}: {$modelo['model_username']}");
+                    }
+                    
                     // Llamar a la API con currentPayment
                     $url = "{$baseUrl}/username/{$studioUsername}/models/username/{$modelo['model_username']}?periodType=currentPayment";
                     

@@ -301,7 +301,7 @@ class AuthController {
                         'message' => "Debe esperar {$remaining} segundos antes de reenviar el código",
                         'remaining_time' => $remaining
                     ];
-                return ['success' => false, 'message' => 'Cédula no válida'];
+                }
             }
             
             try {

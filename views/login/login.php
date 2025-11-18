@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
+require_once '../../config/database.php';
 require_once '../../controllers/login/AuthController.php';
 
 $authController = new AuthController();

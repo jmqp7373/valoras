@@ -79,9 +79,32 @@ class Permisos {
     private function sincronizarModulos($modulosDetectados) {
         try {
             foreach ($modulosDetectados as $clave => $rutaCompleta) {
-                // Extraer categoría
-                preg_match('/views\\\\([^\\\\]+)/', $rutaCompleta, $matches);
-                $categoria = $matches[1] ?? 'sistema';
+                // Extraer categoría correctamente
+                // Ejemplos:
+                // views\admin\permissionsPanel.php -> admin
+                // views\admin\credenciales\credencialesGestion.php -> credenciales
+                // views\login\login.php -> login
+                
+                $categoria = 'sistema';
+                
+                // Dividir la ruta por backslashes
+                $partes = explode('\\', $rutaCompleta);
+                
+                // Buscar el índice de 'views'
+                $indexViews = array_search('views', $partes);
+                
+                if ($indexViews !== false) {
+                    // Si hay al menos 3 niveles después de views (views\carpeta1\carpeta2\archivo.php)
+                    // usar la segunda carpeta (carpeta2)
+                    if (isset($partes[$indexViews + 2]) && strpos($partes[$indexViews + 2], '.php') === false) {
+                        $categoria = $partes[$indexViews + 2];
+                    }
+                    // Si solo hay 2 niveles (views\carpeta\archivo.php)
+                    // usar la primera carpeta
+                    elseif (isset($partes[$indexViews + 1])) {
+                        $categoria = $partes[$indexViews + 1];
+                    }
+                }
                 
                 // Insertar o actualizar módulo
                 $sql = "INSERT INTO modulos (clave, ruta_completa, categoria, activo) 
@@ -110,8 +133,11 @@ class Permisos {
             // Primero escanear archivos físicos para sincronizar
             $modulosArchivos = $this->obtenerModulos();
             
+            // Corrección única: Arreglar categoría del módulo de credenciales
+            $this->conn->exec("UPDATE modulos SET categoria = 'credenciales' WHERE clave = 'views_admin_credenciales_credencialesGestion.php' AND categoria = 'admin'");
+            
             // Obtener TODOS los módulos de la BD ordenados alfabéticamente
-            $sql = "SELECT clave, ruta_completa, titulo, categoria, exento 
+            $sql = "SELECT clave, ruta_completa, titulo, categoria, exento, icono 
                     FROM modulos 
                     WHERE activo = 1
                     ORDER BY categoria ASC, ruta_completa ASC";
@@ -126,6 +152,7 @@ class Permisos {
                 $rutaDB = $moduloDB['ruta_completa'];
                 $titulo = $moduloDB['titulo'];
                 $exento = (int)$moduloDB['exento'];
+                $icono = $moduloDB['icono'] ?? null;
                 
                 // Verificar si el archivo físico existe
                 $rutaFisica = __DIR__ . '/../' . str_replace('\\', '/', $rutaDB);
@@ -136,7 +163,8 @@ class Permisos {
                     'ruta' => $rutaDB,
                     'titulo' => $titulo,
                     'archivo_existe' => $archivoExiste,
-                    'exento' => $exento
+                    'exento' => $exento,
+                    'icono' => $icono
                 ];
             }
             

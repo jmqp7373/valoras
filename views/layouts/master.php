@@ -42,6 +42,31 @@ if (!isset($content)) {
 if (!isset($user_nombres)) $user_nombres = $_SESSION['user_nombres'] ?? '';
 if (!isset($user_apellidos)) $user_apellidos = $_SESSION['user_apellidos'] ?? '';
 
+// FALLBACK: Si los datos de sesión están vacíos pero hay user_id, obtenerlos de la BD
+if ((empty($user_nombres) || empty($user_apellidos)) && isset($_SESSION['user_id'])) {
+    try {
+        $db_connection = getDBConnection();
+        $stmt = $db_connection->prepare("
+            SELECT u.nombres, u.apellidos, ui.email 
+            FROM usuarios u 
+            LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
+            WHERE u.id_usuario = ?
+        ");
+        $stmt->execute([$_SESSION['user_id']]);
+        $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($user_data) {
+            $user_nombres = $_SESSION['user_nombres'] = $user_data['nombres'];
+            $user_apellidos = $_SESSION['user_apellidos'] = $user_data['apellidos'];
+            if (!isset($_SESSION['user_email']) && !empty($user_data['email'])) {
+                $_SESSION['user_email'] = $user_data['email'];
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Error obteniendo datos de usuario en master.php: " . $e->getMessage());
+    }
+}
+
 // Variables opcionales con valores por defecto
 if (!isset($additional_css)) $additional_css = [];
 if (!isset($additional_js)) $additional_js = [];
@@ -122,6 +147,9 @@ if (!isset($base_path)) {
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    
+    <!-- Script para el menú de usuario del header -->
+    <script src="<?php echo htmlspecialchars($base_path); ?>assets/js/header-dropdown.js?v=<?php echo time(); ?>"></script>
     
     <!-- Scripts adicionales específicos de la página -->
     <?php foreach ($additional_js as $js_file): ?>

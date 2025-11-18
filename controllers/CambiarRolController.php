@@ -27,7 +27,7 @@ try {
     
     // Verificar que el usuario actual es Superadmin (nivel_orden = 1)
     $stmt = $db->prepare("
-        SELECT r.nombre, r.nivel_orden, u.nivel_orden as usuario_nivel_orden
+        SELECT r.id as rol_id, r.nombre, r.nivel_orden
         FROM usuarios u 
         JOIN roles r ON u.id_rol = r.id 
         WHERE u.id_usuario = ?
@@ -41,7 +41,7 @@ try {
     // Usuario puede cambiar de rol si:
     // 1. Tiene nivel_orden = 1 (es Superadmin original)
     // 2. O tiene rol_original_id en sesión (ya está en modo prueba)
-    $es_superadmin = ($user_data && ($user_data['usuario_nivel_orden'] == 1 || $user_data['nivel_orden'] == 1));
+    $es_superadmin = ($user_data && $user_data['nivel_orden'] == 1);
     $esta_en_modo_prueba = isset($_SESSION['rol_original_id']);
     
     if (!$es_superadmin && !$esta_en_modo_prueba) {
@@ -51,7 +51,6 @@ try {
             'success' => false, 
             'message' => 'Solo Superadmin puede cambiar de rol',
             'debug' => [
-                'usuario_nivel_orden' => $user_data['usuario_nivel_orden'] ?? null,
                 'rol_nivel_orden' => $user_data['nivel_orden'] ?? null,
                 'modo_prueba' => $esta_en_modo_prueba
             ]
@@ -88,11 +87,10 @@ try {
     
     // Guardar el rol original si no existe
     if (!isset($_SESSION['rol_original_id'])) {
-        $stmt = $db->prepare("SELECT id_rol, nivel_orden FROM usuarios WHERE id_usuario = ?");
+        $stmt = $db->prepare("SELECT id_rol FROM usuarios WHERE id_usuario = ?");
         $stmt->execute([$user_id]);
         $original_data = $stmt->fetch(PDO::FETCH_ASSOC);
         $_SESSION['rol_original_id'] = $original_data['id_rol'];
-        $_SESSION['rol_original_nivel_orden'] = $original_data['nivel_orden'];
         $_SESSION['rol_original_nombre'] = $user_data['nombre'];
         
         error_log("Rol original guardado: " . print_r($original_data, true));
@@ -101,11 +99,10 @@ try {
     // Cambiar el rol en la sesión (temporal)
     $_SESSION['rol_prueba_id'] = $rol_id;
     $_SESSION['rol_prueba_nombre'] = $rol_nombre;
-    $_SESSION['rol_prueba_nivel_orden'] = $rol['nivel_orden'];
     
     // Actualizar temporalmente el rol del usuario en la BD
-    $stmt = $db->prepare("UPDATE usuarios SET id_rol = ?, nivel_orden = ? WHERE id_usuario = ?");
-    $result = $stmt->execute([$rol_id, $rol['nivel_orden'], $user_id]);
+    $stmt = $db->prepare("UPDATE usuarios SET id_rol = ? WHERE id_usuario = ?");
+    $result = $stmt->execute([$rol_id, $user_id]);
     
     error_log("UPDATE resultado: " . ($result ? 'SUCCESS' : 'FAILED'));
     error_log("Filas afectadas: " . $stmt->rowCount());

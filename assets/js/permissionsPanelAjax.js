@@ -121,7 +121,7 @@ function renderizarTabla() {
 
 // Generar HTML de una fila de módulo
 function generarFilaModulo(modulo, index) {
-    const { clave, rutaMostrar, nombreDescriptivo, categoria, archivoExiste, exento } = modulo;
+    const { clave, rutaMostrar, nombreDescriptivo, categoria, archivoExiste, exento, icono } = modulo;
     
     // Normalizar exento a booleano para comparaciones
     const esExento = parseInt(exento) === 1;
@@ -131,19 +131,36 @@ function generarFilaModulo(modulo, index) {
     
     let html = `<tr data-modulo-clave="${escapeHtml(clave)}" class="${claseExento}">`;
     
-    // Columna de archivo/ruta
+    // ====== COLUMNA DE CATEGORÍA ======
+    const estiloCategoria = esExento 
+        ? "min-width: 120px; max-width: 120px; padding: 14px; background: linear-gradient(135deg, #4a4a4a, #6a6a6a); color: white; position: sticky; left: 0; z-index: 3; text-align: center; opacity: 0.7; border-right: 2px solid rgba(255,255,255,0.2);"
+        : "min-width: 120px; max-width: 120px; padding: 14px; background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; position: sticky; left: 0; z-index: 3; text-align: center; border-right: 2px solid rgba(255,255,255,0.2);";
+    
+    html += `
+        <td class="align-middle text-center" style="${estiloCategoria}">
+            <span class="badge badge-${categoria.toLowerCase()}" style="font-size: 0.75rem; padding: 6px 12px; font-weight: 600; text-transform: uppercase;">
+                ${categoria.toUpperCase()}
+            </span>
+        </td>
+    `;
+    
+    // ====== COLUMNA DE ARCHIVO/RUTA (con icono integrado) ======
+    const iconoMostrar = icono || '❓';
     const estiloColumna = esExento 
-        ? "min-width: 400px; max-width: 500px; padding: 14px; background: linear-gradient(135deg, #4a4a4a, #6a6a6a); color: white; position: sticky; left: 0; z-index: 2; text-align: left; opacity: 0.7;"
-        : "min-width: 400px; max-width: 500px; padding: 14px; background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; position: sticky; left: 0; z-index: 2; text-align: left;";
+        ? "min-width: 400px; max-width: 500px; padding: 14px; background: linear-gradient(135deg, #4a4a4a, #6a6a6a); color: white; position: sticky; left: 120px; z-index: 2; text-align: left; opacity: 0.7;"
+        : "min-width: 400px; max-width: 500px; padding: 14px; background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; position: sticky; left: 120px; z-index: 2; text-align: left;";
     
     html += `
         <td class="fw-semibold align-middle" style="${estiloColumna}">
             <div class="modulo-info">
-                <span class="badge badge-${categoria.toLowerCase()} me-2" style="flex-shrink: 0;" title="Categoría: ${categoria}">
-                    ${categoria.toUpperCase()}
-                </span>
                 ${esExento ? '<span class="badge bg-secondary me-2" style="flex-shrink: 0;">EXENTO</span>' : ''}
                 <div style="display: flex; align-items: center; flex: 1; gap: 8px;">
+                    <div class="icono-editable" 
+                         data-clave="${escapeHtml(clave)}"
+                         style="font-size: 1.5rem; cursor: pointer; transition: all 0.2s ease; user-select: none; flex-shrink: 0;"
+                         title="Click para cambiar icono">
+                        ${iconoMostrar}
+                    </div>
                     <div style="flex: 1;">
     `;
     
@@ -343,9 +360,18 @@ function inicializarEventListeners() {
         });
     });
     
+    // Event listener para edición de iconos
+    document.querySelectorAll('.icono-editable').forEach(div => {
+        div.addEventListener('click', function() {
+            const clave = this.getAttribute('data-clave');
+            mostrarSelectorIcono(clave, this);
+        });
+    });
+    
     console.log('✅ Event listeners inicializados');
     console.log('   - Inputs nombre:', document.querySelectorAll('.nombre-descriptivo-input, .sin-nombre-input').length);
     console.log('   - Checkboxes permisos:', document.querySelectorAll('.permiso-checkbox').length);
+    console.log('   - Iconos editables:', document.querySelectorAll('.icono-editable').length);
 }
 
 // Función para toggle de exentos (separada para evitar duplicación de listeners)
@@ -640,6 +666,198 @@ function mostrarError(mensaje) {
     document.body.appendChild(alerta);
     
     setTimeout(() => alerta.remove(), 5000);
+}
+
+// Mostrar selector de iconos
+function mostrarSelectorIcono(clave, divIcono) {
+    // Lista extendida de 250+ iconos organizados por categorías
+    const iconosDisponibles = [
+        // Seguridad y Acceso (20)
+        '🔐', '🔑', '🔒', '🔓', '🔏', '🗝️', '🛡️', '🚪', '🚫', '⛔',
+        '🔞', '🆔', '🎫', '🏷️', '🔖', '📛', '⚠️', '🚨', '🚦', '🔱',
+        
+        // Personas y Roles (20)
+        '👤', '👥', '👨‍💼', '👩‍💼', '👑', '👮', '🧑‍💻', '👨‍🔧', '👩‍🔬', '🧑‍🎨',
+        '👨‍🏫', '👩‍⚕️', '🧑‍🍳', '👨‍🌾', '👩‍✈️', '🧑‍🚀', '🦸', '🧙', '🤵', '👰',
+        
+        // Comunicación (20)
+        '📧', '✉️', '📨', '📩', '📮', '📪', '📫', '📬', '📭', '📯',
+        '📞', '☎️', '📱', '📲', '📟', '📠', '💬', '💭', '🗨️', '🗯️',
+        
+        // Documentos y Archivos (25)
+        '📄', '📃', '📑', '📜', '📋', '📊', '📈', '📉', '📝', '📁',
+        '📂', '🗂️', '🗃️', '🗄️', '📕', '📗', '📘', '📙', '📚', '📓',
+        '📔', '📒', '📰', '🗞️', '📑',
+        
+        // Finanzas y Dinero (20)
+        '💰', '💵', '💴', '💶', '💷', '🪙', '💸', '💳', '🏧', '💹',
+        '📊', '📈', '📉', '💼', '🏦', '🤑', '💲', '💱', '🧾', '🪪',
+        
+        // Tecnología (25)
+        '💻', '🖥️', '⌨️', '🖱️', '🖨️', '💾', '💿', '📀', '🎮', '🕹️',
+        '📡', '🔌', '🔋', '🪫', '📶', '📳', '📴', '🔆', '🔅', '💡',
+        '🔦', '🕯️', '🪔', '📻', '📺',
+        
+        // Herramientas y Configuración (20)
+        '⚙️', '🛠️', '🔧', '🔨', '⚒️', '🛁', '⛏️', '🪛', '🔩', '🗜️',
+        '⚡', '🔥', '💧', '🌊', '🧰', '🪓', '⚔️', '🗡️', '🏹', '🪃',
+        
+        // Organización y Gestión (20)
+        '📅', '📆', '🗓️', '📇', '🗒️', '📌', '📍', '📎', '🖇️', '📏',
+        '📐', '✂️', '🖊️', '🖍️', '✏️', '📝', '✍️', '🖌️', '🖍️', '📏',
+        
+        // Navegación y Ubicación (15)
+        '🧭', '🗺️', '🌐', '🌍', '🌎', '🌏', '🏠', '🏢', '🏛️', '🏗️',
+        '🏭', '🏪', '🏬', '🏦', '🏛️',
+        
+        // Símbolos y Estados (20)
+        '✅', '❌', '✔️', '✖️', '❗', '❓', '⁉️', '‼️', '⭐', '🌟',
+        '✨', '💫', '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '⚫', '⚪',
+        
+        // Multimedia y Arte (20)
+        '🎨', '🖼️', '🎭', '🎪', '🎬', '🎤', '🎧', '🎼', '🎵', '🎶',
+        '🎹', '🥁', '🎷', '🎺', '🎸', '🪕', '🎻', '📷', '📸', '📹',
+        
+        // Educación y Ciencia (20)
+        '📚', '📖', '📕', '📗', '📘', '📙', '🎓', '🔬', '🔭', '⚗️',
+        '🧪', '🧬', '🔢', '➕', '➖', '✖️', '➗', '🔣', '💯', '📐',
+        
+        // Premios y Logros (15)
+        '🏆', '🥇', '🥈', '🥉', '🏅', '🎖️', '🎗️', '🎁', '🎀', '🎊',
+        '🎉', '🎈', '🎂', '🍾', '🥂',
+        
+        // Tiempo y Clima (10)
+        '⏰', '⏱️', '⏲️', '⏳', '⌛', '🕐', '🕑', '🕒', '🕓', '🕔',
+        
+        // Transporte (10)
+        '🚀', '✈️', '🚁', '🚂', '🚗', '🚕', '🚙', '🚌', '🚎', '🏎️',
+        
+        // Comida y Bebida (10)
+        '🍕', '🍔', '🍟', '🌭', '🥪', '🌮', '🌯', '🥙', '🍿', '🧈'
+    ];
+    
+    // Crear modal simple con SweetAlert2 si está disponible
+    if (typeof Swal !== 'undefined') {
+        const html = `
+            <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; max-width: 600px; max-height: 400px; overflow-y: auto; margin: 0 auto; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                ${iconosDisponibles.map(icono => `
+                    <button type="button" 
+                            class="btn-icono-selector" 
+                            data-icono="${icono}"
+                            style="font-size: 1.3rem; padding: 6px; border: 2px solid #dee2e6; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s ease;"
+                            onmouseover="this.style.borderColor='#6A1B1B'; this.style.backgroundColor='#f8f9fa'; this.style.transform='scale(1.15)';"
+                            onmouseout="this.style.borderColor='#dee2e6'; this.style.backgroundColor='white'; this.style.transform='scale(1)';">
+                        ${icono}
+                    </button>
+                `).join('')}
+            </div>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #6A1B1B;">
+                    O escribe un emoji personalizado:
+                </label>
+                <input type="text" 
+                       id="inputIconoPersonalizado" 
+                       maxlength="2"
+                       placeholder="Pega aquí un emoji..."
+                       style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1.2rem; text-align: center;">
+            </div>
+        `;
+        
+        Swal.fire({
+            title: 'Selecciona un Icono',
+            html: html,
+            showCancelButton: true,
+            confirmButtonText: 'Usar Personalizado',
+            cancelButtonText: 'Cancelar',
+            customClass: {
+                confirmButton: 'btn btn-primary',
+                cancelButton: 'btn btn-secondary',
+                actions: 'swal2-actions-custom'
+            },
+            buttonsStyling: false,
+            width: 700,
+            didOpen: () => {
+                // Event listeners para los botones de iconos
+                document.querySelectorAll('.btn-icono-selector').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const icono = this.getAttribute('data-icono');
+                        Swal.close();
+                        guardarIcono(clave, icono, divIcono);
+                    });
+                });
+            },
+            preConfirm: () => {
+                const input = document.getElementById('inputIconoPersonalizado');
+                const icono = input.value.trim();
+                if (icono) {
+                    return icono;
+                } else {
+                    Swal.showValidationMessage('Por favor escribe un emoji');
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                guardarIcono(clave, result.value, divIcono);
+            }
+        });
+    } else {
+        // Fallback sin SweetAlert2: prompt simple
+        const nuevoIcono = prompt('Escribe un emoji para usar como icono:', divIcono.textContent.trim());
+        if (nuevoIcono && nuevoIcono.trim()) {
+            guardarIcono(clave, nuevoIcono.trim(), divIcono);
+        }
+    }
+}
+
+// Guardar icono seleccionado
+async function guardarIcono(clave, icono, divIcono) {
+    console.log('💾 Guardando icono:', { clave, icono });
+    
+    const iconoAnterior = divIcono.textContent.trim();
+    
+    // Actualizar UI optimísticamente
+    divIcono.textContent = icono;
+    divIcono.style.opacity = '0.5';
+    
+    try {
+        const formData = new FormData();
+        formData.append('accion', 'actualizar_icono');
+        formData.append('clave', clave);
+        formData.append('icono', icono);
+        formData.append('csrf_token', window.csrfToken);
+        
+        const response = await fetch('../../controllers/ModulosController.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Icono actualizado correctamente');
+            
+            // Actualizar datos globales
+            const modulo = modulosData.find(m => m.clave === clave);
+            if (modulo) {
+                modulo.icono = icono;
+            }
+            
+            divIcono.style.opacity = '1';
+            mostrarMensajeExito('✓ Icono actualizado');
+            
+        } else {
+            throw new Error(data.message || 'Error al actualizar');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        
+        // Revertir icono
+        divIcono.textContent = iconoAnterior;
+        divIcono.style.opacity = '1';
+        
+        mostrarError('Error al actualizar el icono: ' + error.message);
+    }
 }
 
 // Mostrar estadísticas en consola

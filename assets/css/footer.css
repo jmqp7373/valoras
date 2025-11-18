@@ -12,11 +12,11 @@
 }
 
 .footer-content {
-    max-width: 1200px !important;
+    max-width: 1400px !important;
     margin: 0 auto !important;
     padding: 0 2rem !important;
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
     gap: 2rem !important;
 }
 
@@ -24,7 +24,10 @@
     color: #ee6f92 !important;
     margin-bottom: 1rem !important;
     font-family: 'Poppins', sans-serif !important;
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
 }
 
 .footer-section p {
@@ -46,26 +49,47 @@
 .footer-section ul li a {
     color: #E5E5E5 !important;
     text-decoration: none !important;
-    transition: color 0.3s !important;
+    transition: all 0.3s !important;
     font-family: 'Poppins', sans-serif !important;
+    font-size: 0.9rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
 .footer-section ul li a:hover {
     color: #ee6f92 !important;
+    transform: translateX(5px) !important;
+}
+
+.footer-icon {
+    font-size: 1.1rem !important;
+    flex-shrink: 0 !important;
 }
 
 .footer-copyright-section {
     width: 100% !important;
     text-align: center !important;
-    padding-top: 1.5rem !important;
-    margin-top: 1.5rem !important;
+    padding-top: 2rem !important;
+    margin-top: 2rem !important;
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .footer-copyright {
     margin: 0 !important;
-    font-size: 0.9rem !important;
-    color: #999 !important;
+    font-size: 0.95rem !important;
+    color: #E5E5E5 !important;
+    font-family: 'Poppins', sans-serif !important;
+    line-height: 2 !important;
+}
+
+.footer-copyright strong {
+    color: #ee6f92 !important;
+    font-weight: 600 !important;
+}
+
+.footer-copyright br {
+    margin: 0.5rem 0 !important;
 }
 
 /* Responsive */

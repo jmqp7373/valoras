@@ -83,6 +83,29 @@ if ($accion === 'marcar_eliminado') {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error al actualizar estado exento']);
     }
+} elseif ($accion === 'actualizar_icono') {
+    // Actualizar icono del módulo
+    $icono = $_POST['icono'] ?? '';
+    
+    try {
+        $stmt = $db->prepare("UPDATE modulos SET icono = ? WHERE clave = ?");
+        $resultado = $stmt->execute([$icono, $clave]);
+        
+        if ($resultado) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Icono actualizado correctamente',
+                'icono' => $icono
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error al actualizar el icono']);
+        }
+    } catch (PDOException $e) {
+        error_log("Error actualizando icono: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()]);
+    }
 } else {
     // Acción por defecto: actualizar título
     $titulo = trim($_POST['titulo'] ?? $_POST['nombre_descriptivo'] ?? '');

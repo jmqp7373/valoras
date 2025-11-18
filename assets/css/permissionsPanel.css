@@ -746,4 +746,62 @@ th:first-child {
     color: rgba(0, 0, 0, 0.6);
 }
 
+/* ============================================
+   ESTILOS PARA ICONO EDITABLE
+   ============================================ */
+
+.icono-editable {
+    position: relative;
+    display: inline-block;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.icono-editable:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.icono-editable:active {
+    transform: scale(0.95);
+}
+
+/* Estilos para SweetAlert2 personalizados */
+.swal2-container .btn-icono-selector:hover {
+    border-color: #6A1B1B !important;
+    background-color: #f8f9fa !important;
+    transform: scale(1.1) !important;
+}
+
+.swal2-container .btn-icono-selector:active {
+    transform: scale(0.95) !important;
+}
+
+.swal2-container .swal2-confirm {
+    background: linear-gradient(135deg, #6A1B1B, #882A57) !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    margin: 0 5px !important;
+}
+
+.swal2-container .swal2-cancel {
+    background: #6c757d !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    margin: 0 5px !important;
+}
+
+.swal2-container .swal2-actions-custom {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-top: 20px !important;
+}
+
+
 

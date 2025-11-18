@@ -81,8 +81,12 @@ $breadcrumbs = [
 ];
 
 // CSS y JS adicionales
-$additional_css = ['../../assets/css/permissionsPanel.css'];
+$additional_css = [
+    'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
+    '../../assets/css/permissionsPanel.css'
+];
 $additional_js = [
+    'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js',
     '../../assets/js/permissionsPanelAjax.js'
 ];
 
@@ -125,7 +129,10 @@ ob_start();
                 <table class="table table-bordered table-hover table-sm mb-0" id="tablaPermisos">
                     <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #6A1B1B, #882A57); color: white; border-bottom: 3px solid #7b1733;">
                         <tr>
-                            <th rowspan="2" class="align-middle text-center" style="min-width: 400px; max-width: 500px; vertical-align: middle; position: sticky; left: 0; z-index: 11; background: linear-gradient(135deg, #6A1B1B, #882A57); padding: 15px; color: white; font-size: 1.1rem; font-weight: 700;">
+                            <th rowspan="2" class="align-middle text-center" style="min-width: 120px; max-width: 120px; vertical-align: middle; position: sticky; left: 0; z-index: 11; background: linear-gradient(135deg, #6A1B1B, #882A57); padding: 15px; color: white; font-size: 1.1rem; font-weight: 700;">
+                                <div style="font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px;">CATEGORÍA</div>
+                            </th>
+                            <th rowspan="2" class="align-middle text-center" style="min-width: 400px; max-width: 500px; vertical-align: middle; position: sticky; left: 120px; z-index: 11; background: linear-gradient(135deg, #6A1B1B, #882A57); padding: 15px; color: white; font-size: 1.1rem; font-weight: 700;">
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <i class="bi bi-file-earmark-code-fill" style="font-size: 1.3rem;"></i>

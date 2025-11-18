@@ -34,14 +34,13 @@ try {
     }
     
     $rol_original_id = $_SESSION['rol_original_id'];
-    $rol_original_nivel_orden = $_SESSION['rol_original_nivel_orden'] ?? 1; // Default a Superadmin
     $rol_original_nombre = $_SESSION['rol_original_nombre'] ?? 'Superadmin';
     
-    error_log("Restaurando a: id=$rol_original_id, nivel=$rol_original_nivel_orden, nombre=$rol_original_nombre");
+    error_log("Restaurando a: id=$rol_original_id, nombre=$rol_original_nombre");
     
-    // Restaurar el rol y nivel_orden en la BD
-    $stmt = $db->prepare("UPDATE usuarios SET id_rol = ?, nivel_orden = ? WHERE id_usuario = ?");
-    $result = $stmt->execute([$rol_original_id, $rol_original_nivel_orden, $user_id]);
+    // Restaurar el rol en la BD
+    $stmt = $db->prepare("UPDATE usuarios SET id_rol = ? WHERE id_usuario = ?");
+    $result = $stmt->execute([$rol_original_id, $user_id]);
     
     error_log("UPDATE resultado: " . ($result ? 'SUCCESS' : 'FAILED'));
     error_log("Filas afectadas: " . $stmt->rowCount());
@@ -49,10 +48,8 @@ try {
     // Limpiar las variables de sesión temporales
     unset($_SESSION['rol_prueba_id']);
     unset($_SESSION['rol_prueba_nombre']);
-    unset($_SESSION['rol_prueba_nivel_orden']);
     unset($_SESSION['rol_original_id']);
     unset($_SESSION['rol_original_nombre']);
-    unset($_SESSION['rol_original_nivel_orden']);
     
     error_log("Variables de sesión limpiadas");
     
@@ -62,7 +59,6 @@ try {
         'rol_id' => $rol_original_id,
         'rol_nombre' => $rol_original_nombre,
         'debug' => [
-            'nivel_orden' => $rol_original_nivel_orden,
             'rows_affected' => $stmt->rowCount()
         ]
     ]);

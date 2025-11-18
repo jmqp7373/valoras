@@ -249,7 +249,7 @@ class VentasController {
             $credencial_id = $credencial['id_credencial'];
             
             // 3️⃣ Construir URL completa de la API
-            $url = "{$baseUrl}{$studioUsername}/models/username/{$modelUsername}?periodType=currentPayment";
+            $url = "{$baseUrl}/username/{$studioUsername}/models/username/{$modelUsername}?periodType=currentPayment";
             
             // 4️⃣ Inicializar solicitud cURL
             $ch = curl_init();
@@ -566,28 +566,26 @@ class VentasController {
                 ];
             }
             
-            // Obtener TODAS las credenciales activas de la cuenta estudio
-            // Solo filtrar por usuarios activos según tabla usuarios y usuarios_estados
+            // Obtener TODAS las credenciales de la cuenta estudio
+            // Excluir SOLO los usuarios con estado 'Eliminado'
             $stmtModelos = $this->db->prepare("
                 SELECT DISTINCT
                     c.id_credencial,
                     c.usuario as model_username,
                     c.id_usuario,
-                    u.nombre,
-                    u.apellidos,
-                    ue.nombre_estado
+                    u.estado
                 FROM credenciales c
                 INNER JOIN usuarios u ON u.id_usuario = c.id_usuario
-                INNER JOIN usuarios_estados ue ON ue.id_usuario_estado = u.id_usuario_estado
                 WHERE c.id_cuenta_estudio = :id_cuenta_estudio
                 AND c.id_pagina = 3
                 AND c.eliminado = 0
-                AND u.eliminado = 0
-                AND ue.nombre_estado = 'Activo'
+                AND (u.estado IS NULL OR u.estado != 'Eliminado')
                 ORDER BY c.id_credencial
             ");
             $stmtModelos->execute([':id_cuenta_estudio' => $id_cuenta_estudio]);
             $modelos = $stmtModelos->fetchAll(PDO::FETCH_ASSOC);
+            
+            error_log("Cuenta {$cuentaEstudio['usuario_cuenta_estudio']}: " . count($modelos) . " modelos activos encontrados");
             
             if (empty($modelos)) {
                 return [
@@ -611,72 +609,106 @@ class VentasController {
             $apiKey = $apiConfig['api_key'];
             
             $totalModelos = count($modelos);
-            error_log("Iniciando importación de {$totalModelos} modelos activos para {$cuentaEstudio['usuario_cuenta_estudio']}");
+            $batchSize = 50;
+            $totalBatches = ceil($totalModelos / $batchSize);
+            $batchProgress = []; // Guardar progreso de cada lote
             
-            foreach ($modelos as $index => $modelo) {
-                try {
-                    // Log de progreso cada 50 modelos
-                    if ($index % 50 === 0) {
-                        error_log("Procesando modelo " . ($index + 1) . "/{$totalModelos}: {$modelo['model_username']}");
+            error_log("Iniciando importación de {$totalModelos} modelos activos encontrados en {$totalBatches} lotes de {$batchSize}");
+            
+            // Procesar por lotes
+            for ($batchNum = 0; $batchNum < $totalBatches; $batchNum++) {
+                $offset = $batchNum * $batchSize;
+                $batchModelos = array_slice($modelos, $offset, $batchSize);
+                $batchProgress = round((($batchNum + 1) / $totalBatches) * 100, 1);
+                
+                error_log("Procesando lote " . ($batchNum + 1) . "/{$totalBatches} ({$batchProgress}%) - Modelos " . ($offset + 1) . " a " . ($offset + count($batchModelos)));
+                
+                foreach ($batchModelos as $index => $modelo) {
+                    try {
+                        // Llamar a la API con currentPayment
+                        $url = "{$baseUrl}/username/{$studioUsername}/models/username/{$modelo['model_username']}?periodType=currentPayment";
+                        
+                        // Log de URL para el primer modelo del primer lote
+                        if ($batchNum === 0 && $index === 0) {
+                            error_log("URL de ejemplo: {$url}");
+                        }
+                        
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, $url);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "API-Key: {$apiKey}",
+                            'Accept: application/json'
+                        ]);
+                        
+                        $response = curl_exec($ch);
+                        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                        $curlError = curl_error($ch);
+                        curl_close($ch);
+                        
+                        if ($httpCode !== 200) {
+                            $errores[] = "{$modelo['model_username']}: HTTP {$httpCode}";
+                            
+                            // Log del primer error con más detalle
+                            if (count($errores) === 1) {
+                                error_log("Primer error - Modelo: {$modelo['model_username']}, HTTP: {$httpCode}, URL: {$url}, cURL Error: {$curlError}");
+                            }
+                            continue;
+                        }
+                        
+                        $data = json_decode($response, true);
+                        
+                        if (!$data || !isset($data['totalEarnings'])) {
+                            continue;
+                        }
+                        
+                        // Extraer datos del período
+                        $periodStart = isset($data['periodStart']) ? date('Y-m-d H:i:s', strtotime($data['periodStart'])) : date('Y-m-d H:i:s');
+                        $periodEnd = isset($data['periodEnd']) ? date('Y-m-d H:i:s', strtotime($data['periodEnd'])) : date('Y-m-d H:i:s');
+                        
+                        // Usar UPSERT para insertar o actualizar
+                        $result = $this->upsertVenta([
+                            'id_credencial' => $modelo['id_credencial'],
+                            'id_usuario' => $modelo['id_usuario'],
+                            'id_pagina' => 3,
+                            'period_start' => $periodStart,
+                            'period_end' => $periodEnd,
+                            'total_earnings' => $data['totalEarnings'] ?? 0,
+                            'tips' => $data['tips'] ?? 0,
+                            'public_chat_tips' => $data['publicChatTips'] ?? 0,
+                            'private_chat_tips' => $data['privateChatTips'] ?? 0,
+                            'exclusive_privates' => $data['exclusivePrivates'] ?? 0,
+                            'tokens_earned' => $data['tips'] ?? 0
+                        ]);
+                        
+                        if ($result['inserted']) {
+                            $nuevos++;
+                        } elseif ($result['updated']) {
+                            $actualizados++;
+                        } elseif ($result['unchanged']) {
+                            $sinCambios++;
+                        }
+                        
+                    } catch (Exception $e) {
+                        $errores[] = "{$modelo['model_username']}: {$e->getMessage()}";
                     }
-                    
-                    // Llamar a la API con currentPayment
-                    $url = "{$baseUrl}/username/{$studioUsername}/models/username/{$modelo['model_username']}?periodType=currentPayment";
-                    
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        "API-Key: {$apiKey}",
-                        'Accept: application/json'
-                    ]);
-                    
-                    $response = curl_exec($ch);
-                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
-                    
-                    if ($httpCode !== 200) {
-                        $errores[] = "{$modelo['model_username']}: HTTP {$httpCode}";
-                        continue;
-                    }
-                    
-                    $data = json_decode($response, true);
-                    
-                    if (!$data || !isset($data['totalEarnings'])) {
-                        continue;
-                    }
-                    
-                    // Extraer datos del período
-                    $periodStart = isset($data['periodStart']) ? date('Y-m-d H:i:s', strtotime($data['periodStart'])) : date('Y-m-d H:i:s');
-                    $periodEnd = isset($data['periodEnd']) ? date('Y-m-d H:i:s', strtotime($data['periodEnd'])) : date('Y-m-d H:i:s');
-                    
-                    // Usar UPSERT para insertar o actualizar
-                    $result = $this->upsertVenta([
-                        'id_credencial' => $modelo['id_credencial'],
-                        'id_usuario' => $modelo['id_usuario'],
-                        'id_pagina' => 3,
-                        'period_start' => $periodStart,
-                        'period_end' => $periodEnd,
-                        'total_earnings' => $data['totalEarnings'] ?? 0,
-                        'tips' => $data['tips'] ?? 0,
-                        'public_chat_tips' => $data['publicChatTips'] ?? 0,
-                        'private_chat_tips' => $data['privateChatTips'] ?? 0,
-                        'exclusive_privates' => $data['exclusivePrivates'] ?? 0,
-                        'tokens_earned' => $data['tips'] ?? 0
-                    ]);
-                    
-                    if ($result['inserted']) {
-                        $nuevos++;
-                    } elseif ($result['updated']) {
-                        $actualizados++;
-                    } elseif ($result['unchanged']) {
-                        $sinCambios++;
-                    }
-                    
-                } catch (Exception $e) {
-                    $errores[] = "{$modelo['model_username']}: {$e->getMessage()}";
                 }
+                
+                // Log de progreso cada lote
+                error_log("Lote " . ($batchNum + 1) . " completado - Total: Nuevos={$nuevos}, Actualizados={$actualizados}, Sin cambios={$sinCambios}, Errores=" . count($errores));
+                
+                // Guardar progreso del lote
+                $batchProgress[] = [
+                    'batch' => $batchNum + 1,
+                    'total_batches' => $totalBatches,
+                    'progress_percent' => round((($batchNum + 1) / $totalBatches) * 100, 1),
+                    'models_in_batch' => count($batchModelos),
+                    'nuevos' => $nuevos,
+                    'actualizados' => $actualizados,
+                    'sin_cambios' => $sinCambios,
+                    'errores' => count($errores)
+                ];
             }
             
             return [
@@ -685,7 +717,12 @@ class VentasController {
                 'nuevos' => $nuevos,
                 'actualizados' => $actualizados,
                 'sin_cambios' => $sinCambios,
-                'errores' => array_slice($errores, 0, 5)
+                'errores' => array_slice($errores, 0, 5),
+                'total_batches' => $totalBatches,
+                'batch_progress' => $batchProgress,
+                'detalle_modelos' => array_map(function($m) { 
+                    return ['id' => $m['id_credencial'], 'username' => $m['model_username']]; 
+                }, $modelos)
             ];
             
         } catch (Exception $e) {

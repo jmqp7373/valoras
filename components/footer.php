@@ -34,19 +34,34 @@ if (!isset($css_path)) {
     }
 }
 
-// Cargar módulos activos desde base de datos
+// Cargar módulos activos desde base de datos CON PERMISOS
 $modulos_footer = [];
 try {
     $db_conn = isset($pdo) ? $pdo : (isset($db) ? $db : null);
     if ($db_conn) {
-        $stmt = $db_conn->prepare("
-            SELECT clave, ruta_completa, titulo, categoria, icono 
-            FROM modulos 
-            WHERE activo = 1 AND exento = 0 AND categoria != 'login'
-            ORDER BY categoria, titulo
-        ");
-        $stmt->execute();
-        $modulos_footer = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Obtener el rol del usuario actual
+        $user_id = $_SESSION['user_id'] ?? null;
+        $id_rol = null;
+        
+        if ($user_id) {
+            $stmt = $db_conn->prepare("SELECT id_rol FROM usuarios WHERE id_usuario = ?");
+            $stmt->execute([$user_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $id_rol = $result['id_rol'] ?? null;
+        }
+        
+        if ($id_rol) {
+            // Obtener solo módulos con permiso de ver para el rol actual
+            $stmt = $db_conn->prepare("
+                SELECT m.clave, m.ruta_completa, m.titulo, m.categoria, m.icono
+                FROM modulos m
+                LEFT JOIN roles_permisos rp ON m.clave = rp.modulo AND rp.id_rol = ?
+                WHERE m.activo = 1 AND m.exento = 0 AND m.categoria != 'login' AND rp.puede_ver = 1
+                ORDER BY m.categoria, m.titulo
+            ");
+            $stmt->execute([$id_rol]);
+            $modulos_footer = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
     }
 } catch (PDOException $e) {
     error_log("Error cargando módulos para footer: " . $e->getMessage());
@@ -65,19 +80,9 @@ foreach ($modulos_footer as $modulo) {
 
 <footer class="dashboard-footer">
     <div class="footer-content">
-        <!-- Sección Empresa -->
-        <div class="footer-section">
-            <h4><?php echo htmlspecialchars($company_name); ?></h4>
-            <p><?php echo htmlspecialchars($company_tagline); ?></p>
-        </div>
-        
         <?php 
-        // Mostrar categorías dinámicamente (máximo 3 columnas)
-        $count = 0;
-        $max_cols = 3;
+        // Mostrar TODAS las categorías dinámicamente
         foreach ($footer_categorias as $categoria => $modulos): 
-            if ($count >= $max_cols) break;
-            $count++;
         ?>
         <div class="footer-section">
             <h4><?php echo ucfirst(htmlspecialchars($categoria)); ?></h4>
@@ -85,7 +90,9 @@ foreach ($modulos_footer as $modulo) {
                 <?php foreach ($modulos as $modulo): ?>
                 <li>
                     <a href="<?php echo $base_path . htmlspecialchars($modulo['ruta_completa']); ?>">
-                        <?php echo $modulo['icono'] ?? ''; ?> 
+                        <?php if (!empty($modulo['icono'])): ?>
+                            <span class="footer-icon"><?php echo $modulo['icono']; ?></span>
+                        <?php endif; ?>
                         <?php echo htmlspecialchars($modulo['titulo']); ?>
                     </a>
                 </li>
@@ -95,10 +102,12 @@ foreach ($modulos_footer as $modulo) {
         <?php endforeach; ?>
     </div>
     
-    <!-- Sección Copyright - Separada y centrada -->
+    <!-- Sección Copyright con info de empresa integrada -->
     <div class="footer-copyright-section">
         <p class="footer-copyright">
-            &copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($company_name); ?> - Todos los derechos reservados
+            <strong><?php echo htmlspecialchars($company_name); ?></strong> - <?php echo htmlspecialchars($company_tagline); ?>
+            <br>
+            &copy; <?php echo date('Y'); ?> Todos los derechos reservados
         </p>
     </div>
 </footer>

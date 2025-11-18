@@ -1,16 +1,18 @@
 /**
  * Dropdown Menu Styles - Valora.vip
- * Version: 2.0 - Optimizado y simplificado
+ * Version: 2.1 - Mejorado con mejor visibilidad y z-index
  */
 
 /* ===== DROPDOWN PRINCIPAL ===== */
 .dropdown-menu.user-dropdown-custom {
-    min-width: 220px !important;
+    min-width: 280px !important;
     max-width: 320px !important;
     border-radius: 12px !important;
     box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
     border: none !important;
     padding: 0 !important;
+    z-index: 1050 !important;
+    margin-top: 8px !important;
 }
 
 /* Items del menu */
@@ -23,36 +25,44 @@
     font-family: 'Poppins', sans-serif !important;
     font-size: 0.9rem !important;
     transition: all 0.15s ease !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
 }
 
 .dropdown-menu.user-dropdown-custom .dropdown-item:hover {
     background-color: #f0f2f5 !important;
+    color: #000 !important;
 }
 
 /* ===== SUBMENU EN CASCADA ===== */
 .dropdown-menu.user-dropdown-custom .dropdown-submenu {
-    position: relative;
+    position: relative !important;
 }
 
 /* Contenedor del submenu */
 .dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-menu {
     position: absolute !important;
     top: 0 !important;
+    left: auto !important;
     right: 100% !important;
     margin-top: -6px !important;
     margin-right: -1px !important;
-    width: max-content !important;
+    min-width: 220px !important;
     max-width: 280px !important;
     padding: 0.5rem 0 !important;
     background-color: #ffffff !important;
     border: 1px solid #e0e0e0 !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
-    display: none !important;
+    z-index: 1051 !important;
 }
 
-.dropdown-menu.user-dropdown-custom .dropdown-submenu:hover > .dropdown-menu {
+/* Mostrar submenu en hover (desktop) o con clase show */
+.dropdown-menu.user-dropdown-custom .dropdown-submenu:hover > .dropdown-menu,
+.dropdown-menu.user-dropdown-custom .dropdown-submenu > .dropdown-menu.show {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* Toggle de categoria */

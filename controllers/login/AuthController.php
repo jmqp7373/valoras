@@ -301,12 +301,15 @@ class AuthController {
                         'message' => "Debe esperar {$remaining} segundos antes de reenviar el código",
                         'remaining_time' => $remaining
                     ];
-                }
+                return ['success' => false, 'message' => 'Cédula no válida'];
             }
             
             try {
                 // Buscar el usuario por cédula
-                $stmt = $this->db->prepare("SELECT cedula, celular FROM usuarios WHERE cedula = :cedula LIMIT 1");
+                $stmt = $this->db->prepare("SELECT ui.cedula, ui.celular 
+                                            FROM usuarios u 
+                                            INNER JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
+                                            WHERE ui.cedula = :cedula LIMIT 1");
                 $stmt->bindParam(':cedula', $cedula);
                 $stmt->execute();
                 
@@ -385,7 +388,10 @@ class AuthController {
             
             try {
                 // Buscar el usuario por cédula
-                $stmt = $this->db->prepare("SELECT cedula, celular FROM usuarios WHERE cedula = :cedula LIMIT 1");
+                $stmt = $this->db->prepare("SELECT ui.cedula, ui.celular 
+                                            FROM usuarios u 
+                                            INNER JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
+                                            WHERE ui.cedula = :cedula LIMIT 1");
                 $stmt->bindParam(':cedula', $cedula);
                 $stmt->execute();
                 

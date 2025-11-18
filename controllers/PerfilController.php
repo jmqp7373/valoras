@@ -42,7 +42,7 @@ class PerfilController {
             'nombres', 'apellidos', 'celular', 'email', 'fecha_de_nacimiento',
             'tipo_sangre', 'direccion', 'ciudad',
             'contacto_emergencia_nombre', 'contacto_emergencia_parentesco', 'contacto_emergencia_telefono',
-            'alergias', 'banco_nombre', 'banco_tipo_cuenta', 'banco_numero_cuenta',
+            'alergias', 'id_banco', 'banco_tipo_cuenta', 'banco_numero_cuenta',
             'notas', 'id_estudio'
         ];
 
@@ -127,10 +127,38 @@ class PerfilController {
             ];
         }
 
+        // Mapear tipo de archivo a carpeta específica
+        $carpetas_tipo = [
+            'foto_perfil' => 'FotoDePerfil',
+            'foto_con_cedula' => 'FotoConCedulaEnMano',
+            'foto_cedula_frente' => 'CedulaLadoFrontal',
+            'foto_cedula_reverso' => 'CedulaLadoReverso',
+            'certificado_medico' => '' // Se mantiene en la raíz de perfiles
+        ];
+
+        // Obtener la subcarpeta correspondiente
+        $subcarpeta = $carpetas_tipo[$tipo] ?? '';
+        
+        // Construir ruta completa con subcarpeta
+        $directorio_destino = $this->upload_dir_base;
+        if ($subcarpeta !== '') {
+            $directorio_destino .= $subcarpeta . '/';
+            // Crear directorio si no existe
+            if (!file_exists($directorio_destino)) {
+                mkdir($directorio_destino, 0755, true);
+            }
+        }
+
         // Generar nombre único
         $nombre_archivo = $id_usuario . '_' . $tipo . '_' . time() . '.' . $extension;
-        $ruta_completa = $this->upload_dir_base . $nombre_archivo;
-        $ruta_relativa = 'uploads/perfiles/' . $nombre_archivo;
+        $ruta_completa = $directorio_destino . $nombre_archivo;
+        
+        // Ruta relativa para guardar en BD
+        $ruta_relativa = 'uploads/perfiles/';
+        if ($subcarpeta !== '') {
+            $ruta_relativa .= $subcarpeta . '/';
+        }
+        $ruta_relativa .= $nombre_archivo;
 
         // Mover archivo
         if (move_uploaded_file($archivo['tmp_name'], $ruta_completa)) {
@@ -165,6 +193,30 @@ class PerfilController {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error al obtener estudios: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener lista de bancos activos para el selector
+     */
+    public function obtenerBancos() {
+        try {
+            $query = "SELECT id_banco, nombre_banco, tipo_banco, codigo_abreviado, color_banco 
+                      FROM usuarios_bancos 
+                      WHERE estado = 1 
+                      ORDER BY 
+                        CASE tipo_banco 
+                          WHEN 'Banco' THEN 1 
+                          WHEN 'Neobanco' THEN 2 
+                          WHEN 'Cooperativa' THEN 3 
+                        END,
+                        nombre_banco ASC";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener bancos: " . $e->getMessage());
             return [];
         }
     }

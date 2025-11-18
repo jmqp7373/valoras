@@ -106,6 +106,7 @@ if ((empty($botones) || $autoBotones) && $dbConnection !== null) {
                 FROM modulos 
                 WHERE categoria = ? 
                 AND activo = 1
+                AND exento = 0
                 ORDER BY ruta_completa ASC
             ");
             $stmt->execute([$categoriaActual]);

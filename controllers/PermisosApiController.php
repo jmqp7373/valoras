@@ -93,7 +93,8 @@ try {
             'nombreDescriptivo' => $data['titulo'] ?? '',
             'categoria' => $categoria,
             'archivoExiste' => $data['archivo_existe'] ?? true,
-            'exento' => $data['exento'] ?? 0
+            'exento' => $data['exento'] ?? 0,
+            'icono' => $data['icono'] ?? null
         ];
     }
     

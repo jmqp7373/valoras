@@ -72,8 +72,6 @@ class CredencialesController {
                 INNER JOIN usuarios u ON u.id_usuario = c.id_usuario
                 INNER JOIN paginas p ON p.id_pagina = c.id_pagina
                 INNER JOIN cuentas_estudios ce ON ce.id_cuenta_estudio = c.id_cuenta_estudio
-                INNER JOIN estudios e ON e.id_estudio = u.id_estudio
-                INNER JOIN estudios_casas ec ON ec.id_estudio_casa = e.id_estudio_casa
                 WHERE 1=1
             ";
 
@@ -91,16 +89,6 @@ class CredencialesController {
             if (!empty($plataformaId)) {
                 $sqlBase .= " AND c.id_pagina = ?";
                 $params[] = $plataformaId;
-            }
-
-            if (!empty($estudioId)) {
-                $sqlBase .= " AND e.id_estudio = ?";
-                $params[] = $estudioId;
-            }
-
-            if (!empty($casaId)) {
-                $sqlBase .= " AND ec.id_estudio_casa = ?";
-                $params[] = $casaId;
             }
 
             if (!empty($cuentaEstudioId)) {
@@ -134,9 +122,7 @@ class CredencialesController {
                     u.apellidos,
                     p.nombre_pagina,
                     p.color_pagina,
-                    ce.usuario_cuenta_estudio,
-                    e.nombre_estudio,
-                    ec.nombre_estudio_casa
+                    ce.usuario_cuenta_estudio
                 " . $sqlBase . "
                 ORDER BY c.id_credencial DESC
                 LIMIT {$porPagina} OFFSET {$offset}

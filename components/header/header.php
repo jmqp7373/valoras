@@ -68,16 +68,17 @@ try {
         $user_id = $_SESSION['user_id'] ?? null;
         if ($user_id) {
             $stmt = $dbConnection->prepare("
-                SELECT r.id, r.nombre, r.nivel_orden, u.nivel_orden as usuario_nivel_orden
+                SELECT r.id, r.nombre, r.nivel_orden, ui.nivel_orden as usuario_nivel_orden
                 FROM usuarios u 
                 JOIN roles r ON u.id_rol = r.id 
+                LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario
                 WHERE u.id_usuario = ?
             ");
             $stmt->execute([$user_id]);
             $rol_actual = $stmt->fetch(PDO::FETCH_ASSOC);
             
             // Usuario es Superadmin si:
-            // 1. Tiene nivel_orden = 1 en usuarios O en roles
+            // 1. Tiene nivel_orden = 1 en usuarios_info O en roles
             // 2. O tiene un rol_original_id guardado en sesión (está en modo prueba)
             $es_superadmin_original = ($rol_actual && ($rol_actual['usuario_nivel_orden'] == 1 || $rol_actual['nivel_orden'] == 1));
             $esta_en_modo_prueba = isset($_SESSION['rol_original_id']);
@@ -155,23 +156,32 @@ try {
             }
         }
         
-        // Obtener todos los módulos activos ordenados por categoría y orden
-        $stmt = $dbConnection->prepare("
-            SELECT clave, titulo, categoria, ruta_completa, icono 
-            FROM modulos 
-            WHERE activo = 1 AND exento = 0
-            ORDER BY categoria, titulo
-        ");
-        $stmt->execute();
-        $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Obtener módulos con permisos para el rol actual
+        $id_rol = $rol_actual['id'] ?? null;
         
-        // Agrupar módulos por categoría
-        foreach ($modulos as $modulo) {
-            $categoria = $modulo['categoria'] ?? 'General';
-            if (!isset($modulos_por_categoria[$categoria])) {
-                $modulos_por_categoria[$categoria] = [];
+        if ($id_rol) {
+            $stmt = $dbConnection->prepare("
+                SELECT m.clave, m.titulo, m.categoria, m.ruta_completa, m.icono,
+                       rp.puede_ver, rp.puede_editar, rp.puede_eliminar
+                FROM modulos m
+                LEFT JOIN roles_permisos rp ON m.clave = rp.modulo AND rp.id_rol = ?
+                WHERE m.activo = 1 AND m.exento = 0
+                ORDER BY m.categoria, m.titulo
+            ");
+            $stmt->execute([$id_rol]);
+            $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Agrupar módulos por categoría (solo los que tienen permiso de ver)
+            foreach ($modulos as $modulo) {
+                // Solo incluir módulos con permiso de ver
+                if ($modulo['puede_ver'] == 1) {
+                    $categoria = $modulo['categoria'] ?? 'General';
+                    if (!isset($modulos_por_categoria[$categoria])) {
+                        $modulos_por_categoria[$categoria] = [];
+                    }
+                    $modulos_por_categoria[$categoria][] = $modulo;
+                }
             }
-            $modulos_por_categoria[$categoria][] = $modulo;
         }
     }
 } catch (Exception $e) {
@@ -291,7 +301,7 @@ try {
         align-items: center;
         position: sticky;
         top: 0;
-        z-index: 100;
+        z-index: 1040;
         overflow: visible;
     }
     
@@ -347,11 +357,14 @@ try {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        position: static;
+        overflow: visible;
     }
     
     /* User Menu Container */
     .dropdown {
         position: relative;
+        overflow: visible;
     }
     
     /* User Menu Button */
@@ -458,53 +471,4 @@ try {
     }
 </style>
 
-<script>
-// ============================================
-// MANEJO DE SUBMENÚS EN CASCADA
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    // Manejar los submenús en cascada
-    const dropdownSubmenus = document.querySelectorAll('.dropdown-submenu');
-    
-    dropdownSubmenus.forEach(function(submenu) {
-        const toggle = submenu.querySelector('.dropdown-toggle');
-        const submenuDropdown = submenu.querySelector('.dropdown-menu');
-        
-        if (toggle && submenuDropdown) {
-            // Desktop: mostrar en hover
-            submenu.addEventListener('mouseenter', function() {
-                if (window.innerWidth > 768) {
-                    submenuDropdown.classList.add('show');
-                }
-            });
-            
-            submenu.addEventListener('mouseleave', function() {
-                if (window.innerWidth > 768) {
-                    submenuDropdown.classList.remove('show');
-                }
-            });
-            
-            // Mobile: toggle en click
-            toggle.addEventListener('click', function(e) {
-                if (window.innerWidth <= 768) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    submenuDropdown.classList.toggle('show');
-                }
-            });
-        }
-    });
-    
-    // Cerrar submenús cuando se cierra el menú principal
-    const mainDropdown = document.getElementById('userMenuDropdown');
-    if (mainDropdown) {
-        mainDropdown.addEventListener('hidden.bs.dropdown', function() {
-            document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(function(submenu) {
-                submenu.classList.remove('show');
-            });
-        });
-    }
-});
-</script>
-
-</header>
+<!-- Script de inicialización del menú de usuario se carga al final del body -->

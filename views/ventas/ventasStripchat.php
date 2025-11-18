@@ -437,6 +437,52 @@ ob_start();
 
 <div class="ventas-stripchat-container">
     
+    <!-- Panel de Debugging en Tiempo Real -->
+    <div id="debugPanel" style="display: block; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-family: 'Consolas', monospace; font-size: 12px; max-height: 500px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 8px;">
+            <div>
+                <h4 style="margin: 0; color: #4EC9B0; font-size: 14px;">🔍 Debug Console - Import Engine Monitor</h4>
+                <small id="debugStatus" style="color: #858585; font-size: 10px;">Esperando inicio de proceso...</small>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button id="btnCopyDebug" style="background: #2196F3; color: #fff; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;">📋 Copiar</button>
+                <button id="btnClearDebug" style="background: #555; color: #fff; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;">🗑️ Limpiar</button>
+            </div>
+        </div>
+        <div id="debugStats" style="display: flex; gap: 15px; margin-bottom: 10px; padding: 8px; background: #252525; border-radius: 4px; font-size: 11px;">
+            <div><span style="color: #858585;">⏱️ Tiempo total:</span> <strong id="totalTime" style="color: #4EC9B0;">0s</strong></div>
+            <div><span style="color: #858585;">📊 Eventos:</span> <strong id="eventCount" style="color: #4EC9B0;">0</strong></div>
+            <div><span style="color: #858585;">✅ Éxitos:</span> <strong id="successCount" style="color: #4CAF50;">0</strong></div>
+            <div><span style="color: #858585;">❌ Errores:</span> <strong id="errorCount" style="color: #F44336;">0</strong></div>
+        </div>
+        <div id="debugContent" style="line-height: 1.8;">
+            <div id="welcomeMessage" style="text-align: center; padding: 40px 20px; animation: fadeInOut 3s ease-in-out infinite;">
+                <div style="font-size: 48px; margin-bottom: 15px;">👇</div>
+                <div style="color: #4EC9B0; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                    ¡Bienvenido al Monitor de Importación!
+                </div>
+                <div style="color: #858585; font-size: 12px; line-height: 1.6;">
+                    Haz clic en el botón <strong style="color: #4EC9B0;">"📥 Importar Período Actual"</strong> de abajo<br>
+                    para comenzar a importar las ventas desde Stripchat.<br><br>
+                    <span style="color: #2196F3;">Aquí podrás ver en tiempo real todo el proceso de importación.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<style>
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(0.98);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+</style>
+    
     <!-- Header con período actual -->
     <div class="header-periodo">
         <div class="periodo-info">
@@ -542,37 +588,290 @@ ob_start();
 </div>
 
 <script>
-// Importar período actual
+// Variables globales para tracking
+let debugStartTime = null;
+let eventCounter = 0;
+let successCounter = 0;
+let errorCounter = 0;
+let lastEventTime = null;
+
+// Botones de control del debug panel
+document.getElementById('btnCopyDebug')?.addEventListener('click', function() {
+    const debugContent = document.getElementById('debugContent');
+    if (!debugContent) return;
+    
+    // Extraer solo el texto sin HTML
+    const textContent = debugContent.innerText || debugContent.textContent;
+    
+    // Copiar al portapapeles
+    navigator.clipboard.writeText(textContent).then(function() {
+        // Feedback visual
+        const btn = document.getElementById('btnCopyDebug');
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Copiado!';
+        btn.style.background = '#4CAF50';
+        
+        setTimeout(function() {
+            btn.textContent = originalText;
+            btn.style.background = '#2196F3';
+        }, 2000);
+    }).catch(function(err) {
+        alert('Error al copiar: ' + err);
+    });
+});
+
+document.getElementById('btnClearDebug')?.addEventListener('click', function() {
+    document.getElementById('debugContent').innerHTML = '';
+    eventCounter = 0;
+    successCounter = 0;
+    errorCounter = 0;
+    updateDebugStats();
+});
+
+// Actualizar estadísticas
+function updateDebugStats() {
+    document.getElementById('eventCount').textContent = eventCounter;
+    document.getElementById('successCount').textContent = successCounter;
+    document.getElementById('errorCount').textContent = errorCounter;
+    
+    if (debugStartTime) {
+        const elapsed = ((Date.now() - debugStartTime) / 1000).toFixed(2);
+        document.getElementById('totalTime').textContent = elapsed + 's';
+    }
+}
+
+// Actualizar status
+function updateDebugStatus(message) {
+    const statusEl = document.getElementById('debugStatus');
+    if (statusEl) {
+        statusEl.textContent = message;
+    }
+}
+
+// Función mejorada para agregar log al debug panel
+function addDebugLog(message, type = 'info', details = null) {
+    const debugContent = document.getElementById('debugContent');
+    const debugPanel = document.getElementById('debugPanel');
+    
+    if (!debugContent) return;
+    
+    const now = Date.now();
+    const currentTime = new Date();
+    
+    // Calcular tiempo desde último evento
+    let deltaTime = '';
+    if (lastEventTime) {
+        const delta = ((now - lastEventTime) / 1000).toFixed(3);
+        deltaTime = ` <span style="color: #858585;">(+${delta}s)</span>`;
+    }
+    lastEventTime = now;
+    
+    // Incrementar contadores
+    eventCounter++;
+    if (type === 'success') successCounter++;
+    if (type === 'error') errorCounter++;
+    
+    const colors = {
+        'info': '#4EC9B0',
+        'success': '#4CAF50',
+        'error': '#F44336',
+        'warning': '#FF9800',
+        'api': '#2196F3',
+        'data': '#9C27B0',
+        'time': '#FFC107'
+    };
+    
+    const icons = {
+        'info': 'ℹ️',
+        'success': '✅',
+        'error': '❌',
+        'warning': '⚠️',
+        'api': '🌐',
+        'data': '📊',
+        'time': '⏱️'
+    };
+    
+    const timestamp = currentTime.toLocaleTimeString('es-ES', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+    const color = colors[type] || colors.info;
+    const icon = icons[type] || icons.info;
+    
+    let logHtml = `<div style="margin-bottom: 5px; border-left: 3px solid ${color}; padding-left: 8px; padding-top: 3px; padding-bottom: 3px;">
+        <span style="color: #858585;">[${timestamp}]</span>${deltaTime} 
+        <span style="color: ${color};">${icon} ${message}</span>`;
+    
+    // Agregar detalles expandibles si existen
+    if (details) {
+        const detailId = 'detail_' + eventCounter;
+        logHtml += `
+        <div style="margin-top: 4px;">
+            <button onclick="document.getElementById('${detailId}').style.display = document.getElementById('${detailId}').style.display === 'none' ? 'block' : 'none'" 
+                    style="background: #333; color: #999; border: none; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 10px;">
+                📋 Ver detalles
+            </button>
+            <pre id="${detailId}" style="display: none; background: #2d2d2d; padding: 8px; border-radius: 4px; margin-top: 4px; font-size: 10px; overflow-x: auto; max-height: 300px; border-left: 2px solid ${color};">${JSON.stringify(details, null, 2)}</pre>
+        </div>`;
+    }
+    
+    logHtml += `</div>`;
+    debugContent.innerHTML += logHtml;
+    
+    // Actualizar stats
+    updateDebugStats();
+    
+    // Mostrar panel y scroll automático
+    debugPanel.style.display = 'block';
+    debugPanel.scrollTop = debugPanel.scrollHeight;
+}
+
+// Importar período actual con debugging mejorado
 document.getElementById('btnImportarPeriodo')?.addEventListener('click', async function() {
     const btn = this;
     const mensajeDiv = document.getElementById('mensajeImportacion');
+    const debugContent = document.getElementById('debugContent');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    
+    // Ocultar mensaje de bienvenida
+    if (welcomeMessage) {
+        welcomeMessage.style.display = 'none';
+    }
+    
+    // Resetear variables de tracking
+    debugStartTime = Date.now();
+    lastEventTime = debugStartTime;
+    eventCounter = 0;
+    successCounter = 0;
+    errorCounter = 0;
+    
+    // Limpiar debug panel
+    if (debugContent) {
+        debugContent.innerHTML = '';
+    }
     
     btn.disabled = true;
     btn.textContent = '⏳ Importando...';
     
-    mensajeDiv.innerHTML = '<div class="alert alert-info">⏳ Conectando con API de Stripchat...</div>';
+    updateDebugStatus('🚀 Proceso en ejecución...');
+    addDebugLog('🚀 Iniciando proceso de importación', 'info');
+    addDebugLog('Solicitando análisis previo de cuentas y modelos...', 'info');
+    
+    mensajeDiv.innerHTML = '<div class="alert alert-info">⏳ Analizando configuración...</div>';
     
     try {
+        // Paso 1: Debug info
+        const step1Start = Date.now();
+        addDebugLog('Consultando estado del sistema...', 'api');
+        
+        const debugResponse = await fetch('debug_import_stripchat.php');
+        const debugData = await debugResponse.json();
+        
+        const step1Duration = ((Date.now() - step1Start) / 1000).toFixed(2);
+        addDebugLog(`Análisis completado en ${step1Duration}s`, 'time');
+        
+        if (debugData.error) {
+            addDebugLog('Error en análisis: ' + debugData.mensaje, 'error', debugData);
+        } else {
+            addDebugLog(`Cuentas en BD: ${debugData.cuentas_en_bd}`, 'data');
+            addDebugLog(`Cuentas activas validadas: ${debugData.cuentas_activas_validadas}`, 'data');
+            
+            if (debugData.cuentas_activas_detalle) {
+                debugData.cuentas_activas_detalle.forEach(cuenta => {
+                    addDebugLog(`  → ${cuenta.nombre_bd} (${cuenta.studio_username})`, 'data');
+                });
+            }
+            
+            // Mostrar modelos por cuenta
+            if (debugData.modelos_por_cuenta) {
+                let totalModelos = 0;
+                for (const [cuenta, info] of Object.entries(debugData.modelos_por_cuenta)) {
+                    if (info.error) {
+                        addDebugLog(`❌ Error en ${cuenta}: ${info.error}`, 'error');
+                    } else {
+                        totalModelos += info.total;
+                        const batches = Math.ceil(info.total / 50);
+                        addDebugLog(`${cuenta}: ${info.total} modelos (${batches} lotes)`, 'data', info.muestra);
+                    }
+                }
+                const totalBatches = Math.ceil(totalModelos / 50);
+                addDebugLog(`📦 Total: ${totalModelos} modelos en ${totalBatches} lotes de 50`, 'info');
+            }
+            
+            if (debugData.url_prueba) {
+                addDebugLog(`URL de API generada`, 'api', { url: debugData.url_prueba, api_key: debugData.api_key_preview });
+            }
+        }
+        
+        // Paso 2: Importación real
+        const step2Start = Date.now();
+        addDebugLog('Iniciando importación desde API de Stripchat...', 'api');
+        updateDebugStatus('🌐 Conectando con API de Stripchat...');
+        mensajeDiv.innerHTML = '<div class="alert alert-info">⏳ Conectando con API de Stripchat...</div>';
+        
         const response = await fetch('../../controllers/VentasController.php?action=importarPeriodoActual', {
             method: 'GET'
         });
         
         const data = await response.json();
         
+        const step2Duration = ((Date.now() - step2Start) / 1000).toFixed(2);
+        addDebugLog(`Importación completada en ${step2Duration}s`, 'time');
+        addDebugLog('Respuesta recibida del servidor', 'api');
+        
         if (data.success) {
+            addDebugLog('✅ Importación exitosa', 'success');
+            if (data.totales) {
+                addDebugLog(`Resultados: Nuevos: ${data.totales.nuevos}, Actualizados: ${data.totales.actualizados}, Sin cambios: ${data.totales.sin_cambios || 0}`, 'success');
+                addDebugLog(`Cuentas procesadas: ${data.totales.cuentas_procesadas}, Modelos procesados: ${data.totales.modelos_procesados}`, 'data', {
+                    cuentas_procesadas: data.totales.cuentas_procesadas,
+                    modelos_procesados: data.totales.modelos_procesados,
+                    nuevos: data.totales.nuevos,
+                    actualizados: data.totales.actualizados,
+                    sin_cambios: data.totales.sin_cambios || 0,
+                    total_errores: data.totales.errores ? data.totales.errores.length : 0
+                });
+                
+                if (data.totales.errores && data.totales.errores.length > 0) {
+                    addDebugLog(`⚠️ ${data.totales.errores.length} errores encontrados`, 'warning', data.totales.errores);
+                }
+                
+                if (data.resultados_por_cuenta) {
+                    // Mostrar progreso de lotes para cada cuenta
+                    for (const [cuenta, resultado] of Object.entries(data.resultados_por_cuenta)) {
+                        if (resultado.success && resultado.batch_progress) {
+                            addDebugLog(`📊 Progreso de ${cuenta}:`, 'info');
+                            resultado.batch_progress.forEach(batch => {
+                                addDebugLog(`  Lote ${batch.batch}/${batch.total_batches} (${batch.progress_percent}%): ${batch.nuevos} nuevos, ${batch.actualizados} actualizados, ${batch.sin_cambios} sin cambios`, 'data');
+                            });
+                        }
+                    }
+                    
+                    addDebugLog('Desglose por cuenta:', 'info', data.resultados_por_cuenta);
+                }
+            }
+            
+            const totalDuration = ((Date.now() - debugStartTime) / 1000).toFixed(2);
+            addDebugLog(`⏱️ Proceso total completado en ${totalDuration}s`, 'time');
+            updateDebugStatus(`✅ Completado en ${totalDuration}s - Panel permanece abierto para inspección`);
+            
             mensajeDiv.innerHTML = `
                 <div class="alert alert-success">
                     ✅ ${data.message}
-                    <br><small>Recargando en 2 segundos...</small>
+                    <br><small><a href="javascript:window.location.reload()" style="color: #6A1B1B; text-decoration: underline;">Haz clic aquí para recargar</a> o revisa el debug primero</small>
                 </div>
             `;
-            setTimeout(() => window.location.reload(), 2000);
+            
+            // Habilitar botón para permitir nueva importación
+            btn.disabled = false;
+            btn.textContent = '📥 Importar Período Actual';
         } else {
+            addDebugLog('❌ Error en importación: ' + data.message, 'error', data);
+            updateDebugStatus('❌ Error en importación - Ver detalles abajo');
             mensajeDiv.innerHTML = `<div class="alert alert-error">❌ ${data.message}</div>`;
             btn.disabled = false;
             btn.textContent = '📥 Importar Período Actual';
         }
     } catch (error) {
+        addDebugLog('❌ Excepción: ' + error.message, 'error', { message: error.message, stack: error.stack });
+        updateDebugStatus('❌ Excepción capturada');
         mensajeDiv.innerHTML = `<div class="alert alert-error">❌ Error: ${error.message}</div>`;
         btn.disabled = false;
         btn.textContent = '📥 Importar Período Actual';

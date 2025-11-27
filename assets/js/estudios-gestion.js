@@ -511,9 +511,10 @@ function actualizarTablaCategorias(categorias) {
     }
     
     // Filtrar según el estado de mostrandoInactivosCategorias
+    // Considerar estado NULL o 1 como activo
     const categoriasFiltradas = mostrandoInactivosCategorias 
         ? categorias 
-        : categorias.filter(c => c.estado == 1);
+        : categorias.filter(c => c.estado == 1 || c.estado === null);
     
     console.log('📝 Categorías filtradas:', categoriasFiltradas.length);
     
@@ -650,9 +651,10 @@ function actualizarTablaClases(clases) {
     }
     
     // Filtrar según el estado de mostrandoInactivosClases
+    // Considerar estado NULL o 1 como activo
     const clasesFiltradas = mostrandoInactivosClases 
         ? clases 
-        : clases.filter(c => c.estado == 1);
+        : clases.filter(c => c.estado == 1 || c.estado === null);
     
     console.log('📝 Clases filtradas:', clasesFiltradas.length);
     

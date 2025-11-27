@@ -357,22 +357,39 @@ function actualizarTablaCasas(casas) {
         : casas.filter(c => c.estado == 1);
     
     casasFiltradas.forEach(function(casa) {
-        const acciones = `
+        const acciones = getEsAdmin() ? `
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCasa(${casa.id_estudio_casa}, '${casa.nombre_estudio_casa}')">
                 <i class="fas fa-trash"></i>
             </button>
-        `;
+        ` : '<span class="text-muted">Sin permisos</span>';
+
+        const nombreHtml = getEsAdmin() 
+            ? `<span class="editable-nombre" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.nombre_estudio_casa}" title="Doble click para editar" style="cursor: pointer;">${casa.nombre_estudio_casa}</span>`
+            : casa.nombre_estudio_casa;
+
+        const estadoBadge = casa.estado == 1 
+            ? '<span class="badge bg-success" data-order="0">Activo</span>' 
+            : '<span class="badge bg-secondary" data-order="1">Inactivo</span>';
+        
+        const estadoHtml = getEsAdmin() 
+            ? `<span class="editable-estado" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.estado}" title="Click para cambiar" style="cursor: pointer;">${estadoBadge}</span>`
+            : estadoBadge;
 
         tablaCasas.row.add([
             casa.id_estudio_casa,
             formatearFecha(casa.fecha_creacion),
             casa.estudio_nombre || 'N/A',
-            casa.nombre_estudio_casa,
-            casa.estado == 1 ? '<span class="badge bg-success" data-order="0">Activo</span>' : '<span class="badge bg-secondary" data-order="1">Inactivo</span>',
+            nombreHtml,
+            estadoHtml,
             acciones
         ]);
     });
     tablaCasas.draw();
+    
+    // Agregar eventos de edición inline
+    if (getEsAdmin()) {
+        agregarEventosEdicionInline();
+    }
 }
 
 function abrirModalNuevaCasa() {
@@ -495,10 +512,14 @@ function actualizarTablaCategorias(categorias) {
             </button>
         ` : '';
 
+        const nombreHtml = getEsAdmin() 
+            ? `<span class="editable-nombre" data-id="${categoria.id_estudio_categoria}" data-tipo="categoria" data-valor="${categoria.nombre_estudio_categoria}" title="Doble click para editar" style="cursor: pointer;">${categoria.nombre_estudio_categoria}</span>`
+            : categoria.nombre_estudio_categoria;
+
         const row = [
             categoria.id_estudio_categoria,
             formatearFecha(categoria.fecha_creacion),
-            categoria.nombre_estudio_categoria
+            nombreHtml
         ];
 
         if (getEsAdmin()) {
@@ -508,6 +529,11 @@ function actualizarTablaCategorias(categorias) {
         tablaCategorias.row.add(row);
     });
     tablaCategorias.draw();
+    
+    // Agregar eventos de edición inline
+    if (getEsAdmin()) {
+        agregarEventosEdicionInline();
+    }
 }
 
 function abrirModalNuevaCategoria() {
@@ -630,10 +656,14 @@ function actualizarTablaClases(clases) {
             </button>
         ` : '';
 
+        const nombreHtml = getEsAdmin() 
+            ? `<span class="editable-nombre" data-id="${clase.id_estudio_clase}" data-tipo="clase" data-valor="${clase.nombre_estudio_clase}" title="Doble click para editar" style="cursor: pointer;">${clase.nombre_estudio_clase}</span>`
+            : clase.nombre_estudio_clase;
+
         const row = [
             clase.id_estudio_clase,
             formatearFecha(clase.fecha_creacion),
-            clase.nombre_estudio_clase
+            nombreHtml
         ];
 
         if (getEsAdmin()) {
@@ -643,6 +673,11 @@ function actualizarTablaClases(clases) {
         tablaClases.row.add(row);
     });
     tablaClases.draw();
+    
+    // Agregar eventos de edición inline
+    if (getEsAdmin()) {
+        agregarEventosEdicionInline();
+    }
 }
 
 function abrirModalNuevaClase() {

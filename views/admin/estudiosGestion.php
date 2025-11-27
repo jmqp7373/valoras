@@ -163,7 +163,7 @@ ob_start();
                     </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover" style='padding: 1rem;' id="tablaEstudios">
+                        <table class="table table-striped table-hover" style='padding: 1rem;' id="tablaCasaEstudios">
                             <thead class="table-dark">
                                 <tr>
                                     <th>ID</th>
@@ -201,7 +201,7 @@ ob_start();
                     </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover" id="tablaCasas">
+                        <table class="table table-striped table-hover" id="tablaEstudios">
                             <thead class="table-dark">
                                 <tr>
                                     <th>ID</th>

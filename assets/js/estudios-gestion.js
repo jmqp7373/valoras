@@ -21,7 +21,7 @@ $.fn.dataTable.ext.order['dom-data-order'] = function(settings, col) {
 // ============================================
 // VARIABLES GLOBALES
 // ============================================
-let tablaEstudios, tablaCasas, tablaCategorias, tablaClases;
+let tablaCasaEstudios, tablaEstudios, tablaCategorias, tablaClases;
 let modalEstudio, modalCasa, modalCategoria, modalClase;
 let mostrandoInactivosEstudios = false;
 let mostrandoInactivosCasas = false;
@@ -95,11 +95,11 @@ function inicializarDataTables() {
     };
 
     try {
-        // Tabla Estudios
-        if ($.fn.DataTable.isDataTable('#tablaEstudios')) {
-            $('#tablaEstudios').DataTable().destroy();
+        // Tabla Casa Estudios (estudios base)
+        if ($.fn.DataTable.isDataTable('#tablaCasaEstudios')) {
+            $('#tablaCasaEstudios').DataTable().destroy();
         }
-        tablaEstudios = $('#tablaEstudios').DataTable({
+        tablaCasaEstudios = $('#tablaCasaEstudios').DataTable({
             ...configBase,
             columnDefs: [
                 { targets: 1, type: 'date' },
@@ -109,7 +109,21 @@ function inicializarDataTables() {
             order: [[3, 'asc'], [1, 'desc']]
         });
         
-        // Tabla Casas
+        // Tabla Estudios (casas/plataformas)
+        if ($.fn.DataTable.isDataTable('#tablaEstudios')) {
+            $('#tablaEstudios').DataTable().destroy();
+        }
+        tablaEstudios = $('#tablaEstudios').DataTable({
+            ...configBase,
+            columnDefs: [
+                { targets: 1, type: 'date' },
+                { targets: 4, orderDataType: 'dom-data-order' },
+                { targets: 5, orderable: false }
+            ],
+            order: [[4, 'asc'], [1, 'desc']]
+        });
+        
+        // Tabla Casas (eliminada - ya no se usa)
         if ($.fn.DataTable.isDataTable('#tablaCasas')) {
             $('#tablaCasas').DataTable().destroy();
         }
@@ -177,7 +191,7 @@ function cargarEstudios() {
         success: function(response) {
             console.log('✓ Respuesta de estudios:', response);
             if (response.success) {
-                actualizarTablaEstudios(response.data);
+                actualizarTablaCasaEstudios(response.data);
                 actualizarSelectoresEstudios(response.data);
             } else {
                 mostrarError('Error al cargar estudios: ' + response.message);
@@ -190,8 +204,8 @@ function cargarEstudios() {
     });
 }
 
-function actualizarTablaEstudios(estudios) {
-    tablaEstudios.clear();
+function actualizarTablaCasaEstudios(estudios) {
+    tablaCasaEstudios.clear();
     
     // Filtrar según el estado de mostrandoInactivosEstudios
     const estudiosFiltrados = mostrandoInactivosEstudios 
@@ -217,7 +231,7 @@ function actualizarTablaEstudios(estudios) {
             ? `<span class="editable-estado" data-id="${estudio.id_estudio}" data-tipo="estudio" data-valor="${estudio.estado}" title="Click para cambiar" style="cursor: pointer;">${estadoBadge}</span>`
             : estadoBadge;
 
-        tablaEstudios.row.add([
+        tablaCasaEstudios.row.add([
             estudio.id_estudio,
             formatearFecha(estudio.fecha_creacion),
             nombreHtml,
@@ -225,7 +239,7 @@ function actualizarTablaEstudios(estudios) {
             acciones
         ]);
     });
-    tablaEstudios.draw();
+    tablaCasaEstudios.draw();
     
     // Agregar eventos de edición inline
     if (getEsAdmin()) {
@@ -328,7 +342,7 @@ function cargarCasas(idEstudio = '') {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                actualizarTablaCasas(response.data);
+                actualizarTablaEstudios(response.data);
             } else {
                 mostrarError('Error al cargar casas: ' + response.message);
             }
@@ -340,8 +354,8 @@ function cargarCasas(idEstudio = '') {
     });
 }
 
-function actualizarTablaCasas(casas) {
-    tablaCasas.clear();
+function actualizarTablaEstudios(casas) {
+    tablaEstudios.clear();
     
     // Filtrar según el estado de mostrandoInactivosCasas
     const casasFiltradas = mostrandoInactivosCasas 
@@ -367,7 +381,7 @@ function actualizarTablaCasas(casas) {
             ? `<span class="editable-estado" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.estado}" title="Click para cambiar" style="cursor: pointer;">${estadoBadge}</span>`
             : estadoBadge;
 
-        tablaCasas.row.add([
+        tablaEstudios.row.add([
             casa.id_estudio_casa,
             formatearFecha(casa.fecha_creacion),
             casa.estudio_nombre || 'N/A',
@@ -376,7 +390,7 @@ function actualizarTablaCasas(casas) {
             acciones
         ]);
     });
-    tablaCasas.draw();
+    tablaEstudios.draw();
     
     // Agregar eventos de edición inline
     if (getEsAdmin()) {

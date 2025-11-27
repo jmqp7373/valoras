@@ -182,8 +182,8 @@ ob_start();
 
                 <!-- TAB 2: ESTUDIOS -->
                 <div class="tab-pane fade" id="estudios" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="d-flex gap-3 align-items-center">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex flex-column gap-3">
                             <?php if ($es_admin): ?>
                                 <button class="btn btn-primary" id="btnNuevoEstudio">
                                     <i class="fas fa-plus me-1"></i> Nuevo Estudio

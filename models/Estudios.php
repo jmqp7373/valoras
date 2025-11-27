@@ -170,7 +170,7 @@ class Estudios {
      * Obtener todas las casas con información del estudio
      */
     public function obtenerTodasCasas() {
-        $query = "SELECT c.*, e.nombre_estudio as estudio_nombre 
+        $query = "SELECT c.*, e.id_estudio, e.nombre_estudio as estudio_nombre 
                  FROM " . $this->table_casas . " c
                  LEFT JOIN " . $this->table_estudios . " e ON c.id_estudio_casa = e.id_estudio
                  ORDER BY e.nombre_estudio, c.nombre_estudio_casa ASC";

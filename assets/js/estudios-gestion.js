@@ -24,6 +24,9 @@ $.fn.dataTable.ext.order['dom-data-order'] = function(settings, col) {
 let tablaEstudios, tablaCasas, tablaCategorias, tablaClases;
 let modalEstudio, modalCasa, modalCategoria, modalClase;
 let mostrandoInactivosEstudios = false;
+let mostrandoInactivosCasas = false;
+let mostrandoInactivosCategorias = false;
+let mostrandoInactivosClases = false;
 
 // ============================================
 // INICIALIZACIÓN
@@ -149,8 +152,11 @@ function configurarEventListeners() {
     $('#btnNuevaClase').on('click', abrirModalNuevaClase);
     $('#btnGuardarClase').on('click', guardarClase);
 
-    // Toggle inactivos en Casa Estudios
+    // Toggle inactivos
     $('#btnToggleInactivosEstudios').on('click', toggleInactivosEstudios);
+    $('#btnToggleInactivosCasas').on('click', toggleInactivosCasas);
+    $('#btnToggleInactivosCategorias').on('click', toggleInactivosCategorias);
+    $('#btnToggleInactivosClases').on('click', toggleInactivosClases);
 
     // Historial
     $('#btnFiltrarHistorial').on('click', cargarHistorial);
@@ -344,7 +350,13 @@ function cargarCasas(idEstudio = '') {
 
 function actualizarTablaCasas(casas) {
     tablaCasas.clear();
-    casas.forEach(function(casa) {
+    
+    // Filtrar según el estado de mostrandoInactivosCasas
+    const casasFiltradas = mostrandoInactivosCasas 
+        ? casas 
+        : casas.filter(c => c.estado == 1);
+    
+    casasFiltradas.forEach(function(casa) {
         const acciones = `
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCasa(${casa.id_estudio_casa}, '${casa.nombre_estudio_casa}')">
                 <i class="fas fa-trash"></i>
@@ -470,7 +482,13 @@ function actualizarTablaCategorias(categorias) {
     } else if (tablaCategorias) {
         tablaCategorias.clear();
     }
-    categorias.forEach(function(categoria) {
+    
+    // Filtrar según el estado de mostrandoInactivosCategorias
+    const categoriasFiltradas = mostrandoInactivosCategorias 
+        ? categorias 
+        : categorias.filter(c => c.estado == 1);
+    
+    categoriasFiltradas.forEach(function(categoria) {
         const acciones = getEsAdmin() ? `
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCategoria(${categoria.id_estudio_categoria}, '${categoria.nombre_estudio_categoria}')">
                 <i class="fas fa-trash"></i>
@@ -599,7 +617,13 @@ function actualizarTablaClases(clases) {
     } else if (tablaClases) {
         tablaClases.clear();
     }
-    clases.forEach(function(clase) {
+    
+    // Filtrar según el estado de mostrandoInactivosClases
+    const clasesFiltradas = mostrandoInactivosClases 
+        ? clases 
+        : clases.filter(c => c.estado == 1);
+    
+    clasesFiltradas.forEach(function(clase) {
         const acciones = getEsAdmin() ? `
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarClase(${clase.id_estudio_clase}, '${clase.nombre_estudio_clase}')">
                 <i class="fas fa-trash"></i>
@@ -1002,4 +1026,61 @@ function toggleInactivosEstudios() {
     
     // Recargar la tabla con el filtro actualizado
     cargarEstudios();
+}
+
+// ============================================
+// TOGGLE INACTIVOS EN ESTUDIOS (TAB 2)
+// ============================================
+function toggleInactivosCasas() {
+    mostrandoInactivosCasas = !mostrandoInactivosCasas;
+    const btn = $('#btnToggleInactivosCasas');
+    const icono = btn.find('i');
+    
+    if (mostrandoInactivosCasas) {
+        icono.removeClass('fa-eye-slash').addClass('fa-eye');
+        btn.html('<i class="fas fa-eye" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Inactivos');
+    } else {
+        icono.removeClass('fa-eye').addClass('fa-eye-slash');
+        btn.html('<i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos');
+    }
+    
+    cargarCasas();
+}
+
+// ============================================
+// TOGGLE INACTIVOS EN CATEGORÍAS
+// ============================================
+function toggleInactivosCategorias() {
+    mostrandoInactivosCategorias = !mostrandoInactivosCategorias;
+    const btn = $('#btnToggleInactivosCategorias');
+    const icono = btn.find('i');
+    
+    if (mostrandoInactivosCategorias) {
+        icono.removeClass('fa-eye-slash').addClass('fa-eye');
+        btn.html('<i class="fas fa-eye" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Inactivos');
+    } else {
+        icono.removeClass('fa-eye').addClass('fa-eye-slash');
+        btn.html('<i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos');
+    }
+    
+    cargarCategorias();
+}
+
+// ============================================
+// TOGGLE INACTIVOS EN CLASES
+// ============================================
+function toggleInactivosClases() {
+    mostrandoInactivosClases = !mostrandoInactivosClases;
+    const btn = $('#btnToggleInactivosClases');
+    const icono = btn.find('i');
+    
+    if (mostrandoInactivosClases) {
+        icono.removeClass('fa-eye-slash').addClass('fa-eye');
+        btn.html('<i class="fas fa-eye" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Inactivos');
+    } else {
+        icono.removeClass('fa-eye').addClass('fa-eye-slash');
+        btn.html('<i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos');
+    }
+    
+    cargarClases();
 }

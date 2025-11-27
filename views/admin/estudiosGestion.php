@@ -182,17 +182,26 @@ ob_start();
 
                 <!-- TAB 2: ESTUDIOS -->
                 <div class="tab-pane fade" id="estudios" role="tabpanel">
-                    <?php if ($es_admin): ?>
-                        <button class="btn btn-primary mb-3" id="btnNuevoEstudio">
-                            <i class="fas fa-plus me-1"></i> Nuevo Estudio
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex gap-2 align-items-center">
+                            <?php if ($es_admin): ?>
+                                <button class="btn btn-primary" id="btnNuevoEstudio">
+                                    <i class="fas fa-plus me-1"></i> Nuevo Estudio
+                                </button>
+                            <?php endif; ?>
+                            <label for="filtroCasaEstudio" class="form-label mb-0 me-2">Filtrar por Estudio:</label>
+                            <select class="form-select" id="filtroCasaEstudio" style="max-width: 300px;">
+                                <option value="">Todos los estudios</option>
+                            </select>
+                        </div>
+                        <button type="button" 
+                                id="btnToggleInactivosCasas"
+                                class="btn btn-sm"
+                                style="background: rgba(106, 27, 27, 0.15); color: #6A1B1B; border: 1px solid rgba(106, 27, 27, 0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
+                                onmouseover="this.style.background='rgba(106, 27, 27, 0.25)'; this.style.borderColor='rgba(106, 27, 27, 0.5)';"
+                                onmouseout="this.style.background='rgba(106, 27, 27, 0.15)'; this.style.borderColor='rgba(106, 27, 27, 0.3)';">
+                            <i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos
                         </button>
-                    <?php endif; ?>
-                    
-                    <div class="mb-3">
-                        <label for="filtroCasaEstudio" class="form-label">Filtrar por Estudio:</label>
-                        <select class="form-select" id="filtroCasaEstudio" style="max-width: 300px;">
-                            <option value="">Todos los estudios</option>
-                        </select>
                     </div>
                     
                     <div class="table-responsive">
@@ -216,11 +225,23 @@ ob_start();
 
                 <!-- TAB 3: CATEGORÍAS -->
                 <div class="tab-pane fade" id="categorias" role="tabpanel">
-                    <?php if ($es_admin): ?>
-                        <button class="btn btn-primary mb-3" id="btnNuevaCategoria">
-                            <i class="fas fa-plus me-1"></i> Nueva Categoría
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <?php if ($es_admin): ?>
+                                <button class="btn btn-primary" id="btnNuevaCategoria">
+                                    <i class="fas fa-plus me-1"></i> Nueva Categoría
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" 
+                                id="btnToggleInactivosCategorias"
+                                class="btn btn-sm"
+                                style="background: rgba(106, 27, 27, 0.15); color: #6A1B1B; border: 1px solid rgba(106, 27, 27, 0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
+                                onmouseover="this.style.background='rgba(106, 27, 27, 0.25)'; this.style.borderColor='rgba(106, 27, 27, 0.5)';"
+                                onmouseout="this.style.background='rgba(106, 27, 27, 0.15)'; this.style.borderColor='rgba(106, 27, 27, 0.3)';">
+                            <i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos
                         </button>
-                    <?php endif; ?>
+                    </div>
                     
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" id="tablaCategorias">
@@ -243,11 +264,23 @@ ob_start();
 
                 <!-- TAB 4: CLASES -->
                 <div class="tab-pane fade" id="clases" role="tabpanel">
-                    <?php if ($es_admin): ?>
-                        <button class="btn btn-primary mb-3" id="btnNuevaClase">
-                            <i class="fas fa-plus me-1"></i> Nueva Clase
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <?php if ($es_admin): ?>
+                                <button class="btn btn-primary" id="btnNuevaClase">
+                                    <i class="fas fa-plus me-1"></i> Nueva Clase
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" 
+                                id="btnToggleInactivosClases"
+                                class="btn btn-sm"
+                                style="background: rgba(106, 27, 27, 0.15); color: #6A1B1B; border: 1px solid rgba(106, 27, 27, 0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
+                                onmouseover="this.style.background='rgba(106, 27, 27, 0.25)'; this.style.borderColor='rgba(106, 27, 27, 0.5)';"
+                                onmouseout="this.style.background='rgba(106, 27, 27, 0.15)'; this.style.borderColor='rgba(106, 27, 27, 0.3)';">
+                            <i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos
                         </button>
-                    <?php endif; ?>
+                    </div>
                     
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" id="tablaClases">

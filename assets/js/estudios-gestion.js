@@ -27,6 +27,7 @@ let mostrandoInactivosEstudios = false;
 let mostrandoInactivosCasas = false;
 let mostrandoInactivosCategorias = false;
 let mostrandoInactivosClases = false;
+let estudiosDisponibles = []; // Lista de estudios para selector dropdown
 
 // ============================================
 // INICIALIZACIÓN
@@ -230,6 +231,11 @@ function actualizarTablaCasaEstudios(casas) {
             </button>
         ` : '<span class="text-muted">Sin permisos</span>';
 
+        // Columna Estudio editable (cambia la relación con el estudio)
+        const estudioHtml = getEsAdmin() 
+            ? `<span class="editable-estudio-relacion" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-id-estudio="${casa.id_estudio_casa || ''}" data-nombre="${casa.estudio_nombre || 'N/A'}" title="Doble click para cambiar estudio" style="cursor: pointer; text-decoration: underline dotted;">${casa.estudio_nombre || 'N/A'}</span>`
+            : (casa.estudio_nombre || 'N/A');
+
         const nombreHtml = getEsAdmin() 
             ? `<span class="editable-nombre" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.nombre_estudio_casa}" title="Doble click para editar" style="cursor: pointer;">${casa.nombre_estudio_casa}</span>`
             : casa.nombre_estudio_casa;
@@ -245,7 +251,7 @@ function actualizarTablaCasaEstudios(casas) {
         tablaCasaEstudios.row.add([
             casa.id_estudio_casa,
             formatearFecha(casa.fecha_creacion),
-            casa.estudio_nombre || 'N/A',
+            estudioHtml,
             nombreHtml,
             estadoHtml,
             acciones
@@ -350,6 +356,8 @@ function cargarCasas(idEstudio = '') {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
+                // Guardar estudios disponibles globalmente para selector
+                estudiosDisponibles = response.data;
                 actualizarTablaEstudios(response.data);
                 actualizarSelectoresEstudios(response.data);
             } else {
@@ -939,6 +947,57 @@ function agregarEventosEdicionInline() {
         // Iluminar la fila ANTES de guardar
         $tr.addClass('row-saved');
         guardarEdicionInline(id, tipo, 'estado', nuevoEstado, $tr);
+    });
+
+    // Cambiar estudio asociado (relación) con doble click
+    $(document).off('dblclick', '.editable-estudio-relacion').on('dblclick', '.editable-estudio-relacion', function() {
+        const $span = $(this);
+        const $tr = $span.closest('tr');
+        const idCasa = $span.data('id'); // ID de la casa
+        const tipo = $span.data('tipo');
+        const idEstudioActual = $span.data('id-estudio'); // ID del estudio actual
+        const nombreActual = $span.data('nombre');
+        
+        // Crear selector dropdown con estudios disponibles
+        const $select = $('<select>')
+            .addClass('form-select form-select-sm')
+            .css({
+                'width': '200px',
+                'display': 'inline-block'
+            });
+        
+        // Agregar opción vacía
+        $select.append('<option value="">Seleccione estudio...</option>');
+        
+        // Agregar estudios disponibles
+        estudiosDisponibles.forEach(function(estudio) {
+            const selected = estudio.id_estudio == idEstudioActual ? 'selected' : '';
+            $select.append(`<option value="${estudio.id_estudio}" ${selected}>${estudio.nombre_estudio}</option>`);
+        });
+        
+        $span.replaceWith($select);
+        $select.focus();
+        
+        // Guardar al cambiar o perder foco
+        $select.on('change blur', function(e) {
+            const nuevoIdEstudio = $(this).val();
+            if (nuevoIdEstudio && nuevoIdEstudio != idEstudioActual) {
+                // Iluminar la fila ANTES de guardar
+                $tr.addClass('row-saved');
+                // Usar el campo correcto para la relación
+                guardarEdicionInline(idCasa, tipo, 'id_estudio_casa', nuevoIdEstudio, $tr);
+            } else if (e.type === 'blur') {
+                // Restaurar span original si no cambió
+                $(this).replaceWith($span);
+            }
+        });
+        
+        // Cancelar con Escape
+        $select.on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                $(this).replaceWith($span);
+            }
+        });
     });
 }
 

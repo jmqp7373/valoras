@@ -183,20 +183,12 @@ ob_start();
                 <!-- TAB 2: ESTUDIOS -->
                 <div class="tab-pane fade" id="estudios" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="d-flex gap-3 align-items-center">
+                        <div>
                             <?php if ($es_admin): ?>
                                 <button class="btn btn-primary" id="btnNuevoEstudio">
                                     <i class="fas fa-plus me-1"></i> Nuevo Estudio
                                 </button>
                             <?php endif; ?>
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="filtroCasaEstudio" class="form-label mb-0 text-nowrap" style="font-weight: 500; color: #6A1B1B;">
-                                    <i class="fas fa-filter me-1"></i>Filtrar Estudio por Casa:
-                                </label>
-                                <select class="form-select" id="filtroCasaEstudio" style="min-width: 250px; max-width: 300px;">
-                                    <option value="">Todas las casas</option>
-                                </select>
-                            </div>
                         </div>
                         <button type="button" 
                                 id="btnToggleInactivosCasas"

@@ -198,9 +198,6 @@ function actualizarTablaEstudios(estudios) {
     
     estudiosFiltrados.forEach(function(estudio) {
         const acciones = getEsAdmin() ? `
-            <button class="btn btn-sm btn-warning btn-action" onclick="editarEstudio(${estudio.id_estudio})">
-                <i class="fas fa-edit"></i>
-            </button>
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarEstudio(${estudio.id_estudio}, '${estudio.nombre_estudio}')">
                 <i class="fas fa-trash"></i>
             </button>
@@ -253,31 +250,6 @@ function abrirModalNuevoEstudio() {
     $('#estudio_id').val('');
     $('#modalEstudioTitulo').text('Nuevo Estudio');
     modalEstudio.show();
-}
-
-function editarEstudio(id) {
-    $.ajax({
-        url: API_URL,
-        method: 'GET',
-        data: { accion: 'obtener_estudio', id: id },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                const estudio = response.data;
-                $('#estudio_id').val(estudio.id_estudio);
-                $('#estudio_nombre').val(estudio.nombre);
-                $('#estudio_descripcion').val(estudio.descripcion);
-                $('#modalEstudioTitulo').text('Editar Estudio');
-                modalEstudio.show();
-            } else {
-                mostrarError(response.message);
-            }
-        },
-        error: function(xhr) {
-            mostrarError('Error al cargar datos del estudio');
-            console.error(xhr);
-        }
-    });
 }
 
 function guardarEstudio() {
@@ -374,9 +346,6 @@ function actualizarTablaCasas(casas) {
     tablaCasas.clear();
     casas.forEach(function(casa) {
         const acciones = `
-            <button class="btn btn-sm btn-warning btn-action" onclick="editarCasa(${casa.id_estudio_casa})">
-                <i class="fas fa-edit"></i>
-            </button>
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCasa(${casa.id_estudio_casa}, '${casa.nombre_estudio_casa}')">
                 <i class="fas fa-trash"></i>
             </button>
@@ -399,32 +368,6 @@ function abrirModalNuevaCasa() {
     $('#casa_id').val('');
     $('#modalCasaTitulo').text('Nueva Casa/Plataforma');
     modalCasa.show();
-}
-
-function editarCasa(id) {
-    $.ajax({
-        url: API_URL,
-        method: 'GET',
-        data: { accion: 'obtener_casa', id: id },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                const casa = response.data;
-                $('#casa_id').val(casa.id_casa);
-                $('#casa_estudio').val(casa.id_estudio);
-                $('#casa_nombre').val(casa.nombre_casa);
-                $('#casa_url').val(casa.url_casa);
-                $('#modalCasaTitulo').text('Editar Casa/Plataforma');
-                modalCasa.show();
-            } else {
-                mostrarError(response.message);
-            }
-        },
-        error: function(xhr) {
-            mostrarError('Error al cargar datos de la casa');
-            console.error(xhr);
-        }
-    });
 }
 
 function guardarCasa() {
@@ -529,9 +472,6 @@ function actualizarTablaCategorias(categorias) {
     }
     categorias.forEach(function(categoria) {
         const acciones = getEsAdmin() ? `
-            <button class="btn btn-sm btn-warning btn-action" onclick="editarCategoria(${categoria.id_estudio_categoria})">
-                <i class="fas fa-edit"></i>
-            </button>
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCategoria(${categoria.id_estudio_categoria}, '${categoria.nombre_estudio_categoria}')">
                 <i class="fas fa-trash"></i>
             </button>
@@ -557,31 +497,6 @@ function abrirModalNuevaCategoria() {
     $('#categoria_id').val('');
     $('#modalCategoriaTitulo').text('Nueva Categoría');
     modalCategoria.show();
-}
-
-function editarCategoria(id) {
-    $.ajax({
-        url: API_URL,
-        method: 'GET',
-        data: { accion: 'obtener_categoria', id: id },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                const categoria = response.data;
-                $('#categoria_id').val(categoria.id_categoria);
-                $('#categoria_nombre').val(categoria.nombre_categoria);
-                $('#categoria_descripcion').val(categoria.descripcion);
-                $('#modalCategoriaTitulo').text('Editar Categoría');
-                modalCategoria.show();
-            } else {
-                mostrarError(response.message);
-            }
-        },
-        error: function(xhr) {
-            mostrarError('Error al cargar datos de la categoría');
-            console.error(xhr);
-        }
-    });
 }
 
 function guardarCategoria() {
@@ -686,9 +601,6 @@ function actualizarTablaClases(clases) {
     }
     clases.forEach(function(clase) {
         const acciones = getEsAdmin() ? `
-            <button class="btn btn-sm btn-warning btn-action" onclick="editarClase(${clase.id_estudio_clase})">
-                <i class="fas fa-edit"></i>
-            </button>
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarClase(${clase.id_estudio_clase}, '${clase.nombre_estudio_clase}')">
                 <i class="fas fa-trash"></i>
             </button>
@@ -714,31 +626,6 @@ function abrirModalNuevaClase() {
     $('#clase_id').val('');
     $('#modalClaseTitulo').text('Nueva Clase');
     modalClase.show();
-}
-
-function editarClase(id) {
-    $.ajax({
-        url: API_URL,
-        method: 'GET',
-        data: { accion: 'obtener_clase', id: id },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                const clase = response.data;
-                $('#clase_id').val(clase.id_clase);
-                $('#clase_nombre').val(clase.nombre_clase);
-                $('#clase_descripcion').val(clase.descripcion);
-                $('#modalClaseTitulo').text('Editar Clase');
-                modalClase.show();
-            } else {
-                mostrarError(response.message);
-            }
-        },
-        error: function(xhr) {
-            mostrarError('Error al cargar datos de la clase');
-            console.error(xhr);
-        }
-    });
 }
 
 function guardarClase() {

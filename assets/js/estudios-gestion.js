@@ -140,8 +140,8 @@ function configurarEventListeners() {
     $('#btnNuevaCasa').on('click', abrirModalNuevaCasa);
     $('#btnGuardarCasa').on('click', guardarCasa);
     $('#filtroCasaEstudio').on('change', function() {
-        const idEstudio = $(this).val();
-        cargarCasas(idEstudio);
+        const idCasa = $(this).val();
+        filtrarCasasPorEstudioCasa(idCasa);
     });
 
     // Categorías
@@ -238,16 +238,37 @@ function actualizarTablaEstudios(estudios) {
 }
 
 function actualizarSelectoresEstudios(estudios) {
-    // Actualizar selector de casas
+    // Actualizar selector de casas en el modal (mantiene estudios)
     const selectCasaEstudio = $('#casa_estudio');
-    const selectFiltro = $('#filtroCasaEstudio');
-    
     selectCasaEstudio.html('<option value="">Seleccione un estudio</option>');
-    selectFiltro.html('<option value="">Todos los estudios</option>');
     
     estudios.forEach(function(estudio) {
         selectCasaEstudio.append(`<option value="${estudio.id_estudio}">${estudio.nombre_estudio}</option>`);
-        selectFiltro.append(`<option value="${estudio.id_estudio}">${estudio.nombre_estudio}</option>`);
+    });
+    
+    // Cargar Casa Estudios para el filtro de la pestaña Estudios
+    cargarCasasParaFiltro();
+}
+
+function cargarCasasParaFiltro() {
+    $.ajax({
+        url: API_URL,
+        method: 'GET',
+        data: { accion: 'listar_casas' },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                const selectFiltro = $('#filtroCasaEstudio');
+                selectFiltro.html('<option value="">Todas las casas</option>');
+                
+                response.data.forEach(function(casa) {
+                    selectFiltro.append(`<option value="${casa.id_estudio_casa}">${casa.nombre_estudio_casa}</option>`);
+                });
+            }
+        },
+        error: function(xhr) {
+            console.error('Error al cargar casas para filtro:', xhr);
+        }
     });
 }
 
@@ -343,6 +364,33 @@ function cargarCasas(idEstudio = '') {
         },
         error: function(xhr) {
             mostrarError('Error de conexión al cargar casas');
+            console.error(xhr);
+        }
+    });
+}
+
+function filtrarCasasPorEstudioCasa(idCasa) {
+    $.ajax({
+        url: API_URL,
+        method: 'GET',
+        data: { accion: 'listar_casas' },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                let casasFiltradas = response.data;
+                
+                // Filtrar por id_casa si se especificó
+                if (idCasa) {
+                    casasFiltradas = casasFiltradas.filter(casa => casa.id_estudio_casa == idCasa);
+                }
+                
+                actualizarTablaCasas(casasFiltradas);
+            } else {
+                mostrarError('Error al filtrar casas: ' + response.message);
+            }
+        },
+        error: function(xhr) {
+            mostrarError('Error de conexión al filtrar casas');
             console.error(xhr);
         }
     });

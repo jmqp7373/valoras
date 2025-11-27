@@ -23,6 +23,7 @@ $.fn.dataTable.ext.order['dom-data-order'] = function(settings, col) {
 // ============================================
 let tablaEstudios, tablaCasas, tablaCategorias, tablaClases;
 let modalEstudio, modalCasa, modalCategoria, modalClase;
+let mostrandoInactivosEstudios = false;
 
 // ============================================
 // INICIALIZACIÓN
@@ -148,6 +149,9 @@ function configurarEventListeners() {
     $('#btnNuevaClase').on('click', abrirModalNuevaClase);
     $('#btnGuardarClase').on('click', guardarClase);
 
+    // Toggle inactivos en Casa Estudios
+    $('#btnToggleInactivosEstudios').on('click', toggleInactivosEstudios);
+
     // Historial
     $('#btnFiltrarHistorial').on('click', cargarHistorial);
     $('#btnLimpiarFiltros').on('click', limpiarFiltrosHistorial);
@@ -186,7 +190,13 @@ function cargarEstudios() {
 
 function actualizarTablaEstudios(estudios) {
     tablaEstudios.clear();
-    estudios.forEach(function(estudio) {
+    
+    // Filtrar según el estado de mostrandoInactivosEstudios
+    const estudiosFiltrados = mostrandoInactivosEstudios 
+        ? estudios 
+        : estudios.filter(e => e.estado == 1);
+    
+    estudiosFiltrados.forEach(function(estudio) {
         const acciones = getEsAdmin() ? `
             <button class="btn btn-sm btn-warning btn-action" onclick="editarEstudio(${estudio.id_estudio})">
                 <i class="fas fa-edit"></i>
@@ -1083,4 +1093,26 @@ function mostrarIndicadorGuardado(mensaje) {
     setTimeout(() => {
         indicador.classList.remove('show');
     }, 2000);
+}
+
+// ============================================
+// TOGGLE INACTIVOS EN CASA ESTUDIOS
+// ============================================
+function toggleInactivosEstudios() {
+    mostrandoInactivosEstudios = !mostrandoInactivosEstudios;
+    const btn = $('#btnToggleInactivosEstudios');
+    const icono = btn.find('i');
+    
+    if (mostrandoInactivosEstudios) {
+        // Cambiar a "Ocultar Inactivos"
+        icono.removeClass('fa-eye-slash').addClass('fa-eye');
+        btn.html('<i class="fas fa-eye" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Inactivos');
+    } else {
+        // Cambiar a "Mostrar Inactivos"
+        icono.removeClass('fa-eye').addClass('fa-eye-slash');
+        btn.html('<i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos');
+    }
+    
+    // Recargar la tabla con el filtro actualizado
+    cargarEstudios();
 }

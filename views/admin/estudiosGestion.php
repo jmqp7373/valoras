@@ -144,11 +144,23 @@ ob_start();
             <div class="tab-content" id="estudiosTabContent">
                 <!-- TAB 1: CASA ESTUDIOS -->
                 <div class="tab-pane fade show active" id="casas" role="tabpanel">
-                    <?php if ($es_admin): ?>
-                        <button class="btn btn-primary mb-3" id="btnNuevoEstudio">
-                            <i class="fas fa-plus me-1"></i> Nueva Casa
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <?php if ($es_admin): ?>
+                                <button class="btn btn-primary" id="btnNuevoEstudio">
+                                    <i class="fas fa-plus me-1"></i> Nueva Casa
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" 
+                                id="btnToggleInactivosEstudios"
+                                class="btn btn-sm"
+                                style="background: rgba(106, 27, 27, 0.15); color: #6A1B1B; border: 1px solid rgba(106, 27, 27, 0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
+                                onmouseover="this.style.background='rgba(106, 27, 27, 0.25)'; this.style.borderColor='rgba(106, 27, 27, 0.5)';"
+                                onmouseout="this.style.background='rgba(106, 27, 27, 0.15)'; this.style.borderColor='rgba(106, 27, 27, 0.3)';">
+                            <i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos
                         </button>
-                    <?php endif; ?>
+                    </div>
                     
                     <div class="table-responsive">
                         <table class="table table-striped table-hover" style='padding: 1rem;' id="tablaEstudios">

@@ -25,8 +25,6 @@ let tablaCasaEstudios, tablaEstudios, tablaCategorias, tablaClases;
 let modalEstudio, modalCasa, modalCategoria, modalClase;
 let mostrandoInactivosEstudios = false;
 let mostrandoInactivosCasas = false;
-let mostrandoInactivosCategorias = false;
-let mostrandoInactivosClases = false;
 
 // ============================================
 // INICIALIZACIÓN
@@ -172,11 +170,9 @@ function configurarEventListeners() {
     $('#btnNuevaClase').on('click', abrirModalNuevaClase);
     $('#btnGuardarClase').on('click', guardarClase);
 
-    // Toggle inactivos
+    // Toggle inactivos (solo para Estudios y Casas que tienen estado)
     $('#btnToggleInactivosEstudios').on('click', toggleInactivosEstudios);
     $('#btnToggleInactivosCasas').on('click', toggleInactivosCasas);
-    $('#btnToggleInactivosCategorias').on('click', toggleInactivosCategorias);
-    $('#btnToggleInactivosClases').on('click', toggleInactivosClases);
 
     // Historial
     $('#btnFiltrarHistorial').on('click', cargarHistorial);
@@ -510,15 +506,8 @@ function actualizarTablaCategorias(categorias) {
         tablaCategorias.clear();
     }
     
-    // Filtrar según el estado de mostrandoInactivosCategorias
-    // Considerar estado NULL o 1 como activo
-    const categoriasFiltradas = mostrandoInactivosCategorias 
-        ? categorias 
-        : categorias.filter(c => c.estado == 1 || c.estado === null);
-    
-    console.log('📝 Categorías filtradas:', categoriasFiltradas.length);
-    
-    categoriasFiltradas.forEach(function(categoria) {
+    // Las categorías no tienen columna estado, mostrar todas
+    categorias.forEach(function(categoria) {
         const acciones = getEsAdmin() ? `
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCategoria(${categoria.id_estudio_categoria}, '${categoria.nombre_estudio_categoria}')">
                 <i class="fas fa-trash"></i>
@@ -650,15 +639,8 @@ function actualizarTablaClases(clases) {
         tablaClases.clear();
     }
     
-    // Filtrar según el estado de mostrandoInactivosClases
-    // Considerar estado NULL o 1 como activo
-    const clasesFiltradas = mostrandoInactivosClases 
-        ? clases 
-        : clases.filter(c => c.estado == 1 || c.estado === null);
-    
-    console.log('📝 Clases filtradas:', clasesFiltradas.length);
-    
-    clasesFiltradas.forEach(function(clase) {
+    // Las clases no tienen columna estado, mostrar todas
+    clases.forEach(function(clase) {
         const acciones = getEsAdmin() ? `
             <button class="btn btn-sm btn-danger btn-action" onclick="eliminarClase(${clase.id_estudio_clase}, '${clase.nombre_estudio_clase}')">
                 <i class="fas fa-trash"></i>
@@ -1089,42 +1071,4 @@ function toggleInactivosCasas() {
     }
     
     cargarCasas();
-}
-
-// ============================================
-// TOGGLE INACTIVOS EN CATEGORÍAS
-// ============================================
-function toggleInactivosCategorias() {
-    mostrandoInactivosCategorias = !mostrandoInactivosCategorias;
-    const btn = $('#btnToggleInactivosCategorias');
-    const icono = btn.find('i');
-    
-    if (mostrandoInactivosCategorias) {
-        icono.removeClass('fa-eye-slash').addClass('fa-eye');
-        btn.html('<i class="fas fa-eye" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Inactivos');
-    } else {
-        icono.removeClass('fa-eye').addClass('fa-eye-slash');
-        btn.html('<i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos');
-    }
-    
-    cargarCategorias();
-}
-
-// ============================================
-// TOGGLE INACTIVOS EN CLASES
-// ============================================
-function toggleInactivosClases() {
-    mostrandoInactivosClases = !mostrandoInactivosClases;
-    const btn = $('#btnToggleInactivosClases');
-    const icono = btn.find('i');
-    
-    if (mostrandoInactivosClases) {
-        icono.removeClass('fa-eye-slash').addClass('fa-eye');
-        btn.html('<i class="fas fa-eye" style="font-size: 0.9rem; margin-right: 6px;"></i>Ocultar Inactivos');
-    } else {
-        icono.removeClass('fa-eye').addClass('fa-eye-slash');
-        btn.html('<i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos');
-    }
-    
-    cargarClases();
 }

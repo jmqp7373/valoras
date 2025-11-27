@@ -222,21 +222,11 @@ ob_start();
                 <!-- TAB 3: CATEGORÍAS -->
                 <div class="tab-pane fade" id="categorias" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <?php if ($es_admin): ?>
-                                <button class="btn btn-primary" id="btnNuevaCategoria">
-                                    <i class="fas fa-plus me-1"></i> Nueva Categoría
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                        <button type="button" 
-                                id="btnToggleInactivosCategorias"
-                                class="btn btn-sm"
-                                style="background: rgba(106, 27, 27, 0.15); color: #6A1B1B; border: 1px solid rgba(106, 27, 27, 0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
-                                onmouseover="this.style.background='rgba(106, 27, 27, 0.25)'; this.style.borderColor='rgba(106, 27, 27, 0.5)';"
-                                onmouseout="this.style.background='rgba(106, 27, 27, 0.15)'; this.style.borderColor='rgba(106, 27, 27, 0.3)';">
-                            <i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos
-                        </button>
+                        <?php if ($es_admin): ?>
+                            <button class="btn btn-primary" id="btnNuevaCategoria">
+                                <i class="fas fa-plus me-1"></i> Nueva Categoría
+                            </button>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="table-responsive">
@@ -261,21 +251,11 @@ ob_start();
                 <!-- TAB 4: CLASES -->
                 <div class="tab-pane fade" id="clases" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <?php if ($es_admin): ?>
-                                <button class="btn btn-primary" id="btnNuevaClase">
-                                    <i class="fas fa-plus me-1"></i> Nueva Clase
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                        <button type="button" 
-                                id="btnToggleInactivosClases"
-                                class="btn btn-sm"
-                                style="background: rgba(106, 27, 27, 0.15); color: #6A1B1B; border: 1px solid rgba(106, 27, 27, 0.3); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
-                                onmouseover="this.style.background='rgba(106, 27, 27, 0.25)'; this.style.borderColor='rgba(106, 27, 27, 0.5)';"
-                                onmouseout="this.style.background='rgba(106, 27, 27, 0.15)'; this.style.borderColor='rgba(106, 27, 27, 0.3)';">
-                            <i class="fas fa-eye-slash" style="font-size: 0.9rem; margin-right: 6px;"></i>Mostrar Inactivos
-                        </button>
+                        <?php if ($es_admin): ?>
+                            <button class="btn btn-primary" id="btnNuevaClase">
+                                <i class="fas fa-plus me-1"></i> Nueva Clase
+                            </button>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="table-responsive">

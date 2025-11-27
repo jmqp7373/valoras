@@ -130,8 +130,7 @@ function inicializarDataTables() {
         tablaCategorias = $('#tablaCategorias').DataTable({
             ...configBase,
             columnDefs: [
-                { targets: 1, type: 'date' },
-                { targets: 3, orderable: false }
+                { targets: 1, type: 'date' }
             ],
             order: [[1, 'desc']]
         });
@@ -143,8 +142,7 @@ function inicializarDataTables() {
         tablaClases = $('#tablaClases').DataTable({
             ...configBase,
             columnDefs: [
-                { targets: 1, type: 'date' },
-                { targets: 3, orderable: false }
+                { targets: 1, type: 'date' }
             ],
             order: [[1, 'desc']]
         });
@@ -484,12 +482,14 @@ function eliminarCasa(id, nombre) {
 // CATEGORÍAS
 // ============================================
 function cargarCategorias() {
+    console.log('📊 Cargando categorías...');
     $.ajax({
         url: API_URL,
         method: 'GET',
         data: { accion: 'listar_categorias' },
         dataType: 'json',
         success: function(response) {
+            console.log('✓ Respuesta de categorías:', response);
             if (response.success) {
                 actualizarTablaCategorias(response.data);
             } else {
@@ -497,13 +497,14 @@ function cargarCategorias() {
             }
         },
         error: function(xhr) {
+            console.error('❌ Error al cargar categorías:', xhr);
             mostrarError('Error de conexión al cargar categorías');
-            console.error(xhr);
         }
     });
 }
 
 function actualizarTablaCategorias(categorias) {
+    console.log('📝 Actualizando tabla categorías con', categorias?.length || 0, 'registros');
     // Limpiar la tabla existente
     if (tablaCategorias) {
         tablaCategorias.clear();
@@ -513,6 +514,8 @@ function actualizarTablaCategorias(categorias) {
     const categoriasFiltradas = mostrandoInactivosCategorias 
         ? categorias 
         : categorias.filter(c => c.estado == 1);
+    
+    console.log('📝 Categorías filtradas:', categoriasFiltradas.length);
     
     categoriasFiltradas.forEach(function(categoria) {
         const acciones = getEsAdmin() ? `
@@ -618,12 +621,14 @@ function eliminarCategoria(id, nombre) {
 // CLASES
 // ============================================
 function cargarClases() {
+    console.log('📊 Cargando clases...');
     $.ajax({
         url: API_URL,
         method: 'GET',
         data: { accion: 'listar_clases' },
         dataType: 'json',
         success: function(response) {
+            console.log('✓ Respuesta de clases:', response);
             if (response.success) {
                 actualizarTablaClases(response.data);
             } else {
@@ -631,13 +636,14 @@ function cargarClases() {
             }
         },
         error: function(xhr) {
+            console.error('❌ Error al cargar clases:', xhr);
             mostrarError('Error de conexión al cargar clases');
-            console.error(xhr);
         }
     });
 }
 
 function actualizarTablaClases(clases) {
+    console.log('📝 Actualizando tabla clases con', clases?.length || 0, 'registros');
     // Limpiar la tabla existente
     if (tablaClases) {
         tablaClases.clear();
@@ -647,6 +653,8 @@ function actualizarTablaClases(clases) {
     const clasesFiltradas = mostrandoInactivosClases 
         ? clases 
         : clases.filter(c => c.estado == 1);
+    
+    console.log('📝 Clases filtradas:', clasesFiltradas.length);
     
     clasesFiltradas.forEach(function(clase) {
         const acciones = getEsAdmin() ? `

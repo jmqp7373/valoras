@@ -123,18 +123,30 @@ function inicializarDataTables() {
             order: [[4, 'asc'], [1, 'desc']]
         });
         
-        // Tabla Casas (eliminada - ya no se usa)
-        if ($.fn.DataTable.isDataTable('#tablaCasas')) {
-            $('#tablaCasas').DataTable().destroy();
+        // Tabla Categorías
+        if ($.fn.DataTable.isDataTable('#tablaCategorias')) {
+            $('#tablaCategorias').DataTable().destroy();
         }
-        tablaCasas = $('#tablaCasas').DataTable({
+        tablaCategorias = $('#tablaCategorias').DataTable({
             ...configBase,
             columnDefs: [
                 { targets: 1, type: 'date' },
-                { targets: 4, orderDataType: 'dom-data-order' },
-                { targets: 5, orderable: false }
+                { targets: 3, orderable: false }
             ],
-            order: [[4, 'asc'], [1, 'desc']]
+            order: [[1, 'desc']]
+        });
+        
+        // Tabla Clases
+        if ($.fn.DataTable.isDataTable('#tablaClases')) {
+            $('#tablaClases').DataTable().destroy();
+        }
+        tablaClases = $('#tablaClases').DataTable({
+            ...configBase,
+            columnDefs: [
+                { targets: 1, type: 'date' },
+                { targets: 3, orderable: false }
+            ],
+            order: [[1, 'desc']]
         });
     } catch (error) {
         console.error('Error inicializando DataTables:', error);
@@ -491,18 +503,8 @@ function cargarCategorias() {
 }
 
 function actualizarTablaCategorias(categorias) {
-    // Inicializar DataTable si no existe
-    if (!$.fn.DataTable.isDataTable('#tablaCategorias')) {
-        tablaCategorias = $('#tablaCategorias').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
-            pageLength: 25,
-            responsive: true,
-            autoWidth: false,
-            order: [[1, 'desc']]
-        });
-    } else if (tablaCategorias) {
+    // Limpiar la tabla existente
+    if (tablaCategorias) {
         tablaCategorias.clear();
     }
     
@@ -635,18 +637,8 @@ function cargarClases() {
 }
 
 function actualizarTablaClases(clases) {
-    // Inicializar DataTable si no existe
-    if (!$.fn.DataTable.isDataTable('#tablaClases')) {
-        tablaClases = $('#tablaClases').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
-            pageLength: 25,
-            responsive: true,
-            autoWidth: false,
-            order: [[1, 'desc']]
-        });
-    } else if (tablaClases) {
+    // Limpiar la tabla existente
+    if (tablaClases) {
         tablaClases.clear();
     }
     

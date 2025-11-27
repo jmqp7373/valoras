@@ -95,7 +95,7 @@ function inicializarDataTables() {
     };
 
     try {
-        // Tabla Casa Estudios (estudios base)
+        // Tabla Casa Estudios (casas - 6 columnas: ID, Creación, Estudio, Nombre Casa, Estado, Acciones)
         if ($.fn.DataTable.isDataTable('#tablaCasaEstudios')) {
             $('#tablaCasaEstudios').DataTable().destroy();
         }
@@ -103,13 +103,13 @@ function inicializarDataTables() {
             ...configBase,
             columnDefs: [
                 { targets: 1, type: 'date' },
-                { targets: 3, orderDataType: 'dom-data-order' },
-                { targets: 4, orderable: false }
+                { targets: 4, orderDataType: 'dom-data-order' },
+                { targets: 5, orderable: false }
             ],
-            order: [[3, 'asc'], [1, 'desc']]
+            order: [[4, 'asc'], [1, 'desc']]
         });
         
-        // Tabla Estudios (casas/plataformas)
+        // Tabla Estudios (estudios base - 5 columnas: ID, Creación, Nombre, Estado, Acciones)
         if ($.fn.DataTable.isDataTable('#tablaEstudios')) {
             $('#tablaEstudios').DataTable().destroy();
         }
@@ -117,10 +117,10 @@ function inicializarDataTables() {
             ...configBase,
             columnDefs: [
                 { targets: 1, type: 'date' },
-                { targets: 4, orderDataType: 'dom-data-order' },
-                { targets: 5, orderable: false }
+                { targets: 3, orderDataType: 'dom-data-order' },
+                { targets: 4, orderable: false }
             ],
-            order: [[4, 'asc'], [1, 'desc']]
+            order: [[3, 'asc'], [1, 'desc']]
         });
         
         // Tabla Categorías
@@ -194,58 +194,58 @@ function configurarEventListeners() {
 // ESTUDIOS
 // ============================================
 function cargarEstudios() {
-    console.log('📊 Cargando estudios...');
+    console.log('📊 Cargando casas para Casa Estudios...');
     $.ajax({
         url: API_URL,
         method: 'GET',
-        data: { accion: 'listar_estudios' },
+        data: { accion: 'listar_casas' },
         dataType: 'json',
         success: function(response) {
-            console.log('✓ Respuesta de estudios:', response);
+            console.log('✓ Respuesta de casas:', response);
             if (response.success) {
                 actualizarTablaCasaEstudios(response.data);
-                actualizarSelectoresEstudios(response.data);
             } else {
-                mostrarError('Error al cargar estudios: ' + response.message);
+                mostrarError('Error al cargar casas: ' + response.message);
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Error al cargar estudios:', {xhr, status, error});
-            mostrarError('Error de conexión al cargar estudios. Por favor, verifica que el servidor esté funcionando.');
+            console.error('❌ Error al cargar casas:', {xhr, status, error});
+            mostrarError('Error de conexión al cargar casas. Por favor, verifica que el servidor esté funcionando.');
         }
     });
 }
 
-function actualizarTablaCasaEstudios(estudios) {
+function actualizarTablaCasaEstudios(casas) {
     tablaCasaEstudios.clear();
     
     // Filtrar según el estado de mostrandoInactivosEstudios
-    const estudiosFiltrados = mostrandoInactivosEstudios 
-        ? estudios 
-        : estudios.filter(e => e.estado == 1);
+    const casasFiltradas = mostrandoInactivosEstudios 
+        ? casas 
+        : casas.filter(c => c.estado == 1);
     
-    estudiosFiltrados.forEach(function(estudio) {
+    casasFiltradas.forEach(function(casa) {
         const acciones = getEsAdmin() ? `
-            <button class="btn btn-sm btn-danger btn-action" onclick="eliminarEstudio(${estudio.id_estudio}, '${estudio.nombre_estudio}')">
+            <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCasa(${casa.id_estudio_casa}, '${casa.nombre_estudio_casa}')">
                 <i class="fas fa-trash"></i>
             </button>
         ` : '<span class="text-muted">Sin permisos</span>';
 
         const nombreHtml = getEsAdmin() 
-            ? `<span class="editable-nombre" data-id="${estudio.id_estudio}" data-tipo="estudio" data-valor="${estudio.nombre_estudio}" title="Doble click para editar" style="cursor: pointer;">${estudio.nombre_estudio}</span>`
-            : estudio.nombre_estudio;
+            ? `<span class="editable-nombre" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.nombre_estudio_casa}" title="Doble click para editar" style="cursor: pointer;">${casa.nombre_estudio_casa}</span>`
+            : casa.nombre_estudio_casa;
 
-        const estadoBadge = estudio.estado == 1 
+        const estadoBadge = casa.estado == 1 
             ? '<span class="badge bg-success" data-order="0">Activo</span>' 
             : '<span class="badge bg-secondary" data-order="1">Inactivo</span>';
         
         const estadoHtml = getEsAdmin() 
-            ? `<span class="editable-estado" data-id="${estudio.id_estudio}" data-tipo="estudio" data-valor="${estudio.estado}" title="Click para cambiar" style="cursor: pointer;">${estadoBadge}</span>`
+            ? `<span class="editable-estado" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.estado}" title="Click para cambiar" style="cursor: pointer;">${estadoBadge}</span>`
             : estadoBadge;
 
         tablaCasaEstudios.row.add([
-            estudio.id_estudio,
-            formatearFecha(estudio.fecha_creacion),
+            casa.id_estudio_casa,
+            formatearFecha(casa.fecha_creacion),
+            casa.estudio_nombre || 'N/A',
             nombreHtml,
             estadoHtml,
             acciones
@@ -342,61 +342,57 @@ function eliminarEstudio(id, nombre) {
 // CASAS
 // ============================================
 function cargarCasas(idEstudio = '') {
-    const params = { accion: 'listar_casas' };
-    if (idEstudio) {
-        params.id_estudio = idEstudio;
-    }
-
+    console.log('📊 Cargando estudios base para Estudios...');
     $.ajax({
         url: API_URL,
         method: 'GET',
-        data: params,
+        data: { accion: 'listar_estudios' },
         dataType: 'json',
         success: function(response) {
             if (response.success) {
                 actualizarTablaEstudios(response.data);
+                actualizarSelectoresEstudios(response.data);
             } else {
-                mostrarError('Error al cargar casas: ' + response.message);
+                mostrarError('Error al cargar estudios: ' + response.message);
             }
         },
         error: function(xhr) {
-            mostrarError('Error de conexión al cargar casas');
+            mostrarError('Error de conexión al cargar estudios');
             console.error(xhr);
         }
     });
 }
 
-function actualizarTablaEstudios(casas) {
+function actualizarTablaEstudios(estudios) {
     tablaEstudios.clear();
     
     // Filtrar según el estado de mostrandoInactivosCasas
-    const casasFiltradas = mostrandoInactivosCasas 
-        ? casas 
-        : casas.filter(c => c.estado == 1);
+    const estudiosFiltrados = mostrandoInactivosCasas 
+        ? estudios 
+        : estudios.filter(e => e.estado == 1);
     
-    casasFiltradas.forEach(function(casa) {
+    estudiosFiltrados.forEach(function(estudio) {
         const acciones = getEsAdmin() ? `
-            <button class="btn btn-sm btn-danger btn-action" onclick="eliminarCasa(${casa.id_estudio_casa}, '${casa.nombre_estudio_casa}')">
+            <button class="btn btn-sm btn-danger btn-action" onclick="eliminarEstudio(${estudio.id_estudio}, '${estudio.nombre_estudio}')">
                 <i class="fas fa-trash"></i>
             </button>
         ` : '<span class="text-muted">Sin permisos</span>';
 
         const nombreHtml = getEsAdmin() 
-            ? `<span class="editable-nombre" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.nombre_estudio_casa}" title="Doble click para editar" style="cursor: pointer;">${casa.nombre_estudio_casa}</span>`
-            : casa.nombre_estudio_casa;
+            ? `<span class="editable-nombre" data-id="${estudio.id_estudio}" data-tipo="estudio" data-valor="${estudio.nombre_estudio}" title="Doble click para editar" style="cursor: pointer;">${estudio.nombre_estudio}</span>`
+            : estudio.nombre_estudio;
 
-        const estadoBadge = casa.estado == 1 
+        const estadoBadge = estudio.estado == 1 
             ? '<span class="badge bg-success" data-order="0">Activo</span>' 
             : '<span class="badge bg-secondary" data-order="1">Inactivo</span>';
         
         const estadoHtml = getEsAdmin() 
-            ? `<span class="editable-estado" data-id="${casa.id_estudio_casa}" data-tipo="casa" data-valor="${casa.estado}" title="Click para cambiar" style="cursor: pointer;">${estadoBadge}</span>`
+            ? `<span class="editable-estado" data-id="${estudio.id_estudio}" data-tipo="estudio" data-valor="${estudio.estado}" title="Click para cambiar" style="cursor: pointer;">${estadoBadge}</span>`
             : estadoBadge;
 
         tablaEstudios.row.add([
-            casa.id_estudio_casa,
-            formatearFecha(casa.fecha_creacion),
-            casa.estudio_nombre || 'N/A',
+            estudio.id_estudio,
+            formatearFecha(estudio.fecha_creacion),
             nombreHtml,
             estadoHtml,
             acciones

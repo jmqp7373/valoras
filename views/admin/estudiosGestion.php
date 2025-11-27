@@ -147,7 +147,7 @@ ob_start();
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <?php if ($es_admin): ?>
-                                <button class="btn btn-primary" id="btnNuevoEstudio">
+                                <button class="btn btn-primary" id="btnNuevaCasa">
                                     <i class="fas fa-plus me-1"></i> Nueva Casa
                                 </button>
                             <?php endif; ?>
@@ -168,7 +168,8 @@ ob_start();
                                 <tr>
                                     <th>ID</th>
                                     <th>CREACIÓN</th>
-                                    <th>Nombre</th>
+                                    <th>Estudio</th>
+                                    <th>Nombre Casa</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -206,8 +207,7 @@ ob_start();
                                 <tr>
                                     <th>ID</th>
                                     <th>CREACIÓN</th>
-                                    <th>Estudio</th>
-                                    <th>Nombre Casa</th>
+                                    <th>Nombre</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>

@@ -39,11 +39,11 @@ class PerfilController {
 
         // Campos de texto simples
         $campos_texto = [
-            'nombres', 'apellidos', 'celular', 'email', 'fecha_de_nacimiento',
+            'nombres', 'apellidos', 'celular', 'email', 'fecha_nacimiento',
             'tipo_sangre', 'direccion', 'ciudad',
             'contacto_emergencia_nombre', 'contacto_emergencia_parentesco', 'contacto_emergencia_telefono',
             'alergias', 'id_banco', 'banco_tipo_cuenta', 'banco_numero_cuenta',
-            'notas', 'id_estudio'
+            'notas', 'id_estudio', 'codigo_pais', 'cedula', 'id_referente'
         ];
 
         foreach ($campos_texto as $campo) {
@@ -187,7 +187,7 @@ class PerfilController {
      */
     public function obtenerEstudios() {
         try {
-            $query = "SELECT id_estudio, nombre FROM estudios ORDER BY nombre ASC";
+            $query = "SELECT id_estudio, nombre_estudio as nombre FROM estudios ORDER BY nombre_estudio ASC";
             $stmt = $this->db->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

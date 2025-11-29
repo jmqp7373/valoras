@@ -188,14 +188,29 @@ function generarFilaModulo(modulo, index) {
                         </div>
         `;
     } else if (nombreDescriptivo) {
-        // Edición inline: input en lugar de div estático
+        // Edición inline del título: input en lugar de div estático
         html += `
                         <input type="text" 
                                class="form-control nombre-descriptivo-input"
                                data-clave="${escapeHtml(clave)}"
                                value="${escapeHtml(nombreDescriptivo)}"
-                               style="font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; background: transparent; border: 1px solid transparent; color: white; padding: 4px 8px; border-radius: 4px;"
-                               title="Haz clic para editar. Presiona Enter o pierde el foco para guardar.">
+                               style="font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; background: transparent; border: 1px solid transparent; color: white; padding: 4px 8px; border-radius: 4px;"
+                               title="Haz clic para editar el título. Presiona Enter o pierde el foco para guardar.">
+        `;
+        
+        // Edición inline del subtítulo
+        const subtituloValor = modulo.subtitulo || '';
+        html += `
+                        <input type="text" 
+                               class="form-control subtitulo-input"
+                               data-clave="${escapeHtml(clave)}"
+                               value="${escapeHtml(subtituloValor)}"
+                               placeholder="Agregar subtítulo..."
+                               style="font-size: 0.8rem; font-weight: 500; margin-bottom: 4px; background: transparent; border: 1px solid transparent; color: rgba(255,255,255,0.85); padding: 3px 8px; border-radius: 4px; font-style: ${subtituloValor ? 'normal' : 'italic'};"
+                               title="Haz clic para editar el subtítulo. Presiona Enter o pierde el foco para guardar.">
+        `;
+        
+        html += `
                         <div style="font-size: 0.72rem; font-family: 'Courier New', monospace; opacity: 0.7;" title="${escapeHtml(modulo.ruta)}">
                             ${escapeHtml(rutaMostrar)}
                         </div>
@@ -331,6 +346,37 @@ function inicializarEventListeners() {
         });
     });
     
+    // Event listener para inputs de subtítulo (inline editing)
+    document.querySelectorAll('.subtitulo-input').forEach(input => {
+        // Guardar al perder foco
+        input.addEventListener('blur', function() {
+            guardarSubtitulo(this);
+        });
+        
+        // Guardar al presionar Enter
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.blur(); // Trigger blur event
+            }
+        });
+        
+        // Efecto visual al hacer focus
+        input.addEventListener('focus', function() {
+            this.style.background = 'rgba(255, 255, 255, 0.15)';
+            this.style.borderColor = '#fff';
+            this.style.fontStyle = 'normal';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.background = 'transparent';
+            this.style.borderColor = 'transparent';
+            if (!this.value.trim()) {
+                this.style.fontStyle = 'italic';
+            }
+        });
+    });
+    
     // Event listener para botones de eliminar módulo
     document.querySelectorAll('.eliminar-modulo-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -457,6 +503,67 @@ async function guardarNombreDescriptivo(inputElement) {
         inputElement.value = valorAnterior;
         
         mostrarError('Error al actualizar el nombre: ' + error.message);
+        
+    } finally {
+        // Rehabilitar input
+        inputElement.disabled = false;
+    }
+}
+
+// Guardar subtítulo
+async function guardarSubtitulo(inputElement) {
+    const clave = inputElement.getAttribute('data-clave');
+    const nuevoSubtitulo = inputElement.value.trim();
+    
+    // Buscar el subtítulo original en modulosData
+    const moduloOriginal = modulosData.find(m => m.clave === clave);
+    const subtituloOriginal = moduloOriginal ? (moduloOriginal.subtitulo || '') : '';
+    
+    // Si no cambió, no hacer nada
+    if (nuevoSubtitulo === subtituloOriginal) {
+        return;
+    }
+    
+    console.log('💾 Guardando subtítulo:', { clave, nuevoSubtitulo });
+    
+    // Deshabilitar input temporalmente
+    inputElement.disabled = true;
+    const valorAnterior = inputElement.value;
+    
+    try {
+        const formData = new FormData();
+        formData.append('clave', clave);
+        formData.append('subtitulo', nuevoSubtitulo);
+        formData.append('csrf_token', window.csrfToken);
+        
+        const response = await fetch('../../controllers/ModulosController.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Subtítulo actualizado correctamente');
+            
+            // Actualizar datos globales
+            if (moduloOriginal) {
+                moduloOriginal.subtitulo = nuevoSubtitulo;
+            }
+            
+            mostrarMensajeExito('✓ Subtítulo actualizado');
+            
+        } else {
+            throw new Error(data.message || 'Error al actualizar');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        
+        // Revertir valor
+        inputElement.value = valorAnterior;
+        
+        mostrarError('Error al actualizar el subtítulo: ' + error.message);
         
     } finally {
         // Rehabilitar input

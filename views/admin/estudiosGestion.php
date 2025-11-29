@@ -30,7 +30,7 @@ if (isset($_SESSION['rol_actual'])) {
 if (!$es_admin) {
     try {
         $pdo = getDBConnection();
-        $query = "SELECT nivel_orden FROM usuarios_info WHERE id_usuario = ?";
+        $query = "SELECT nivel_orden FROM usuarios WHERE id_usuario = ?";
         $stmt = $pdo->prepare($query);
         $stmt->execute([$_SESSION['user_id']]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -168,8 +168,8 @@ ob_start();
                                 <tr>
                                     <th>ID</th>
                                     <th>CREACIÓN</th>
-                                    <th>Estudio</th>
                                     <th>Nombre Casa</th>
+                                    <th>Estudio</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>

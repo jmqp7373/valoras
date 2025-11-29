@@ -98,3 +98,6 @@ session_data/
 # 💻 Cache de desarrollo
 opcache/
 .php_cs.cache
+#  Uploads de usuarios (fotos de perfil, documentos)
+assets/images/uploads/
+uploads/perfiles/

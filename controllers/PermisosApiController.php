@@ -91,6 +91,7 @@ try {
             'ruta' => $rutaCompleta,
             'rutaMostrar' => $rutaMostrar,
             'nombreDescriptivo' => $data['titulo'] ?? '',
+            'subtitulo' => $data['subtitulo'] ?? '',
             'categoria' => $categoria,
             'archivoExiste' => $data['archivo_existe'] ?? true,
             'exento' => $data['exento'] ?? 0,

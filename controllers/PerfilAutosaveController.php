@@ -32,11 +32,11 @@ try {
     
     // Campos permitidos para auto-guardado
     $campos_permitidos = [
-        'nombres', 'apellidos', 'celular', 'email', 'fecha_de_nacimiento',
-        'tipo_sangre', 'direccion', 'ciudad',
+        'nombres', 'apellidos', 'celular', 'email', 'fecha_nacimiento',
+        'tipo_sangre', 'direccion', 'ciudad', 'codigo_pais', 'cedula',
         'contacto_emergencia_nombre', 'contacto_emergencia_parentesco', 'contacto_emergencia_telefono',
         'alergias', 'id_banco', 'banco_tipo_cuenta', 'banco_numero_cuenta',
-        'notas', 'id_estudio', 'ref1_nombre', 'ref1_parentesco', 'ref1_celular'
+        'notas', 'id_estudio', 'ref1_nombre', 'ref1_parentesco', 'ref1_celular', 'id_referente'
     ];
     
     // Recoger solo los campos enviados

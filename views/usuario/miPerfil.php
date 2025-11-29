@@ -34,10 +34,22 @@ $perfil = $perfilController->obtenerPerfil();
 $estudios = $perfilController->obtenerEstudios();
 $bancos = $perfilController->obtenerBancos();
 
+// DEBUG: Ver qué datos llegan
+error_log("PERFIL DATA: " . print_r($perfil, true));
+error_log("ID USUARIO SESION: " . ($_SESSION['user_id'] ?? 'NO HAY'));
+
 // Valores por defecto
 $perfil = $perfil ?: [];
 $dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-$dias_seleccionados = $perfil['dias_descanso'] ?? [];
+
+// Decodificar dias_descanso si es un JSON string
+$dias_descanso_raw = $perfil['dias_descanso'] ?? [];
+if (is_string($dias_descanso_raw)) {
+    $dias_seleccionados = json_decode($dias_descanso_raw, true) ?: [];
+} else {
+    $dias_seleccionados = is_array($dias_descanso_raw) ? $dias_descanso_raw : [];
+}
+
 $progreso = $perfil['progreso_perfil'] ?? 0;
 
 // ============================================
@@ -167,9 +179,14 @@ ob_start();
                 </div>
 
                 <div class="form-group">
-                    <label for="fecha_de_nacimiento">Fecha de Nacimiento</label>
-                    <input type="date" id="fecha_de_nacimiento" name="fecha_de_nacimiento" 
-                           value="<?php echo htmlspecialchars($perfil['fecha_de_nacimiento'] ?? ''); ?>"
+                    <label for="fecha_nacimiento">Fecha de Nacimiento</label>
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" 
+                           value="<?php 
+                               $fecha = $perfil['fecha_nacimiento'] ?? '';
+                               if ($fecha && $fecha !== '0000-00-00 00:00:00') {
+                                   echo htmlspecialchars(date('Y-m-d', strtotime($fecha)));
+                               }
+                           ?>"
                            data-autosave="true"
                            class="autosave-field">
                 </div>

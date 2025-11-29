@@ -47,9 +47,8 @@ if ((empty($user_nombres) || empty($user_apellidos)) && isset($_SESSION['user_id
     try {
         $db_connection = getDBConnection();
         $stmt = $db_connection->prepare("
-            SELECT u.nombres, u.apellidos, ui.email 
+            SELECT u.nombres, u.apellidos, u.email 
             FROM usuarios u 
-            LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
             WHERE u.id_usuario = ?
         ");
         $stmt->execute([$_SESSION['user_id']]);

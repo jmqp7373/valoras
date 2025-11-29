@@ -244,8 +244,8 @@ function actualizarTablaCasaEstudios(casas) {
         tablaCasaEstudios.row.add([
             casa.id_estudio_casa,
             formatearFecha(casa.fecha_creacion),
-            estudioHtml,
             nombreHtml,
+            estudioHtml,
             estadoHtml,
             acciones
         ]);
@@ -764,7 +764,6 @@ function cargarHistorial() {
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error al cargar historial:', {xhr, status, error});
             $('#contenedorHistorial').html('<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>No hay cambios registrados aún. Los cambios aparecerán aquí cuando se creen, editen o eliminen estudios, casas, categorías o clases.</div>');
         }
     });
@@ -785,17 +784,31 @@ function mostrarHistorial(registros) {
             'UPDATE': 'warning',
             'DELETE': 'danger'
         }[registro.accion] || 'secondary';
+        
+        const badgeText = {
+            'INSERT': 'CREACIÓN',
+            'UPDATE': 'ACTUALIZACIÓN',
+            'DELETE': 'ELIMINACIÓN'
+        }[registro.accion] || registro.accion;
 
         const usuario = registro.nombres && registro.apellidos ? 
             `${registro.nombres} ${registro.apellidos}` : 
             registro.usuario || 'Sistema';
+        
+        // Mapear nombres de tablas a nombres legibles
+        const tablaNombre = {
+            'estudios': 'Estudio',
+            'estudios_casas': 'Casa',
+            'estudios_categorias': 'Categoría',
+            'estudios_clases': 'Clase'
+        }[registro.tabla_afectada] || registro.tabla_afectada;
 
         html += `
             <div class="audit-item">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
-                        <span class="badge bg-${badgeColor} audit-badge">${registro.accion}</span>
-                        <strong>${registro.tabla_afectada}</strong> #${registro.id_registro}
+                        <span class="badge bg-${badgeColor} audit-badge">${badgeText}</span>
+                        <strong>${tablaNombre}</strong> #${registro.id_registro}
                     </div>
                     <small class="text-muted">${new Date(registro.fecha_modificacion).toLocaleString('es-ES')}</small>
                 </div>
@@ -803,23 +816,43 @@ function mostrarHistorial(registros) {
                 <p class="mb-1"><small><strong>Usuario:</strong> ${usuario} | <strong>IP:</strong> ${registro.ip_usuario || 'N/A'}</small></p>
         `;
 
-        if (registro.datos_anteriores_json || registro.datos_nuevos_json) {
+        // Parsear JSON si viene como string
+        let datosAnteriores = registro.datos_anteriores;
+        let datosNuevos = registro.datos_nuevos;
+        
+        try {
+            if (typeof datosAnteriores === 'string') {
+                datosAnteriores = JSON.parse(datosAnteriores);
+            }
+        } catch (e) {
+            console.error('Error parseando datos_anteriores:', e);
+        }
+        
+        try {
+            if (typeof datosNuevos === 'string') {
+                datosNuevos = JSON.parse(datosNuevos);
+            }
+        } catch (e) {
+            console.error('Error parseando datos_nuevos:', e);
+        }
+
+        if (datosAnteriores || datosNuevos) {
             html += '<div class="row mt-2">';
             
-            if (registro.datos_anteriores_json) {
+            if (datosAnteriores) {
                 html += `
                     <div class="col-md-6">
-                        <small class="text-muted">Datos anteriores:</small>
-                        <div class="json-diff">${JSON.stringify(registro.datos_anteriores_json, null, 2)}</div>
+                        <small class="text-muted"><strong>Antes:</strong></small>
+                        <pre class="json-diff" style="background:#f8f9fa; padding:8px; border-radius:4px; font-size:12px;">${JSON.stringify(datosAnteriores, null, 2)}</pre>
                     </div>
                 `;
             }
             
-            if (registro.datos_nuevos_json) {
+            if (datosNuevos) {
                 html += `
                     <div class="col-md-6">
-                        <small class="text-muted">Datos nuevos:</small>
-                        <div class="json-diff">${JSON.stringify(registro.datos_nuevos_json, null, 2)}</div>
+                        <small class="text-muted"><strong>Después:</strong></small>
+                        <pre class="json-diff" style="background:#f8f9fa; padding:8px; border-radius:4px; font-size:12px;">${JSON.stringify(datosNuevos, null, 2)}</pre>
                     </div>
                 `;
             }

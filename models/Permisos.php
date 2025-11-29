@@ -45,7 +45,7 @@ class Permisos {
         }
         
         // Carpetas a escanear
-        $carpetas = ['admin', 'checksTests', 'login', 'finanzas', 'ventas', 'tickets', 'usuario'];
+        $carpetas = ['admin', 'afiliados', 'checksTests', 'login', 'finanzas', 'ventas', 'tickets', 'usuario'];
         
         foreach ($carpetas as $carpeta) {
             $carpetaPath = $viewsPath . $carpeta;
@@ -137,7 +137,7 @@ class Permisos {
             $this->conn->exec("UPDATE modulos SET categoria = 'credenciales' WHERE clave = 'views_admin_credenciales_credencialesGestion.php' AND categoria = 'admin'");
             
             // Obtener TODOS los módulos de la BD ordenados alfabéticamente
-            $sql = "SELECT clave, ruta_completa, titulo, categoria, exento, icono 
+            $sql = "SELECT clave, ruta_completa, titulo, subtitulo, categoria, exento, icono 
                     FROM modulos 
                     WHERE activo = 1
                     ORDER BY categoria ASC, ruta_completa ASC";
@@ -151,6 +151,7 @@ class Permisos {
                 $clave = $moduloDB['clave'];
                 $rutaDB = $moduloDB['ruta_completa'];
                 $titulo = $moduloDB['titulo'];
+                $subtitulo = $moduloDB['subtitulo'] ?? '';
                 $exento = (int)$moduloDB['exento'];
                 $icono = $moduloDB['icono'] ?? null;
                 
@@ -162,6 +163,7 @@ class Permisos {
                 $resultado[$clave] = [
                     'ruta' => $rutaDB,
                     'titulo' => $titulo,
+                    'subtitulo' => $subtitulo,
                     'archivo_existe' => $archivoExiste,
                     'exento' => $exento,
                     'icono' => $icono

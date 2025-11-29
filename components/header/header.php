@@ -68,10 +68,9 @@ try {
         $user_id = $_SESSION['user_id'] ?? null;
         if ($user_id) {
             $stmt = $dbConnection->prepare("
-                SELECT r.id, r.nombre, r.nivel_orden, ui.nivel_orden as usuario_nivel_orden
+                SELECT r.id, r.nombre, r.nivel_orden, u.nivel_orden as usuario_nivel_orden
                 FROM usuarios u 
                 JOIN roles r ON u.id_rol = r.id 
-                LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario
                 WHERE u.id_usuario = ?
             ");
             $stmt->execute([$user_id]);

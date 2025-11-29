@@ -1,0 +1,208 @@
+/**
+ * Estilos para Gestión de Afiliados
+ * Sigue los patrones visuales del sistema Valora
+ */
+
+/* Variables CSS para sobrescribir colores de Bootstrap */
+:root {
+    --bs-pagination-color: #6A1B1B;
+    --bs-pagination-bg: #fff;
+    --bs-pagination-border-color: #dee2e6;
+    --bs-pagination-hover-color: #6A1B1B;
+    --bs-pagination-hover-bg: #f5e6ee;
+    --bs-pagination-hover-border-color: #882A57;
+    --bs-pagination-focus-color: #6A1B1B;
+    --bs-pagination-focus-bg: #f5e6ee;
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(106, 27, 27, 0.25);
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-active-bg: #6A1B1B;
+    --bs-pagination-active-border-color: #6A1B1B;
+    --bs-pagination-disabled-color: #999;
+    --bs-pagination-disabled-bg: #fff;
+    --bs-pagination-disabled-border-color: #dee2e6;
+}
+
+/* Tabs personalizadas */
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    color: #6A1B1B;
+    font-weight: 500;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border: none;
+    color: #882A57;
+    background-color: #f8f9fa;
+}
+
+.nav-tabs .nav-link.active {
+    color: #882A57;
+    border: none;
+    border-bottom: 3px solid #882A57;
+    background-color: transparent;
+    font-weight: 600;
+}
+
+.nav-tabs .nav-link i {
+    margin-right: 0.5rem;
+}
+
+/* Botones de acción en tablas */
+.btn-action {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    margin: 0 2px;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Tablas */
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.table tbody tr.usuario-row:hover {
+    background-color: #f5e6ee !important;
+    transform: scale(1.005);
+    box-shadow: 0 2px 8px rgba(106, 27, 27, 0.15);
+}
+
+/* Botones primarios personalizados */
+.btn-primary {
+    background: linear-gradient(135deg, #6A1B1B 0%, #882A57 100%);
+    border: none;
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 27, 27, 0.4);
+    background: linear-gradient(135deg, #882A57 0%, #6A1B1B 100%);
+}
+
+/* Card principal */
+.card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tab-pane.active {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Formularios */
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #6A1B1B;
+    box-shadow: 0 0 0 0.2rem rgba(106, 27, 27, 0.25);
+}
+
+/* Badges personalizados */
+.badge {
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Tooltip de usuario */
+.usuario-tooltip {
+    user-select: text;
+    cursor: default;
+}
+
+.usuario-tooltip::-webkit-scrollbar {
+    width: 8px;
+}
+
+.usuario-tooltip::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.usuario-tooltip::-webkit-scrollbar-thumb {
+    background: #6A1B1B;
+    border-radius: 10px;
+}
+
+.usuario-tooltip::-webkit-scrollbar-thumb:hover {
+    background: #882A57;
+}
+
+.usuario-tooltip h6 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.usuario-tooltip h6 i {
+    color: #882A57;
+}
+
+/* Permitir selección de texto en el tooltip */
+.usuario-tooltip * {
+    user-select: text;
+}

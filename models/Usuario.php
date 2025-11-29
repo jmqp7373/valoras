@@ -26,10 +26,9 @@ class Usuario {
 
     // Método para autenticar usuario
     public function login($numero_cedula, $password) {
-        $query = "SELECT u.*, ui.* 
+        $query = "SELECT u.* 
                   FROM " . $this->table_name . " u
-                  LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario
-                  WHERE ui.cedula = :cedula LIMIT 1";
+                  WHERE u.cedula = :cedula LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':cedula', $numero_cedula);
@@ -61,12 +60,10 @@ class Usuario {
                     u.password,
                     u.estado,
                     u.id_rol,
-                    ui.cedula,
-                    ui.celular,
-                    ui.email,
-                    ui.codigo_pais
+                    u.cedula,
+                    u.celular,
+                    u.email
                 FROM " . $this->table_name . " u 
-                LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
                 WHERE u.usuario = :identificador LIMIT 1";
                 break;
             case 'celular':
@@ -78,13 +75,11 @@ class Usuario {
                     u.password,
                     u.estado,
                     u.id_rol,
-                    ui.cedula,
-                    ui.celular,
-                    ui.email,
-                    ui.codigo_pais
+                    u.cedula,
+                    u.celular,
+                    u.email
                 FROM " . $this->table_name . " u 
-                LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
-                WHERE ui.celular = :identificador LIMIT 1";
+                WHERE u.celular = :identificador LIMIT 1";
                 break;
             case 'cedula':
             default:
@@ -96,13 +91,11 @@ class Usuario {
                     u.password,
                     u.estado,
                     u.id_rol,
-                    ui.cedula,
-                    ui.celular,
-                    ui.email,
-                    ui.codigo_pais
+                    u.cedula,
+                    u.celular,
+                    u.email
                 FROM " . $this->table_name . " u 
-                LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
-                WHERE ui.cedula = :identificador LIMIT 1";
+                WHERE u.cedula = :identificador LIMIT 1";
                 break;
         }
         
@@ -125,8 +118,7 @@ class Usuario {
     // Método para verificar si un usuario existe por cédula
     public function existsByCedula($cedula) {
         $query = "SELECT u.id_usuario FROM " . $this->table_name . " u 
-                  INNER JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
-                  WHERE ui.cedula = :cedula LIMIT 1";
+                  WHERE u.cedula = :cedula LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':cedula', $cedula);
@@ -143,8 +135,7 @@ class Usuario {
         }
         
         $query = "SELECT u.id_usuario FROM " . $this->table_name . " u 
-                  INNER JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
-                  WHERE ui.email = :email LIMIT 1";
+                  WHERE u.email = :email LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':email', $email);
@@ -156,8 +147,7 @@ class Usuario {
     // Método para verificar si un usuario existe por celular
     public function existsByCelular($celular) {
         $query = "SELECT u.id_usuario FROM " . $this->table_name . " u 
-                  INNER JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
-                  WHERE ui.celular = :celular LIMIT 1";
+                  WHERE u.celular = :celular LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':celular', $celular);
@@ -262,9 +252,8 @@ class Usuario {
 
     // Método para obtener información del usuario por ID
     public function getById($id) {
-        $query = "SELECT u.*, ui.* 
+        $query = "SELECT u.* 
                   FROM " . $this->table_name . " u
-                  LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario
                   WHERE u.id_usuario = :id LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
@@ -288,28 +277,12 @@ class Usuario {
      */
     public function updateContactData($cedula, $telefono, $email) {
         try {
-            // Primero obtener id_usuario
-            $query_id = "SELECT u.id_usuario FROM usuarios u 
-                         INNER JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario 
-                         WHERE ui.cedula = :cedula LIMIT 1";
-            $stmt_id = $this->conn->prepare($query_id);
-            $stmt_id->bindParam(':cedula', $cedula);
-            $stmt_id->execute();
-            
-            if ($stmt_id->rowCount() === 0) {
-                error_log("Usuario no encontrado con cédula: {$cedula}");
-                return false;
-            }
-            
-            $row = $stmt_id->fetch(PDO::FETCH_ASSOC);
-            $id_usuario = $row['id_usuario'];
-            
-            // Actualizar en usuarios_info
-            $query = "UPDATE usuarios_info SET celular = :telefono, email = :email WHERE id_usuario = :id_usuario";
+            // Actualizar directamente en usuarios
+            $query = "UPDATE usuarios SET celular = :telefono, email = :email WHERE cedula = :cedula";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':telefono', $telefono);
             $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':id_usuario', $id_usuario);
+            $stmt->bindParam(':cedula', $cedula);
             
             if ($stmt->execute()) {
                 error_log("Usuario actualizado/verificado: Cédula {$cedula}, Rows affected: " . $stmt->rowCount());
@@ -332,18 +305,24 @@ class Usuario {
      */
     public function actualizarPerfil($id_usuario, $datos) {
         try {
-            // Separar campos entre usuarios y usuarios_info
-            $campos_usuarios = ['nombres', 'apellidos'];
+            error_log("ACTUALIZAR PERFIL - ID: $id_usuario");
+            error_log("DATOS RECIBIDOS: " . print_r($datos, true));
+            
+            // Campos en tabla usuarios (incluye los migrados)
+            $campos_usuarios = [
+                'nombres', 'apellidos', 'celular', 'email', 'fecha_nacimiento', 'cedula',
+                'id_estudio', 'id_referente', 'nivel_orden', 'codigo_pais',
+                'direccion', 'ciudad', 'dias_descanso', 'progreso_perfil'
+            ];
             $campos_usuarios_info = [
-                'celular', 'email', 'fecha_de_nacimiento', 'cedula',
-                'tipo_sangre', 'direccion', 'ciudad', 'codigo_pais',
-                'contacto_emergencia_nombre', 'contacto_emergencia_parentesco', 'contacto_emergencia_telefono',
+                'tipo_sangre', 'contacto_emergencia_nombre', 'contacto_emergencia_parentesco', 'contacto_emergencia_telefono',
                 'alergias', 'certificado_medico',
-                'id_banco', 'banco_tipo_cuenta', 'banco_numero_cuenta',
-                'dias_descanso', 'id_estudio', 'id_referente', 'notas',
-                'foto_perfil', 'foto_con_cedula', 'foto_cedula_frente', 'foto_cedula_reverso',
-                'disponibilidad', 'nivel_orden', 'inmune_asistencia', 'url_entrevista',
+                'id_banco', 'banco_tipo_cuenta', 'banco_numero_cuenta', 'notas',
+                'disponibilidad', 'inmune_asistencia', 'url_entrevista',
                 'ref1_nombre', 'ref1_parentesco', 'ref1_celular', 'info_medica'
+            ];
+            $campos_usuarios_fotos = [
+                'foto_perfil', 'foto_con_cedula', 'foto_cedula_frente', 'foto_cedula_reverso'
             ];
 
             // UPDATE para tabla usuarios
@@ -355,6 +334,11 @@ class Usuario {
                     $valores_usuarios[$campo] = $datos[$campo];
                 }
             }
+
+            // Calcular progreso y agregarlo al UPDATE de usuarios
+            $progreso = $this->calcularProgresoPerfil($id_usuario, $datos);
+            $set_usuarios[] = "progreso_perfil = :progreso_perfil";
+            $valores_usuarios['progreso_perfil'] = $progreso;
 
             if (!empty($set_usuarios)) {
                 $query_usuarios = "UPDATE " . $this->table_name . " SET " . 
@@ -378,10 +362,15 @@ class Usuario {
                 }
             }
 
-            // Calcular y agregar progreso
-            $progreso = $this->calcularProgresoPerfil($id_usuario, $datos);
-            $set_info[] = "progreso_perfil = :progreso_perfil";
-            $valores_info['progreso_perfil'] = $progreso;
+            // UPDATE para tabla usuarios_fotos
+            $set_fotos = [];
+            $valores_fotos = [];
+            foreach ($campos_usuarios_fotos as $campo) {
+                if (array_key_exists($campo, $datos)) {
+                    $set_fotos[] = "$campo = :$campo";
+                    $valores_fotos[$campo] = $datos[$campo];
+                }
+            }
 
             if (!empty($set_info)) {
                 $query_info = "UPDATE usuarios_info SET " . 
@@ -392,17 +381,41 @@ class Usuario {
                     $stmt_info->bindValue(":$key", $value);
                 }
                 $stmt_info->bindValue(':id_usuario', $id_usuario);
-                
-                if ($stmt_info->execute()) {
-                    return [
-                        'success' => true, 
-                        'message' => 'Perfil actualizado exitosamente',
-                        'progreso' => $progreso
-                    ];
-                }
+                $stmt_info->execute();
             }
 
-            return ['success' => false, 'message' => 'No hay datos para actualizar'];
+            // UPDATE para usuarios_fotos si hay datos
+            if (!empty($set_fotos)) {
+                // Verificar si el registro existe
+                $check = $this->conn->prepare("SELECT id_foto FROM usuarios_fotos WHERE id_usuario = :id_usuario");
+                $check->bindValue(':id_usuario', $id_usuario);
+                $check->execute();
+                
+                if ($check->rowCount() > 0) {
+                    // UPDATE
+                    $query_fotos = "UPDATE usuarios_fotos SET " . 
+                                 implode(', ', $set_fotos) . 
+                                 " WHERE id_usuario = :id_usuario";
+                    $stmt_fotos = $this->conn->prepare($query_fotos);
+                } else {
+                    // INSERT
+                    $campos_insert = array_merge(['id_usuario'], array_keys($valores_fotos));
+                    $query_fotos = "INSERT INTO usuarios_fotos (" . implode(', ', $campos_insert) . ") VALUES (:id_usuario, :" . implode(', :', array_keys($valores_fotos)) . ")";
+                    $stmt_fotos = $this->conn->prepare($query_fotos);
+                }
+                
+                foreach ($valores_fotos as $key => $value) {
+                    $stmt_fotos->bindValue(":$key", $value);
+                }
+                $stmt_fotos->bindValue(':id_usuario', $id_usuario);
+                $stmt_fotos->execute();
+            }
+
+            return [
+                'success' => true, 
+                'message' => 'Perfil actualizado exitosamente',
+                'progreso' => $progreso
+            ];
 
         } catch (PDOException $e) {
             error_log("Error al actualizar perfil: " . $e->getMessage());
@@ -418,17 +431,24 @@ class Usuario {
      */
     public function obtenerPerfil($id_usuario) {
         try {
-            $query = "SELECT u.*, ui.*, 
-                             ub.nombre_banco, ub.codigo_abreviado as banco_codigo, 
-                             ub.color_banco, ub.tipo_banco,
+            $query = "SELECT 
+                             u.id_usuario, u.usuario, u.nombres, u.apellidos, u.password,
+                             u.id_rol, u.estado, u.nivel_orden, u.fecha_creacion,
+                             u.id_estudio, u.id_referente, u.celular, u.cedula, u.email,
+                             u.codigo_pais, u.fecha_nacimiento, u.direccion, u.ciudad,
+                             u.dias_descanso, u.progreso_perfil,
+                             ui.disponibilidad,
+                             ui.ref1_nombre, ui.ref1_parentesco, ui.ref1_celular,
+                             ui.info_medica, ui.tipo_sangre, ui.alergias,
+                             ui.contacto_emergencia_nombre, ui.contacto_emergencia_parentesco, ui.contacto_emergencia_telefono,
+                             ui.banco_nombre, ui.banco_tipo_cuenta, ui.banco_numero_cuenta,
+                             ui.url_entrevista, ui.inmune_asistencia, ui.certificado_medico, ui.notas,
                              uf.FotoDePerfil as foto_perfil,
                              uf.FotoConCedulaEnMano as foto_con_cedula,
                              uf.CedulaLadoFrontal as foto_cedula_frente,
-                             uf.CedulaLadoReverso as foto_cedula_reverso,
-                             uf.certificado_medico
+                             uf.CedulaLadoReverso as foto_cedula_reverso
                       FROM " . $this->table_name . " u
                       LEFT JOIN usuarios_info ui ON u.id_usuario = ui.id_usuario
-                      LEFT JOIN usuarios_bancos ub ON ui.id_banco = ub.id_banco
                       LEFT JOIN usuarios_fotos uf ON u.id_usuario = uf.id_usuario
                       WHERE u.id_usuario = :id_usuario LIMIT 1";
             $stmt = $this->conn->prepare($query);
@@ -437,13 +457,6 @@ class Usuario {
 
             if ($stmt->rowCount() > 0) {
                 $perfil = $stmt->fetch(PDO::FETCH_ASSOC);
-                
-                // Decodificar JSON de días de descanso
-                if (isset($perfil['dias_descanso']) && !empty($perfil['dias_descanso'])) {
-                    $perfil['dias_descanso'] = json_decode($perfil['dias_descanso'], true);
-                } else {
-                    $perfil['dias_descanso'] = [];
-                }
 
                 return $perfil;
             }
@@ -480,14 +493,13 @@ class Usuario {
         $campos_obligatorios = [
             'nombres', 'apellidos', 'cedula', 'celular', 'email',
             'foto_perfil', 'foto_con_cedula', 'foto_cedula_frente', 'foto_cedula_reverso',
-            'contacto_emergencia_nombre', 'contacto_emergencia_telefono',
-            'id_banco', 'banco_numero_cuenta'
+            'contacto_emergencia_nombre', 'contacto_emergencia_telefono'
         ];
 
         // Campos opcionales (peso: 40%)
         $campos_opcionales = [
             'fecha_de_nacimiento', 'ciudad', 'direccion', 'tipo_sangre',
-            'contacto_emergencia_parentesco', 'alergias', 'banco_tipo_cuenta',
+            'contacto_emergencia_parentesco', 'alergias',
             'dias_descanso', 'id_estudio', 'notas'
         ];
 

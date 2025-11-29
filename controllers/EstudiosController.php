@@ -49,7 +49,7 @@ class EstudiosController {
 
         // Verificar por nivel_orden
         try {
-            $query = "SELECT nivel_orden FROM usuarios_info WHERE id_usuario = ?";
+            $query = "SELECT nivel_orden FROM usuarios WHERE id_usuario = ?";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$this->id_usuario]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -66,7 +66,7 @@ class EstudiosController {
      */
     private function obtenerEstudioUsuario() {
         try {
-            $query = "SELECT id_estudio FROM usuarios_info WHERE id_usuario = ?";
+            $query = "SELECT id_estudio FROM usuarios WHERE id_usuario = ?";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$this->id_usuario]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -616,11 +616,13 @@ class EstudiosController {
     // ============================================
 
     private function obtenerHistorial() {
-        $tabla = $_GET['tabla'] ?? null;
-        $id_registro = $_GET['id_registro'] ?? null;
-        $limit = $_GET['limit'] ?? 100;
+        // NO usar $_GET['accion'] porque ya se usa para enrutar
+        $filtros = [
+            'tabla' => $_GET['tabla'] ?? null,
+            'accion' => $_GET['tipo_accion'] ?? null  // Solo usar tipo_accion para filtrar
+        ];
 
-        $historial = $this->estudios->obtenerHistorialAuditoria($tabla, $id_registro, $limit);
+        $historial = $this->estudios->obtenerHistorial($filtros);
         $this->jsonResponse(['success' => true, 'data' => $historial]);
     }
 
@@ -669,9 +671,26 @@ class EstudiosController {
                     break;
             }
 
+            // Obtener valor anterior
+            $queryAnterior = "SELECT $nombreCampo FROM $tabla WHERE $idCampo = ?";
+            $stmtAnterior = $this->db->prepare($queryAnterior);
+            $stmtAnterior->execute([$id]);
+            $valorAnterior = $stmtAnterior->fetchColumn();
+
+            // Actualizar registro
             $query = "UPDATE $tabla SET $nombreCampo = ? WHERE $idCampo = ?";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$valor, $id]);
+
+            // Registrar edición
+            $this->estudios->registrarEdicion(
+                $tabla,
+                $id,
+                'UPDATE',
+                [$nombreCampo => $valorAnterior],
+                [$nombreCampo => $valor],
+                $this->id_usuario
+            );
 
             $this->jsonResponse(['success' => true, 'message' => 'Actualizado correctamente']);
         } catch (Exception $e) {

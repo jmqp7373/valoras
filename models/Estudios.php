@@ -7,7 +7,7 @@ class Estudios {
     private $table_casas = 'estudios_casas';
     private $table_categorias = 'estudios_categorias';
     private $table_clases = 'estudios_clases';
-    private $table_auditoria = 'estudios_auditoria';
+    private $table_ediciones = 'estudios_auditoria'; // Cambiar a 'estudios_ediciones' después de migración
 
     public function __construct() {
         $database = new Database();
@@ -570,29 +570,132 @@ class Estudios {
     /**
      * Registrar auditoría
      */
+    /**
+     * Método legacy - redirige al nuevo sistema de ediciones
+     * @deprecated Usar registrarEdicion() en su lugar
+     */
     private function registrarAuditoria($tabla, $id_registro, $accion, $datos_anteriores, $datos_nuevos, $descripcion) {
+        $id_usuario = $_SESSION['id_usuario'] ?? null;
+        
+        // No convertir - la tabla usa INSERT/UPDATE/DELETE directamente
+        return $this->registrarEdicion($tabla, $id_registro, $accion, $datos_anteriores, $datos_nuevos, $id_usuario);
+    }
+
+    /**
+     * Registrar edición en estudios_ediciones (compatible con estudios_auditoria)
+     */
+    public function registrarEdicion($tabla, $id_registro, $accion, $datos_anteriores = null, $datos_nuevos = null, $id_usuario = null) {
         try {
-            $id_usuario = $_SESSION['id_usuario'] ?? null;
+            // Usar nombres de columnas actuales de estudios_auditoria
+            $query = "INSERT INTO " . $this->table_ediciones . " 
+                     (tabla_afectada, id_registro, accion, datos_anteriores, datos_nuevos, id_usuario, ip_usuario, descripcion) 
+                     VALUES (:tabla, :id_registro, :accion, :datos_anteriores, :datos_nuevos, :id_usuario, :ip, :descripcion)";
             
-            $query = "INSERT INTO " . $this->table_auditoria . "
-                     (tabla, id_registro, accion, datos_anteriores, datos_nuevos, id_usuario, descripcion)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)";
+            // Generar descripción automática
+            $descripcion = $this->generarDescripcionEdicion($tabla, $accion, $datos_anteriores, $datos_nuevos);
+            
+            // Convertir datos a JSON
+            $datos_anteriores_json = $datos_anteriores ? json_encode($datos_anteriores, JSON_UNESCAPED_UNICODE) : null;
+            $datos_nuevos_json = $datos_nuevos ? json_encode($datos_nuevos, JSON_UNESCAPED_UNICODE) : null;
+            
+            // Obtener IP
+            $ip = $_SERVER['REMOTE_ADDR'] ?? null;
             
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
-                $tabla,
-                $id_registro,
-                $accion,
-                json_encode($datos_anteriores),
-                json_encode($datos_nuevos),
-                $id_usuario,
-                $descripcion
+                ':tabla' => $tabla,
+                ':id_registro' => $id_registro,
+                ':accion' => $accion,
+                ':datos_anteriores' => $datos_anteriores_json,
+                ':datos_nuevos' => $datos_nuevos_json,
+                ':id_usuario' => $id_usuario,
+                ':ip' => $ip,
+                ':descripcion' => $descripcion
             ]);
             
             return true;
         } catch (Exception $e) {
-            error_log("Error al registrar auditoría: " . $e->getMessage());
+            error_log("Error al registrar edición: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             return false;
         }
     }
+
+    /**
+     * Generar descripción legible de la edición
+     */
+    private function generarDescripcionEdicion($tabla, $accion, $datos_anteriores, $datos_nuevos) {
+        $nombres = [
+            'estudios' => 'estudio',
+            'estudios_casas' => 'casa',
+            'estudios_categorias' => 'categoría',
+            'estudios_clases' => 'clase'
+        ];
+        
+        $tipo = $nombres[$tabla] ?? 'registro';
+        
+        switch($accion) {
+            case 'INSERT':
+            case 'CREATE':
+                return "Creó {$tipo}";
+            case 'UPDATE':
+                if ($datos_anteriores && $datos_nuevos) {
+                    $cambios = [];
+                    foreach ($datos_nuevos as $campo => $nuevo) {
+                        if (isset($datos_anteriores[$campo]) && $datos_anteriores[$campo] != $nuevo) {
+                            $cambios[] = $campo;
+                        }
+                    }
+                    if (!empty($cambios)) {
+                        return "Modificó " . implode(', ', $cambios) . " de {$tipo}";
+                    }
+                }
+                return "Modificó {$tipo}";
+            case 'DELETE':
+                return "Eliminó {$tipo}";
+            default:
+                return "Acción en {$tipo}";
+        }
+    }
+
+    /**
+     * Obtener historial de ediciones (compatible con estudios_auditoria)
+     */
+    public function obtenerHistorial($filtros = []) {
+        try {
+            $query = "SELECT e.id_auditoria, e.tabla_afectada, e.id_registro, e.accion, 
+                            e.datos_anteriores, e.datos_nuevos, e.id_usuario, 
+                            e.fecha_modificacion, e.ip_usuario, e.descripcion,
+                            u.nombres, u.apellidos, u.usuario 
+                     FROM " . $this->table_ediciones . " e
+                     LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario
+                     WHERE 1=1";
+            
+            $params = [];
+            
+            // Filtrar por tabla
+            if (!empty($filtros['tabla'])) {
+                $query .= " AND e.tabla_afectada = :tabla";
+                $params[':tabla'] = $filtros['tabla'];
+            }
+            
+            // Filtrar por acción
+            if (!empty($filtros['accion'])) {
+                $query .= " AND e.accion = :accion";
+                $params[':accion'] = $filtros['accion'];
+            }
+            
+            // Ordenar por más reciente
+            $query .= " ORDER BY e.fecha_modificacion DESC LIMIT 100";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($params);
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error al obtener historial: " . $e->getMessage());
+            return [];
+        }
+    }
 }
+

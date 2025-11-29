@@ -107,19 +107,44 @@ if ($accion === 'marcar_eliminado') {
         echo json_encode(['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()]);
     }
 } else {
-    // Acción por defecto: actualizar título
-    $titulo = trim($_POST['titulo'] ?? $_POST['nombre_descriptivo'] ?? '');
-    $resultado = $permisosModel->actualizarNombreDescriptivo($clave, $titulo);
-    
-    if ($resultado) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Título actualizado correctamente',
-            'nombre' => $titulo
-        ]);
+    // Verificar si se está actualizando el subtítulo
+    if (isset($_POST['subtitulo'])) {
+        $subtitulo = trim($_POST['subtitulo']);
+        
+        try {
+            $stmt = $db->prepare("UPDATE modulos SET subtitulo = ? WHERE clave = ?");
+            $resultado = $stmt->execute([$subtitulo, $clave]);
+            
+            if ($resultado) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Subtítulo actualizado correctamente',
+                    'subtitulo' => $subtitulo
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Error al actualizar el subtítulo']);
+            }
+        } catch (PDOException $e) {
+            error_log("Error actualizando subtítulo: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()]);
+        }
     } else {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al actualizar el título']);
+        // Acción por defecto: actualizar título
+        $titulo = trim($_POST['titulo'] ?? $_POST['nombre_descriptivo'] ?? '');
+        $resultado = $permisosModel->actualizarNombreDescriptivo($clave, $titulo);
+        
+        if ($resultado) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Título actualizado correctamente',
+                'nombre' => $titulo
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error al actualizar el título']);
+        }
     }
 }
 
